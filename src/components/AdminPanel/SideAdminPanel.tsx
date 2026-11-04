@@ -132,7 +132,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   onShowToast,
   onUnauthorized
 }) => {
-  const [activeTab, setActiveTab] = useState<AdminTab>('general');
+  const [activeTab, setActiveTab] = useState<AdminTab>('queries');
+  const [queriesUnread, setQueriesUnread] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // States for sub-form editing
@@ -441,7 +442,11 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         }}
       >
         {[
-          { id: 'queries', label: 'Queries', icon: <Mail size={15} /> },
+          {
+            id: 'queries',
+            label: queriesUnread > 0 ? `Queries (${queriesUnread})` : 'Queries',
+            icon: <Mail size={15} />
+          },
           { id: 'general', label: 'General & Hero', icon: <LayoutTemplate size={15} /> },
           { id: 'services', label: `Services (${data.services.length})`, icon: <Briefcase size={15} /> },
           { id: 'projects', label: `Case Studies (${data.projects.length})`, icon: <FolderGit2 size={15} /> },
@@ -504,9 +509,13 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           background: '#0d1527'
         }}
       >
-        {activeTab === 'queries' && (
-          <QueriesPanel onShowToast={onShowToast} onUnauthorized={onUnauthorized} />
-        )}
+        <div style={{ display: activeTab === 'queries' ? 'block' : 'none' }}>
+          <QueriesPanel
+            onShowToast={onShowToast}
+            onUnauthorized={onUnauthorized}
+            onUnreadCountChange={setQueriesUnread}
+          />
+        </div>
 
         {/* TAB 1: GENERAL & HERO */}
         {activeTab === 'general' && (
@@ -3119,7 +3128,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           />
           <span style={{ color: syncStatus === 'connected' ? '#94a3b8' : '#f59e0b' }}>
             {activeTab === 'queries'
-              ? 'Enquiries load from Firebase for this session.'
+              ? 'Visitor contact messages sync live from Firebase.'
               : syncStatus === 'connected'
               ? 'Live Cloud Synced: Changes publish immediately to all public visitors across the web.'
               : syncStatus === 'syncing'
