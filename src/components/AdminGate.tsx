@@ -1,51 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import {
+  authErrorMessage,
+  signInAdminWithGoogle,
+  watchAdminAuth
+} from '../utils/adminAuth';
+
+export { signOutAdmin as clearAdminSession } from '../utils/adminAuth';
 
 interface AdminGateProps {
   onSuccess: () => void;
 }
 
-const SESSION_KEY = 'ae_admin_unlocked';
-
-/** Digits of the admin passcode (assembled at runtime). */
-const PASSCODE = String.fromCharCode(52, 50, 56, 52, 50, 55);
-
-export function isAdminSessionActive(): boolean {
-  try {
-    return sessionStorage.getItem(SESSION_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-export function clearAdminSession(): void {
-  try {
-    sessionStorage.removeItem(SESSION_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-function markAdminSession(): void {
-  try {
-    sessionStorage.setItem(SESSION_KEY, '1');
-  } catch {
-    /* ignore */
-  }
-}
-
 export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
-  const [password, setPassword] = useState('');
+  const [phase, setPhase] = useState<'checking' | 'form'>('checking');
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (password.trim() !== PASSCODE) {
-      setError('Incorrect passcode.');
-      return;
-    }
-    markAdminSession();
+  useEffect(() => {
+    const unsubscribe = watchAdminAuth((user) => {
+      if (user) {
+        onSuccess();
+        return;
+      }
+      setPhase('form');
+    });
+    return () => unsubscribe();
+  }, [onSuccess]);
+
+  const handleGoogleSignIn = async () => {
+    if (busy) return;
+    setBusy(true);
     setError('');
-    onSuccess();
+    try {
+      await signInAdminWithGoogle();
+      onSuccess();
+    } catch (caught) {
+      setError(authErrorMessage(caught));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -83,43 +76,40 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
         </p>
         <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#f8fafc' }}>Admin sign in</h1>
         <p style={{ marginBottom: '1.5rem', color: '#94a3b8' }}>
-          Enter the passcode to open the content editor and enquiry inbox.
+          Sign in with an authorized Google account to open the content editor and enquiry inbox.
         </p>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="admin-password" style={{ display: 'block', marginBottom: '0.4rem', color: '#e2e8f0' }}>
-            Passcode
-          </label>
-          <input
-            id="admin-password"
-            type="password"
-            inputMode="numeric"
-            autoComplete="current-password"
-            autoFocus
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              if (error) setError('');
-            }}
-            required
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              background: '#0f172a',
-              border: '1px solid #334155',
-              color: '#fff',
-              marginBottom: '1rem'
-            }}
-          />
-          {error && (
-            <p role="alert" style={{ color: '#f87171', marginBottom: '1rem' }}>
-              {error}
-            </p>
-          )}
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Sign in
-          </button>
-        </form>
+
+        {phase === 'checking' ? (
+          <p role="status" style={{ color: '#94a3b8' }}>
+            Checking your session…
+          </p>
+        ) : (
+          <>
+            {error && (
+              <p role="alert" style={{ color: '#f87171', marginBottom: '1rem' }}>
+                {error}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => void handleGoogleSignIn()}
+              disabled={busy}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                padding: '12px 16px'
+              }}
+            >
+              <GoogleMark />
+              {busy ? 'Signing in…' : 'Continue with Google'}
+            </button>
+          </>
+        )}
+
         <p style={{ marginTop: '1.25rem', marginBottom: 0 }}>
           <a href="/" style={{ color: 'var(--primary-color)' }}>
             Back to the website
@@ -129,3 +119,14 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
     </div>
   );
 };
+
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.5-.4-3.5z" />
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16.1 19 13 24 13c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 16.3 4 9.6 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.3 4.1-4.1 5.5l.1.1 6.2 5.2C39.2 36.3 44 31.5 44 24c0-1.3-.1-2.5-.4-3.5z" />
+    </svg>
+  );
+}

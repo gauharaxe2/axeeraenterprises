@@ -23,7 +23,8 @@ import { NotFound } from './components/NotFound';
 import { PageView, BlogPost, ServiceItem, PolicyType } from './types';
 import { useAdminData } from './hooks/useAdminData';
 import { AppRoute, isAdminLocation, resolveRoute } from './routing';
-import { AdminGate, clearAdminSession, isAdminSessionActive } from './components/AdminGate';
+import { AdminGate, clearAdminSession } from './components/AdminGate';
+import { isAdminSessionActive } from './utils/adminAuth';
 
 const AdminPanel = lazy(() =>
   import('./components/AdminPanel/SideAdminPanel').then((mod) => ({ default: mod.SideAdminPanel }))
@@ -93,13 +94,10 @@ export const App: React.FC = () => {
   const dataRef = useRef(data);
   dataRef.current = data;
 
-  const [adminGate, setAdminGate] = useState<'off' | 'gate' | 'open'>(() => {
-    if (!isAdminLocation(window.location.pathname, window.location.hash)) return 'off';
-    return isAdminSessionActive() ? 'open' : 'gate';
-  });
-  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() =>
-    isAdminLocation(window.location.pathname, window.location.hash) && isAdminSessionActive()
+  const [adminGate, setAdminGate] = useState<'off' | 'gate' | 'open'>(() =>
+    isAdminLocation(window.location.pathname, window.location.hash) ? 'gate' : 'off'
   );
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageView>(() => {
     const route = resolveRoute(window.location.pathname, window.location.hash);
     if (route.page === 'blog-detail' && !data.blogs.some((blog) => blog.slug === route.slug)) {
@@ -311,13 +309,14 @@ export const App: React.FC = () => {
   };
 
   const handleAdminLogout = () => {
-    clearAdminSession();
-    setIsAdminOpen(false);
-    setAdminGate('off');
-    if (isAdminLocation(window.location.pathname, window.location.hash)) {
-      pushUrl('/');
-      setCurrentPage('home');
-    }
+    void clearAdminSession().finally(() => {
+      setIsAdminOpen(false);
+      setAdminGate('off');
+      if (isAdminLocation(window.location.pathname, window.location.hash)) {
+        pushUrl('/');
+        setCurrentPage('home');
+      }
+    });
   };
 
   const handleNavigateSection = (sectionId: string) => {

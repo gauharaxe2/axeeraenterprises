@@ -1,0 +1,24 @@
+{
+  "firestore": [
+    {
+      "database": "ai-studio-gauharaxe-c14987a6-2f07-400b-8412-0f0026abd243",
+      "rules": "firestore.rules"
+    }
+  ],
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Axe's Era Enterprise",
+        "supportEmail": "gauharaxe@outlook.com",
+        "authorizedRedirectUris": [
+          "https://possible-hydra-vj4jh.firebaseapp.com/__/auth/handler",
+          "https://www.gauharaxe.org",
+          "https://gauharaxe.org",
+          "https://axeeraenterprises.vercel.app",
+          "http://localhost",
+          "http://127.0.0.1"
+        ]
+      }
+    }
+  }
+}
