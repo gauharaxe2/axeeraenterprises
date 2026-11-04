@@ -27,7 +27,7 @@ A modern, high-performance React application rewritten for Axe's Era Enterprise 
   - Full-length deep dive on *What is Web Development?* covering frontend, backend, database architectures, security, Core Web Vitals, and SEO.
 - **Client Testimonials & Partnerships**: Verified reviews with star ratings and strategic alliance notices.
 - **Interactive Contact & WhatsApp Integration**:
-  - Contact form posts url-encoded fields to Netlify Forms and keeps the visitor's input if the submission fails.
+  - Contact form saves enquiries to Firebase Firestore and keeps the visitor's input if the submission fails.
   - Floating WhatsApp call-to-action button with instant chat launcher.
 - **FAQ Accordion**: Expandable questions and answers addressing project timelines, scope, and maintenance.
 

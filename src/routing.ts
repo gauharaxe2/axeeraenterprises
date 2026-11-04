@@ -99,7 +99,7 @@ function isServiceId(value: string): value is ServiceId {
 /**
  * Resolve the public URL to a view.
  * `/`, `/policies`, and `/admin` are real app paths. Legacy URLs are 301'd by
- * Netlify before this runs. Anything else is not found.
+ * the host redirects before this runs. Anything else is not found.
  */
 export function resolveRoute(pathname: string, hash: string): AppRoute {
   if (isAdminLocation(pathname, hash)) {

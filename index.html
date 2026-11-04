@@ -14,34 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   </head>
   <body>
-    <!--
-      Static Netlify Forms definition. The visible form is rendered by React,
-      so Netlify cannot see it at deploy time unless this matching form is in
-      the published HTML. Field names must stay in sync with the React form.
-    -->
-    <form
-      name="contact"
-      method="POST"
-      action="/form-received"
-      data-netlify="true"
-      netlify-honeypot="bot-field"
-      data-form-skeleton="contact"
-      hidden
-      style="display: none"
-    >
-      <input type="hidden" name="form-name" value="contact" />
-      <p hidden>
-        <label>
-          Don’t fill this out if you're human:
-          <input name="bot-field" />
-        </label>
-      </p>
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="text" name="company" />
-      <input type="text" name="service" />
-      <textarea name="message"></textarea>
-    </form>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

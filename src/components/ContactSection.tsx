@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import { ContactFormData, ServiceItem } from '../types';
-import { CONTACT_FORM_ACTION, CONTACT_FORM_NAME, encodeContactForm, isNetlifyFormAccepted } from '../utils/netlifyForm';
 import { saveSubmissionToFirestore } from '../utils/firebase';
 import { WhatsAppIcon } from './WhatsAppIcon';
 
@@ -63,26 +62,25 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       return;
     }
 
+    if (botField.trim()) {
+      onShowNotification('Message blocked.', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(false);
 
+    const payload = {
+      fullName: formData.name.trim(),
+      email: formData.email.trim(),
+      company: formData.company.trim() || undefined,
+      service: formData.service || undefined,
+      message: formData.message.trim()
+    };
+
     try {
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encodeContactForm({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          company: formData.company.trim(),
-          service: formData.service,
-          message: formData.message.trim(),
-          botField
-        })
-      });
-      const body = await response.text();
-      if (!isNetlifyFormAccepted(response.status, body)) {
-        throw new Error('Form was not accepted');
-      }
+      const id = await saveSubmissionToFirestore(payload);
+      if (!id) throw new Error('Form was not accepted');
 
       setFormData({
         name: '',
@@ -92,17 +90,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         message: ''
       });
       setBotField('');
-
-      // Also persist inquiry directly to Firebase Firestore
-      saveSubmissionToFirestore({
-        fullName: formData.name.trim(),
-        email: formData.email.trim(),
-        service: formData.service || undefined,
-        message: formData.message.trim(),
-        budget: formData.company ? `Company: ${formData.company}` : undefined
-      }).catch((fErr) => {
-        console.warn('Firestore submission backup error:', fErr);
-      });
 
       onShowNotification(
         "Thank you for your message! Axe's Era Enterprise will review your request and get back to you shortly.",
@@ -179,14 +166,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           </div>
 
           <div className="contact-form">
-            <form
-              name={CONTACT_FORM_NAME}
-              method="POST"
-              action={CONTACT_FORM_ACTION}
-              data-netlify="true"
-              onSubmit={handleSubmit}
-            >
-              <input type="hidden" name="form-name" value={CONTACT_FORM_NAME} />
+            <form onSubmit={handleSubmit} noValidate>
               <p hidden>
                 <label>
                   Don’t fill this out if you're human:
