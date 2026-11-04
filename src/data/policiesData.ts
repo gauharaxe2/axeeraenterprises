@@ -76,7 +76,7 @@ export const POLICIES_DATA: Record<PolicyType, PolicyDocument> = {
         id: 'external-links',
         title: '5. External Links & Third-Party Platforms',
         paragraphs: [
-          'Our website and case study demonstrations contain links to third-party web platforms (including cloud hosts like AWS, Google Cloud, Cloudflare, Netlify, Stripe Payments, Shopify, and social networks).',
+          'Our website and case study demonstrations contain links to third-party web platforms (including cloud hosts like AWS, Google Cloud, Cloudflare, Vercel, Stripe Payments, Shopify, and social networks).',
           'Axe\'s Era Enterprise maintains no operational control over external websites and disclaims any responsibility for their content, availability, privacy practices, or commercial terms.'
         ]
       },

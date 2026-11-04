@@ -124,8 +124,8 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
       </div>
 
       <p style={{ color: 'var(--text-light)', fontSize: '0.8rem' }}>
-        Verified submissions to the contact form, newest first. Spam held by Netlify is not listed.
-        Content edits in the other tabs stay in this browser only.
+        Verified contact-form submissions from Firebase, newest first.
+        Content edits in the other tabs sync through Firestore.
       </p>
 
       {readState === 'unavailable' && (
@@ -152,7 +152,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
       {!loading && !formFound && (
         <div style={{ background: '#151d32', border: '1px solid #334155', borderRadius: '10px', padding: '1.25rem' }}>
           <p style={{ margin: 0 }}>
-            Netlify has not registered the contact form on this site yet. Publish the site, submit a test enquiry, then refresh.
+            No Firebase submissions collection data yet. Submit a test enquiry from the contact form, then refresh.
           </p>
         </div>
       )}
