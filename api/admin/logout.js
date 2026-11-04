@@ -1,8 +1,8 @@
 import handler from '../../netlify/functions/admin-logout.ts';
 
-/** Vercel Function entry for POST /api/admin/logout. */
+/** Vercel Function entry for /api/admin/logout. */
 export default {
-  fetch(request: Request) {
+  fetch(request) {
     return handler(request);
   }
 };
