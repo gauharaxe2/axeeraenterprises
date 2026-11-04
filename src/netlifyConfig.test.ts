@@ -101,6 +101,11 @@ test('Vercel mirrors the admin SPA rewrites and API function entries', () => {
   assert.match(buildApi, /admin-session\.ts/);
   assert.match(buildApi, /admin-submissions\.ts/);
   assert.match(read('package.json'), /build-vercel-admin\.mjs/);
+  for (const name of ['login', 'logout', 'session', 'submissions']) {
+    const source = read(`api/admin/${name}.js`);
+    assert.match(source, /export \{/);
+    assert.match(source, /fetch/);
+  }
 });
 
 test('static files match the real public urls and the form definition', () => {
