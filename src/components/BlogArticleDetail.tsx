@@ -4,7 +4,6 @@ import {
   Calendar,
   Clock,
   User,
-  Share2,
   Check,
   Copy,
   ChevronLeft,
@@ -19,6 +18,7 @@ import {
   Images
 } from 'lucide-react';
 import { BlogPost } from '../types';
+import { WhatsAppIcon } from './WhatsAppIcon';
 
 interface BlogArticleDetailProps {
   blog: BlogPost;
@@ -239,7 +239,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                 gap: '6px'
               }}
             >
-              <Share2 size={14} /> Share on WhatsApp
+              <WhatsAppIcon size={16} color="#25D366" /> Share on WhatsApp
             </button>
           </div>
         </div>

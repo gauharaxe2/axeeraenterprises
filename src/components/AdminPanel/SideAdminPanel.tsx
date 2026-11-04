@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Settings,
@@ -25,7 +25,8 @@ import {
   ChevronUp,
   ChevronDown,
   FileText,
-  Mail
+  Mail,
+  UploadCloud
 } from 'lucide-react';
 import {
   AdminTab,
@@ -87,8 +88,10 @@ interface SideAdminPanelProps {
   onResetDefaults: () => void;
   onExportJson: () => string;
   onImportJson: (json: string) => boolean;
+  onPublishAll?: () => Promise<boolean>;
   onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
   onUnauthorized?: () => void;
+  syncStatus?: 'connected' | 'syncing' | 'offline';
 }
 
 export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
@@ -96,6 +99,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   onClose,
   onLogout,
   data,
+  syncStatus = 'connected',
   onUpdateGeneral,
   onAddService,
   onUpdateService,
@@ -124,6 +128,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   onResetDefaults,
   onExportJson,
   onImportJson,
+  onPublishAll,
   onShowToast,
   onUnauthorized
 }) => {
@@ -162,6 +167,31 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
   // General info state
   const [generalForm, setGeneralForm] = useState<AgencyGeneralInfo>(data.generalInfo);
+
+  // Sync generalForm if data.generalInfo updates from Firestore
+  useEffect(() => {
+    setGeneralForm(data.generalInfo);
+  }, [data.generalInfo]);
+
+  // Cloud Publish state
+  const [isPublishingAll, setIsPublishingAll] = useState(false);
+
+  const handlePublishAllToCloud = async () => {
+    if (!onPublishAll) return;
+    setIsPublishingAll(true);
+    try {
+      const ok = await onPublishAll();
+      if (ok) {
+        onShowToast('All 9 content sections published live to cloud! Visitors will see your updates.', 'success');
+      } else {
+        onShowToast('Cloud sync completed with warnings. Check connection.', 'info');
+      }
+    } catch {
+      onShowToast('Cloud synchronization encountered an error.', 'error');
+    } finally {
+      setIsPublishingAll(false);
+    }
+  };
 
   // Backup state
   const [importText, setImportText] = useState('');
@@ -279,13 +309,64 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
             <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#fff', fontWeight: 700 }}>
               Axe's Era Admin Portal
             </h2>
-            <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--primary-color)' }}>
-              Queries are the live inbox. Other edits stay in this browser.
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  color: syncStatus === 'connected' ? '#34d399' : syncStatus === 'syncing' ? '#fbbf24' : '#94a3b8',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  border: '1px solid rgba(255, 255, 255, 0.12)'
+                }}
+              >
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: syncStatus === 'connected' ? '#10b981' : syncStatus === 'syncing' ? '#f59e0b' : '#94a3b8',
+                    boxShadow: syncStatus === 'connected' ? '0 0 6px #10b981' : undefined
+                  }}
+                />
+                {syncStatus === 'connected' ? 'Firebase Live Synced' : syncStatus === 'syncing' ? 'Syncing Firestore...' : 'Offline Local Storage'}
+              </span>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                All edits synchronize instantly to public site & cloud
+              </span>
+            </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {onPublishAll && (
+            <button
+              onClick={handlePublishAllToCloud}
+              disabled={isPublishingAll}
+              style={{
+                background: isPublishingAll ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.4)',
+                color: '#34d399',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: isPublishingAll ? 'wait' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600
+              }}
+              title="Force publish all 9 sections live to Firebase Firestore for all visitors"
+            >
+              <UploadCloud size={15} />
+              <span>{isPublishingAll ? 'Publishing...' : 'Publish to Cloud'}</span>
+            </button>
+          )}
+
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             style={{
@@ -2898,11 +2979,36 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           <div>
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{ margin: '0 0 4px', color: 'var(--primary-color)', fontSize: '1.15rem' }}>
-                Backup, Restore & Reset
+                Cloud Sync, Backup & Restore
               </h3>
               <p style={{ margin: 0, color: 'var(--text-light)', fontSize: '0.85rem' }}>
-                Export all front panel data as JSON, import new configurations, or reset to original factory state.
+                Force-sync your content to Firebase Firestore for all public visitors, export JSON snapshots, or reset to original defaults.
               </p>
+            </div>
+
+            {/* Cloud Sync Section */}
+            <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <h4 style={{ color: '#34d399', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <UploadCloud size={18} /> Firebase Live Cloud Sync
+                </h4>
+                <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: syncStatus === 'connected' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: syncStatus === 'connected' ? '#34d399' : '#f87171', fontWeight: 600 }}>
+                  {syncStatus === 'connected' ? 'Connected' : syncStatus === 'syncing' ? 'Syncing...' : 'Offline'}
+                </span>
+              </div>
+              <p style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                All 9 site sections (services, case studies, blogs, team, testimonials, partnerships, partner logos, FAQs, and general info) are connected to Firestore. Click below to immediately push all current edits across the web to every visitor.
+              </p>
+              {onPublishAll && (
+                <button
+                  onClick={handlePublishAllToCloud}
+                  disabled={isPublishingAll}
+                  className="btn btn-primary"
+                  style={{ padding: '8px 18px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <UploadCloud size={16} /> {isPublishingAll ? 'Publishing to Cloud...' : 'Publish All Content to Cloud Now'}
+                </button>
+              )}
             </div>
 
             <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid #334155' }}>
@@ -3000,11 +3106,27 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           color: 'var(--text-light)'
         }}
       >
-        <span>
-          {activeTab === 'queries'
-            ? 'Enquiries load from Netlify Forms for this signed-in session.'
-            : 'Auto-saved to this browser only. These edits are not published to other visitors.'}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
+            style={{
+              display: 'inline-block',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: syncStatus === 'connected' ? '#10b981' : syncStatus === 'syncing' ? '#f59e0b' : '#ef4444',
+              boxShadow: syncStatus === 'connected' ? '0 0 6px #10b981' : undefined
+            }}
+          />
+          <span style={{ color: syncStatus === 'connected' ? '#94a3b8' : '#f59e0b' }}>
+            {activeTab === 'queries'
+              ? 'Enquiries load from Netlify Forms for this session.'
+              : syncStatus === 'connected'
+              ? 'Live Cloud Synced: Changes publish immediately to all public visitors across the web.'
+              : syncStatus === 'syncing'
+              ? 'Syncing changes to cloud...'
+              : 'Offline: Changes saved in browser; will automatically sync when connection returns.'}
+          </span>
+        </div>
         <button
           onClick={onClose}
           style={{

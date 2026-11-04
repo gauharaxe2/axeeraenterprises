@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import { ContactFormData, ServiceItem } from '../types';
 import { CONTACT_FORM_ACTION, CONTACT_FORM_NAME, encodeContactForm, isNetlifyFormAccepted } from '../utils/netlifyForm';
+import { saveSubmissionToFirestore } from '../utils/firebase';
+import { WhatsAppIcon } from './WhatsAppIcon';
 
 const WHATSAPP_URL = 'https://wa.me/923157338694';
 
@@ -90,6 +92,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         message: ''
       });
       setBotField('');
+
+      // Also persist inquiry directly to Firebase Firestore
+      saveSubmissionToFirestore({
+        fullName: formData.name.trim(),
+        email: formData.email.trim(),
+        service: formData.service || undefined,
+        message: formData.message.trim(),
+        budget: formData.company ? `Company: ${formData.company}` : undefined
+      }).catch((fErr) => {
+        console.warn('Firestore submission backup error:', fErr);
+      });
+
       onShowNotification(
         "Thank you for your message! Axe's Era Enterprise will review your request and get back to you shortly.",
         'success'
@@ -283,9 +297,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       href={WHATSAPP_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: 'var(--primary-color)', fontWeight: 700 }}
+                      style={{
+                        color: '#25D366',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
                     >
-                      WhatsApp
+                      <WhatsAppIcon size={15} color="#25D366" /> WhatsApp
                     </a>
                     {phoneNumbers.length > 0 ? ' or call ' : '.'}
                     {phoneNumbers.map((number, index) => (

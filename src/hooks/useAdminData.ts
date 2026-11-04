@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   AgencyGeneralInfo,
   ServiceItem,
@@ -18,6 +18,8 @@ import { initialTeamMembers } from '../data/team';
 import { testimonialsData } from '../data/testimonials';
 import { initialPartnerships, initialPartnerLogos } from '../data/partnerships';
 import { faqsData } from '../data/faqs';
+import { db, testConnection, saveSectionToFirestore } from '../utils/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const STORAGE_KEY = 'axes_era_admin_data_v3';
 
@@ -33,13 +35,26 @@ export interface AdminStoreData {
   faqs: FaqItem[];
 }
 
+export type FirebaseSyncStatus = 'connected' | 'syncing' | 'offline';
+
+function mergeProjectsWithDefaults(loaded: Project[] | undefined): Project[] {
+  if (!Array.isArray(loaded) || loaded.length === 0) return projectsData;
+  const merged = [...loaded];
+  for (const def of projectsData) {
+    if (!merged.some((p) => p.id === def.id || (p.link && p.link === def.link))) {
+      merged.push(def);
+    }
+  }
+  return merged;
+}
+
 export const useAdminData = () => {
+  const [syncStatus, setSyncStatus] = useState<FirebaseSyncStatus>('syncing');
   const [data, setData] = useState<AdminStoreData>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('axes_era_admin_data_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Handle team array conversion if legacy was single object
         let teamMembers: TeamMemberData[] = initialTeamMembers;
         if (Array.isArray(parsed.team)) {
           teamMembers = parsed.team;
@@ -70,7 +85,7 @@ export const useAdminData = () => {
         return {
           generalInfo: parsed.generalInfo || initialGeneralInfo,
           services: parsed.services || servicesData,
-          projects: parsed.projects || projectsData,
+          projects: mergeProjectsWithDefaults(parsed.projects),
           blogs: loadedBlogs,
           team: teamMembers,
           testimonials: parsed.testimonials || testimonialsData,
@@ -95,7 +110,10 @@ export const useAdminData = () => {
     };
   });
 
-  // Save to localStorage whenever data changes
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
+  // Local storage backup persistence
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -104,153 +122,315 @@ export const useAdminData = () => {
     }
   }, [data]);
 
+  // Firestore real-time synchronization between Admin and Front UI
+  useEffect(() => {
+    let isMounted = true;
+
+    // Test connection on boot
+    testConnection().then((ok) => {
+      if (isMounted) {
+        setSyncStatus(ok ? 'connected' : 'offline');
+      }
+    });
+
+    // Real-time listener for all site content sections
+    const unsubscribe = onSnapshot(
+      collection(db, 'site_content'),
+      (snapshot) => {
+        if (!isMounted) return;
+
+        if (snapshot.empty) {
+          // If Firestore is empty on first run, seed all sections from initial data
+          const current = dataRef.current;
+          saveSectionToFirestore('generalInfo', current.generalInfo).catch(() => {});
+          saveSectionToFirestore('services', current.services).catch(() => {});
+          saveSectionToFirestore('projects', current.projects).catch(() => {});
+          saveSectionToFirestore('blogs', current.blogs).catch(() => {});
+          saveSectionToFirestore('team', current.team).catch(() => {});
+          saveSectionToFirestore('testimonials', current.testimonials).catch(() => {});
+          saveSectionToFirestore('partnerships', current.partnerships).catch(() => {});
+          saveSectionToFirestore('partnerLogos', current.partnerLogos).catch(() => {});
+          saveSectionToFirestore('faqs', current.faqs).catch(() => {});
+          setSyncStatus('connected');
+          return;
+        }
+
+        setSyncStatus('connected');
+        const incomingUpdates: Partial<AdminStoreData> = {};
+        let needsProjectsSync = false;
+        let mergedProjectsToSync: Project[] = [];
+
+        snapshot.docs.forEach((docSnap) => {
+          const docData = docSnap.data();
+          const sectionId = docSnap.id;
+          if (!docData || typeof docData.data !== 'string') return;
+
+          try {
+            const parsed = JSON.parse(docData.data);
+            switch (sectionId) {
+              case 'generalInfo':
+                incomingUpdates.generalInfo = parsed;
+                break;
+              case 'services':
+                incomingUpdates.services = parsed;
+                break;
+              case 'projects': {
+                const mergedProjects = mergeProjectsWithDefaults(parsed);
+                if (Array.isArray(parsed) && mergedProjects.length > parsed.length) {
+                  needsProjectsSync = true;
+                  mergedProjectsToSync = mergedProjects;
+                }
+                incomingUpdates.projects = mergedProjects;
+                break;
+              }
+              case 'blogs':
+                incomingUpdates.blogs = parsed;
+                break;
+              case 'team':
+                incomingUpdates.team = parsed;
+                break;
+              case 'testimonials':
+                incomingUpdates.testimonials = parsed;
+                break;
+              case 'partnerships':
+                incomingUpdates.partnerships = parsed;
+                break;
+              case 'partnerLogos':
+                incomingUpdates.partnerLogos = parsed;
+                break;
+              case 'faqs':
+                incomingUpdates.faqs = parsed;
+                break;
+            }
+          } catch (err) {
+            console.warn(`Error parsing incoming Firestore data for ${sectionId}:`, err);
+          }
+        });
+
+        if (Object.keys(incomingUpdates).length > 0) {
+          setData((prev) => ({ ...prev, ...incomingUpdates }));
+        }
+
+        if (needsProjectsSync && mergedProjectsToSync.length > 0) {
+          saveSectionToFirestore('projects', mergedProjectsToSync).catch(() => {});
+        }
+      },
+      (error) => {
+        console.warn('Firestore live listener warning:', error);
+        if (isMounted) setSyncStatus('offline');
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
+
   // General Info
   const updateGeneralInfo = (info: AgencyGeneralInfo) => {
     setData((prev) => ({ ...prev, generalInfo: info }));
+    saveSectionToFirestore('generalInfo', info).catch((err) => {
+      console.warn('Firestore sync failed for generalInfo:', err);
+    });
   };
 
   // Services
   const addService = (item: ServiceItem) => {
-    setData((prev) => ({ ...prev, services: [item, ...prev.services] }));
+    const currentServices = dataRef.current.services;
+    const nextServices = [item, ...currentServices.filter((s) => s.id !== item.id)];
+    setData((prev) => ({ ...prev, services: nextServices }));
+    saveSectionToFirestore('services', nextServices).catch((err) => {
+      console.warn('Firestore sync failed for services:', err);
+    });
   };
 
   const updateService = (item: ServiceItem) => {
-    setData((prev) => ({
-      ...prev,
-      services: prev.services.map((s) => (s.id === item.id ? item : s))
-    }));
+    const currentServices = dataRef.current.services;
+    const nextServices = currentServices.map((s) => (s.id === item.id ? item : s));
+    setData((prev) => ({ ...prev, services: nextServices }));
+    saveSectionToFirestore('services', nextServices).catch((err) => {
+      console.warn('Firestore sync failed for services:', err);
+    });
   };
 
   const deleteService = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      services: prev.services.filter((s) => s.id !== id)
-    }));
+    const currentServices = dataRef.current.services;
+    const nextServices = currentServices.filter((s) => s.id !== id);
+    setData((prev) => ({ ...prev, services: nextServices }));
+    saveSectionToFirestore('services', nextServices).catch((err) => {
+      console.warn('Firestore sync failed for services:', err);
+    });
   };
 
   // Projects / Case Studies
   const addProject = (project: Project) => {
-    setData((prev) => ({ ...prev, projects: [project, ...prev.projects] }));
+    const currentProjects = dataRef.current.projects;
+    const nextProjects = [project, ...currentProjects.filter((p) => p.id !== project.id)];
+    setData((prev) => ({ ...prev, projects: nextProjects }));
+    saveSectionToFirestore('projects', nextProjects).catch((err) => {
+      console.warn('Firestore sync failed for projects:', err);
+    });
   };
 
   const updateProject = (project: Project) => {
-    setData((prev) => ({
-      ...prev,
-      projects: prev.projects.map((p) => (p.id === project.id ? project : p))
-    }));
+    const currentProjects = dataRef.current.projects;
+    const nextProjects = currentProjects.map((p) => (p.id === project.id ? project : p));
+    setData((prev) => ({ ...prev, projects: nextProjects }));
+    saveSectionToFirestore('projects', nextProjects).catch((err) => {
+      console.warn('Firestore sync failed for projects:', err);
+    });
   };
 
   const deleteProject = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((p) => p.id !== id)
-    }));
+    const currentProjects = dataRef.current.projects;
+    const nextProjects = currentProjects.filter((p) => p.id !== id);
+    setData((prev) => ({ ...prev, projects: nextProjects }));
+    saveSectionToFirestore('projects', nextProjects).catch((err) => {
+      console.warn('Firestore sync failed for projects:', err);
+    });
   };
 
   // Blogs
   const addBlog = (blog: BlogPost) => {
-    setData((prev) => ({ ...prev, blogs: [blog, ...prev.blogs] }));
+    const currentBlogs = dataRef.current.blogs;
+    const nextBlogs = [blog, ...currentBlogs.filter((b) => b.id !== blog.id)];
+    setData((prev) => ({ ...prev, blogs: nextBlogs }));
+    saveSectionToFirestore('blogs', nextBlogs).catch((err) => {
+      console.warn('Firestore sync failed for blogs:', err);
+    });
   };
 
   const updateBlog = (blog: BlogPost) => {
-    setData((prev) => ({
-      ...prev,
-      blogs: prev.blogs.map((b) => (b.id === blog.id ? blog : b))
-    }));
+    const currentBlogs = dataRef.current.blogs;
+    const nextBlogs = currentBlogs.map((b) => (b.id === blog.id ? blog : b));
+    setData((prev) => ({ ...prev, blogs: nextBlogs }));
+    saveSectionToFirestore('blogs', nextBlogs).catch((err) => {
+      console.warn('Firestore sync failed for blogs:', err);
+    });
   };
 
   const deleteBlog = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      blogs: prev.blogs.filter((b) => b.id !== id)
-    }));
+    const currentBlogs = dataRef.current.blogs;
+    const nextBlogs = currentBlogs.filter((b) => b.id !== id);
+    setData((prev) => ({ ...prev, blogs: nextBlogs }));
+    saveSectionToFirestore('blogs', nextBlogs).catch((err) => {
+      console.warn('Firestore sync failed for blogs:', err);
+    });
   };
 
   // Team Members
   const addTeamMember = (member: TeamMemberData) => {
-    setData((prev) => ({ ...prev, team: [...prev.team, member] }));
+    const currentTeam = dataRef.current.team;
+    const nextTeam = [...currentTeam.filter((m) => m.id !== member.id), member];
+    setData((prev) => ({ ...prev, team: nextTeam }));
+    saveSectionToFirestore('team', nextTeam).catch((err) => {
+      console.warn('Firestore sync failed for team:', err);
+    });
   };
 
   const updateTeamMember = (member: TeamMemberData) => {
-    setData((prev) => ({
-      ...prev,
-      team: prev.team.map((m) => (m.id === member.id ? member : m))
-    }));
+    const currentTeam = dataRef.current.team;
+    const nextTeam = currentTeam.map((m) => (m.id === member.id ? member : m));
+    setData((prev) => ({ ...prev, team: nextTeam }));
+    saveSectionToFirestore('team', nextTeam).catch((err) => {
+      console.warn('Firestore sync failed for team:', err);
+    });
   };
 
   const deleteTeamMember = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      team: prev.team.filter((m) => m.id !== id)
-    }));
+    const currentTeam = dataRef.current.team;
+    const nextTeam = currentTeam.filter((m) => m.id !== id);
+    setData((prev) => ({ ...prev, team: nextTeam }));
+    saveSectionToFirestore('team', nextTeam).catch((err) => {
+      console.warn('Firestore sync failed for team:', err);
+    });
   };
 
   // Testimonials
   const addTestimonial = (testimonial: Testimonial) => {
-    setData((prev) => ({
-      ...prev,
-      testimonials: [...prev.testimonials, testimonial]
-    }));
+    const currentTestimonials = dataRef.current.testimonials;
+    const nextTestimonials = [...currentTestimonials.filter((t) => t.id !== testimonial.id), testimonial];
+    setData((prev) => ({ ...prev, testimonials: nextTestimonials }));
+    saveSectionToFirestore('testimonials', nextTestimonials).catch((err) => {
+      console.warn('Firestore sync failed for testimonials:', err);
+    });
   };
 
   const updateTestimonial = (testimonial: Testimonial) => {
-    setData((prev) => ({
-      ...prev,
-      testimonials: prev.testimonials.map((t) =>
-        t.id === testimonial.id ? testimonial : t
-      )
-    }));
+    const currentTestimonials = dataRef.current.testimonials;
+    const nextTestimonials = currentTestimonials.map((t) =>
+      t.id === testimonial.id ? testimonial : t
+    );
+    setData((prev) => ({ ...prev, testimonials: nextTestimonials }));
+    saveSectionToFirestore('testimonials', nextTestimonials).catch((err) => {
+      console.warn('Firestore sync failed for testimonials:', err);
+    });
   };
 
   const deleteTestimonial = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      testimonials: prev.testimonials.filter((t) => t.id !== id)
-    }));
+    const currentTestimonials = dataRef.current.testimonials;
+    const nextTestimonials = currentTestimonials.filter((t) => t.id !== id);
+    setData((prev) => ({ ...prev, testimonials: nextTestimonials }));
+    saveSectionToFirestore('testimonials', nextTestimonials).catch((err) => {
+      console.warn('Firestore sync failed for testimonials:', err);
+    });
   };
 
   // Partnerships Cards
   const updatePartnership = (item: PartnershipItem) => {
-    setData((prev) => ({
-      ...prev,
-      partnerships: prev.partnerships.map((p) => (p.id === item.id ? item : p))
-    }));
+    const currentPartnerships = dataRef.current.partnerships;
+    const nextPartnerships = currentPartnerships.map((p) => (p.id === item.id ? item : p));
+    setData((prev) => ({ ...prev, partnerships: nextPartnerships }));
+    saveSectionToFirestore('partnerships', nextPartnerships).catch((err) => {
+      console.warn('Firestore sync failed for partnerships:', err);
+    });
   };
 
   const addPartnership = (item: PartnershipItem) => {
-    setData((prev) => ({
-      ...prev,
-      partnerships: [...prev.partnerships, item]
-    }));
+    const currentPartnerships = dataRef.current.partnerships;
+    const nextPartnerships = [...currentPartnerships.filter((p) => p.id !== item.id), item];
+    setData((prev) => ({ ...prev, partnerships: nextPartnerships }));
+    saveSectionToFirestore('partnerships', nextPartnerships).catch((err) => {
+      console.warn('Firestore sync failed for partnerships:', err);
+    });
   };
 
   const deletePartnership = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      partnerships: prev.partnerships.filter((p) => p.id !== id)
-    }));
+    const currentPartnerships = dataRef.current.partnerships;
+    const nextPartnerships = currentPartnerships.filter((p) => p.id !== id);
+    setData((prev) => ({ ...prev, partnerships: nextPartnerships }));
+    saveSectionToFirestore('partnerships', nextPartnerships).catch((err) => {
+      console.warn('Firestore sync failed for partnerships:', err);
+    });
   };
 
   // Partner Logos
   const addPartnerLogo = (logo: PartnerLogo) => {
-    setData((prev) => ({
-      ...prev,
-      partnerLogos: [...prev.partnerLogos, logo]
-    }));
+    const currentLogos = dataRef.current.partnerLogos;
+    const nextLogos = [...currentLogos.filter((l) => l.id !== logo.id), logo];
+    setData((prev) => ({ ...prev, partnerLogos: nextLogos }));
+    saveSectionToFirestore('partnerLogos', nextLogos).catch((err) => {
+      console.warn('Firestore sync failed for partnerLogos:', err);
+    });
   };
 
   const updatePartnerLogo = (logo: PartnerLogo) => {
-    setData((prev) => ({
-      ...prev,
-      partnerLogos: prev.partnerLogos.map((l) => (l.id === logo.id ? logo : l))
-    }));
+    const currentLogos = dataRef.current.partnerLogos;
+    const nextLogos = currentLogos.map((l) => (l.id === logo.id ? logo : l));
+    setData((prev) => ({ ...prev, partnerLogos: nextLogos }));
+    saveSectionToFirestore('partnerLogos', nextLogos).catch((err) => {
+      console.warn('Firestore sync failed for partnerLogos:', err);
+    });
   };
 
   const deletePartnerLogo = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      partnerLogos: prev.partnerLogos.filter((l) => l.id !== id)
-    }));
+    const currentLogos = dataRef.current.partnerLogos;
+    const nextLogos = currentLogos.filter((l) => l.id !== id);
+    setData((prev) => ({ ...prev, partnerLogos: nextLogos }));
+    saveSectionToFirestore('partnerLogos', nextLogos).catch((err) => {
+      console.warn('Firestore sync failed for partnerLogos:', err);
+    });
   };
 
   // FAQs
@@ -259,21 +439,55 @@ export const useAdminData = () => {
       ...faq,
       id: faq.id || `faq-${Date.now()}`
     };
-    setData((prev) => ({ ...prev, faqs: [...prev.faqs, newItem] }));
+    const currentFaqs = dataRef.current.faqs;
+    const nextFaqs = [...currentFaqs.filter((f) => f.id !== newItem.id), newItem];
+    setData((prev) => ({ ...prev, faqs: nextFaqs }));
+    saveSectionToFirestore('faqs', nextFaqs).catch((err) => {
+      console.warn('Firestore sync failed for faqs:', err);
+    });
   };
 
   const updateFaq = (faq: FaqItem) => {
-    setData((prev) => ({
-      ...prev,
-      faqs: prev.faqs.map((f) => (f.id === faq.id ? faq : f))
-    }));
+    const currentFaqs = dataRef.current.faqs;
+    const nextFaqs = currentFaqs.map((f) => (f.id === faq.id ? faq : f));
+    setData((prev) => ({ ...prev, faqs: nextFaqs }));
+    saveSectionToFirestore('faqs', nextFaqs).catch((err) => {
+      console.warn('Firestore sync failed for faqs:', err);
+    });
   };
 
   const deleteFaq = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      faqs: prev.faqs.filter((f) => f.id !== id)
-    }));
+    const currentFaqs = dataRef.current.faqs;
+    const nextFaqs = currentFaqs.filter((f) => f.id !== id);
+    setData((prev) => ({ ...prev, faqs: nextFaqs }));
+    saveSectionToFirestore('faqs', nextFaqs).catch((err) => {
+      console.warn('Firestore sync failed for faqs:', err);
+    });
+  };
+
+  // Full Cloud Publish (guarantees all 9 collections are synced to Firestore)
+  const publishAllToCloud = async (): Promise<boolean> => {
+    try {
+      setSyncStatus('syncing');
+      const current = dataRef.current;
+      await Promise.all([
+        saveSectionToFirestore('generalInfo', current.generalInfo),
+        saveSectionToFirestore('services', current.services),
+        saveSectionToFirestore('projects', current.projects),
+        saveSectionToFirestore('blogs', current.blogs),
+        saveSectionToFirestore('team', current.team),
+        saveSectionToFirestore('testimonials', current.testimonials),
+        saveSectionToFirestore('partnerships', current.partnerships),
+        saveSectionToFirestore('partnerLogos', current.partnerLogos),
+        saveSectionToFirestore('faqs', current.faqs)
+      ]);
+      setSyncStatus('connected');
+      return true;
+    } catch (err) {
+      console.error('Failed to publish all data to cloud:', err);
+      setSyncStatus('connected');
+      return false;
+    }
   };
 
   // Reset to Defaults
@@ -292,6 +506,11 @@ export const useAdminData = () => {
     setData(defaultData);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('axes_era_admin_data_v1');
+
+    // Sync reset defaults to Firestore
+    Object.entries(defaultData).forEach(([sec, val]) => {
+      saveSectionToFirestore(sec, val).catch(() => {});
+    });
   };
 
   // Export & Import
@@ -310,7 +529,7 @@ export const useAdminData = () => {
           teamMembers = [{ ...parsed.team, id: parsed.team.id || 'gauhar-nadeem' }];
         }
 
-        setData({
+        const importedData: AdminStoreData = {
           generalInfo: parsed.generalInfo || initialGeneralInfo,
           services: parsed.services || servicesData,
           projects: parsed.projects || projectsData,
@@ -320,6 +539,10 @@ export const useAdminData = () => {
           partnerships: parsed.partnerships || initialPartnerships,
           partnerLogos: parsed.partnerLogos || initialPartnerLogos,
           faqs: parsed.faqs || faqsData
+        };
+        setData(importedData);
+        Object.entries(importedData).forEach(([sec, val]) => {
+          saveSectionToFirestore(sec, val).catch(() => {});
         });
         return true;
       }
@@ -331,6 +554,8 @@ export const useAdminData = () => {
 
   return {
     data,
+    syncStatus,
+    publishAllToCloud,
     updateGeneralInfo,
     addService,
     updateService,

@@ -7,12 +7,13 @@
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "tsc && vite build && node scripts/build-vercel-admin.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 3000",
-    "test": "node --experimental-strip-types --test src/routing.test.ts src/utils/netlifyForm.test.ts src/netlifyConfig.test.ts src/adminServer.test.ts",
+    "test": "node --experimental-strip-types --test src/routing.test.ts src/utils/netlifyForm.test.ts src/netlifyConfig.test.ts src/adminServer.test.ts src/utils/firebase.test.ts",
     "build:api": "node scripts/build-vercel-admin.mjs"
   },
   "dependencies": {
     "@netlify/blobs": "^11.1.7",
     "clsx": "^2.1.1",
+    "firebase": "^13.2.0",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

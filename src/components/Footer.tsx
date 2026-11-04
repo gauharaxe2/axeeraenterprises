@@ -1,5 +1,6 @@
 import React from 'react';
 import { Facebook, Twitter, Linkedin, Instagram, Youtube, Scale, Shield, FileText } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import { PolicyType } from '../types';
 
 interface FooterProps {
@@ -190,6 +191,15 @@ export const Footer: React.FC<FooterProps> = ({
                 title="YouTube"
               >
                 <Youtube size={18} />
+              </a>
+              <a
+                href="https://wa.me/923157338694"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                title="WhatsApp Direct (+92-315-7338694)"
+              >
+                <WhatsAppIcon size={18} color="currentColor" />
               </a>
             </div>
           </div>

@@ -55,5 +55,16 @@ export const projectsData: Project[] = [
     imageUrl: 'https://i.postimg.cc/Ty8Bmv6y/Screenshot-20260817-091530.jpg',
     description: 'Real-time business analytics platform with responsive data visualization and automated team reporting capabilities.',
     tags: ['Analytics', 'Real-time', 'Data Visualization']
+  },
+  {
+    id: 'estate-crm',
+    title: 'EstateCRM Platform',
+    subtitle: 'Real Estate CRM & Operating System',
+    category: 'saas',
+    metric: '+240% Pipeline Velocity',
+    link: 'https://real-estate-crm-ps3u.vercel.app/',
+    imageUrl: '/images/estate-crm.png',
+    description: 'All-in-one real estate CRM and business operating system engineered for brokerages and top-producing agents. Features lead capture pipelines, deal tracking, task workflows, and comprehensive analytics.',
+    tags: ['Real Estate', 'CRM', 'Next.js', 'Pipeline Analytics', 'SaaS']
   }
 ];

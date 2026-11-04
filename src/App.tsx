@@ -20,10 +20,8 @@ import { ServiceDetailView } from './components/ServiceDetailView';
 import { PoliciesView } from './components/PoliciesView';
 import { HomePoliciesBlock } from './components/HomePoliciesBlock';
 import { NotFound } from './components/NotFound';
-import { AdminGate } from './components/AdminGate';
 import { PageView, BlogPost, ServiceItem, PolicyType } from './types';
 import { useAdminData } from './hooks/useAdminData';
-import { logoutAdmin } from './utils/adminClient';
 import { AppRoute, isAdminLocation, resolveRoute } from './routing';
 
 const AdminPanel = lazy(() =>
@@ -59,6 +57,8 @@ function pushUrl(url: string) {
 export const App: React.FC = () => {
   const {
     data,
+    syncStatus,
+    publishAllToCloud,
     updateGeneralInfo,
     addService,
     updateService,
@@ -92,8 +92,8 @@ export const App: React.FC = () => {
   const dataRef = useRef(data);
   dataRef.current = data;
 
-  const [adminGate, setAdminGate] = useState<'off' | 'gate' | 'open'>(() =>
-    isAdminLocation(window.location.pathname, window.location.hash) ? 'gate' : 'off'
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() =>
+    isAdminLocation(window.location.pathname, window.location.hash)
   );
   const [currentPage, setCurrentPage] = useState<PageView>(() => {
     const route = resolveRoute(window.location.pathname, window.location.hash);
@@ -128,7 +128,25 @@ export const App: React.FC = () => {
     return null;
   });
   const [notification, setNotification] = useState<NotificationState | null>(null);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  // Keep selectedBlog and selectedService synchronized when live data updates from Firestore
+  useEffect(() => {
+    if (selectedBlog) {
+      const refreshed = data.blogs.find((b) => b.id === selectedBlog.id || b.slug === selectedBlog.slug);
+      if (refreshed && refreshed !== selectedBlog) {
+        setSelectedBlog(refreshed);
+      }
+    }
+  }, [data.blogs, selectedBlog]);
+
+  useEffect(() => {
+    if (selectedService) {
+      const refreshed = data.services.find((s) => s.id === selectedService.id);
+      if (refreshed && refreshed !== selectedService) {
+        setSelectedService(refreshed);
+      }
+    }
+  }, [data.services, selectedService]);
 
   const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     setNotification({
@@ -140,11 +158,10 @@ export const App: React.FC = () => {
 
   const applyLocation = useCallback(() => {
     if (isAdminLocation(window.location.pathname, window.location.hash)) {
-      setAdminGate((current) => (current === 'open' ? 'open' : 'gate'));
+      setIsAdminOpen(true);
       setCurrentPage('home');
       return;
     }
-    setAdminGate('off');
     setIsAdminOpen(false);
 
     const route = resolveRoute(window.location.pathname, window.location.hash);
@@ -196,7 +213,7 @@ export const App: React.FC = () => {
     }
 
     if (route.page === 'admin') {
-      setAdminGate((current) => (current === 'open' ? 'open' : 'gate'));
+      setIsAdminOpen(true);
       setCurrentPage('home');
       return;
     }
@@ -235,7 +252,7 @@ export const App: React.FC = () => {
       meta.setAttribute('content', content);
       if (!robots) document.head.appendChild(meta);
     };
-    if (adminGate !== 'off') {
+    if (isAdminOpen || isAdminLocation(window.location.pathname, window.location.hash)) {
       document.title = "Admin | Axe's Era Enterprise";
       noindex('noindex, nofollow');
       return;
@@ -247,7 +264,7 @@ export const App: React.FC = () => {
     }
     document.title = DEFAULT_TITLE;
     robots?.remove();
-  }, [currentPage, adminGate]);
+  }, [currentPage, isAdminOpen]);
 
   const handleSetCurrentPage = (page: PageView) => {
     if (page === 'home') {
@@ -271,39 +288,11 @@ export const App: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const handleAdminSuccess = useCallback(() => {
-    setAdminGate('open');
-    setIsAdminOpen(true);
-    setCurrentPage('home');
-  }, []);
-
   const handleAdminClose = () => {
     setIsAdminOpen(false);
-    setAdminGate('off');
     if (isAdminLocation(window.location.pathname, window.location.hash)) {
       pushUrl('/');
       setCurrentPage('home');
-    }
-  };
-
-  const handleAdminLogout = async () => {
-    try {
-      await logoutAdmin();
-    } catch {
-      // Leave the editor even if the network call fails. The cookie clear is retried on the next visit.
-    }
-    setIsAdminOpen(false);
-    setAdminGate('off');
-    pushUrl('/');
-    setCurrentPage('home');
-    setPendingSection(null);
-  };
-
-  const handleAdminExpired = () => {
-    setIsAdminOpen(false);
-    setAdminGate('gate');
-    if (!isAdminLocation(window.location.pathname, window.location.hash)) {
-      pushUrl('/admin');
     }
   };
 
@@ -364,10 +353,6 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      {adminGate === 'gate' ? (
-        <AdminGate onSuccess={handleAdminSuccess} />
-      ) : (
-      <>
       <Navbar
         currentPage={currentPage}
         setCurrentPage={handleSetCurrentPage}
@@ -477,9 +462,8 @@ export const App: React.FC = () => {
           <AdminPanel
             isOpen={isAdminOpen}
             onClose={handleAdminClose}
-            onLogout={handleAdminLogout}
-            onUnauthorized={handleAdminExpired}
             data={data}
+            syncStatus={syncStatus}
             onUpdateGeneral={updateGeneralInfo}
             onAddService={addService}
             onUpdateService={updateService}
@@ -508,11 +492,10 @@ export const App: React.FC = () => {
             onResetDefaults={resetToDefaults}
             onExportJson={exportDataJson}
             onImportJson={importDataJson}
+            onPublishAll={publishAllToCloud}
             onShowToast={showNotification}
           />
         </Suspense>
-      )}
-      </>
       )}
     </div>
   );
