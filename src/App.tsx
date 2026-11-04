@@ -21,7 +21,6 @@ import { PoliciesView } from './components/PoliciesView';
 import { HomePoliciesBlock } from './components/HomePoliciesBlock';
 import { NotFound } from './components/NotFound';
 import { AdminGate } from './components/AdminGate';
-import { InboxPopup } from './components/AdminPanel/InboxPopup';
 import { PageView, BlogPost, ServiceItem, PolicyType } from './types';
 import { useAdminData } from './hooks/useAdminData';
 import { logoutAdmin } from './utils/adminClient';
@@ -145,8 +144,8 @@ export const App: React.FC = () => {
       setCurrentPage('home');
       return;
     }
-    // Leaving /admin must not drop an active session — the inbox popup stays up.
-    setAdminGate((current) => (current === 'open' ? 'open' : 'off'));
+    setAdminGate('off');
+    setIsAdminOpen(false);
 
     const route = resolveRoute(window.location.pathname, window.location.hash);
     const { services, blogs } = dataRef.current;
@@ -274,16 +273,13 @@ export const App: React.FC = () => {
 
   const handleAdminSuccess = useCallback(() => {
     setAdminGate('open');
-    setIsAdminOpen(false);
+    setIsAdminOpen(true);
     setCurrentPage('home');
-    if (isAdminLocation(window.location.pathname, window.location.hash)) {
-      pushUrl('/');
-    }
   }, []);
 
   const handleAdminClose = () => {
-    // Keep the session so the bottom-right inbox popup stays available.
     setIsAdminOpen(false);
+    setAdminGate('off');
     if (isAdminLocation(window.location.pathname, window.location.hash)) {
       pushUrl('/');
       setCurrentPage('home');
@@ -470,18 +466,6 @@ export const App: React.FC = () => {
       />
 
       <WhatsAppButton whatsappNumber={data.generalInfo.whatsappNumber} />
-
-      {adminGate === 'open' && (
-        <InboxPopup
-          editorOpen={isAdminOpen}
-          onOpenEditor={() => setIsAdminOpen(true)}
-          onLogout={() => {
-            void handleAdminLogout();
-          }}
-          onUnauthorized={handleAdminExpired}
-          onShowToast={showNotification}
-        />
-      )}
 
       <NotificationToast
         notification={notification}
