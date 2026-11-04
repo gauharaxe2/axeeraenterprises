@@ -3119,7 +3119,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           />
           <span style={{ color: syncStatus === 'connected' ? '#94a3b8' : '#f59e0b' }}>
             {activeTab === 'queries'
-              ? 'Enquiries load from Netlify Forms for this session.'
+              ? 'Enquiries load from Firebase for this session.'
               : syncStatus === 'connected'
               ? 'Live Cloud Synced: Changes publish immediately to all public visitors across the web.'
               : syncStatus === 'syncing'

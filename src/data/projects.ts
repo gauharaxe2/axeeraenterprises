@@ -32,7 +32,7 @@ export const projectsData: Project[] = [
     link: 'https://shopaxe.netlify.app',
     imageUrl: 'https://i.postimg.cc/21Y4B0tC/Screenshot-20260817-091842-(1).jpg',
     description: 'Custom headless storefront engineered for ultra-fast checkout and mobile conversion.',
-    tags: ['E-Commerce', 'Netlify', 'Tailored UI']
+    tags: ['E-Commerce', 'Hosting', 'Tailored UI']
   },
   {
     id: 'shopaxe-shopify-store',

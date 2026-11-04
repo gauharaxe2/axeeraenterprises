@@ -7,7 +7,10 @@ import {
   collection,
   addDoc,
   getDocs,
-  serverTimestamp
+  deleteDoc,
+  updateDoc,
+  serverTimestamp,
+  Timestamp
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -112,19 +115,59 @@ export async function getAllSiteContentDocs(): Promise<Record<string, { id: stri
   return result;
 }
 
-// Save inquiry submission to Firestore
-export async function saveSubmissionToFirestore(submission: {
+export interface ContactSubmissionInput {
   fullName: string;
   email: string;
   message: string;
   service?: string;
-  budget?: string;
+  company?: string;
   phone?: string;
-}): Promise<string | null> {
+}
+
+export interface EnquiryRecord {
+  id: string;
+  createdAt: string;
+  name: string;
+  email: string;
+  company: string;
+  service: string;
+  message: string;
+  read: boolean;
+}
+
+function asText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function createdAtIso(value: unknown): string {
+  if (value instanceof Timestamp) return value.toDate().toISOString();
+  if (value && typeof value === 'object' && 'toDate' in value && typeof (value as { toDate: () => Date }).toDate === 'function') {
+    try {
+      return (value as { toDate: () => Date }).toDate().toISOString();
+    } catch {
+      // fall through
+    }
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) return new Date(parsed).toISOString();
+    return value.trim();
+  }
+  return new Date().toISOString();
+}
+
+// Save inquiry submission to Firestore
+export async function saveSubmissionToFirestore(submission: ContactSubmissionInput): Promise<string | null> {
   const collectionPath = 'submissions';
   try {
     const docRef = await addDoc(collection(db, collectionPath), {
-      ...submission,
+      fullName: submission.fullName,
+      email: submission.email,
+      message: submission.message,
+      service: submission.service || '',
+      company: submission.company || '',
+      phone: submission.phone || '',
+      read: false,
       createdAt: serverTimestamp()
     });
     return docRef.id;
@@ -132,4 +175,37 @@ export async function saveSubmissionToFirestore(submission: {
     console.error('Failed to log submission to Firestore:', error);
     return null;
   }
+}
+
+export async function listSubmissionsFromFirestore(): Promise<EnquiryRecord[]> {
+  const snap = await getDocs(collection(db, 'submissions'));
+  const rows: EnquiryRecord[] = [];
+  snap.forEach((entry) => {
+    const data = entry.data();
+    const companyFromBudget = asText(data.budget).replace(/^Company:\s*/i, '');
+    rows.push({
+      id: entry.id,
+      createdAt: createdAtIso(data.createdAt),
+      name: asText(data.fullName) || asText(data.name),
+      email: asText(data.email),
+      company: asText(data.company) || companyFromBudget,
+      service: asText(data.service),
+      message: asText(data.message),
+      read: data.read === true
+    });
+  });
+  rows.sort((left, right) => {
+    const rightMs = Date.parse(right.createdAt);
+    const leftMs = Date.parse(left.createdAt);
+    return (Number.isFinite(rightMs) ? rightMs : 0) - (Number.isFinite(leftMs) ? leftMs : 0);
+  });
+  return rows;
+}
+
+export async function setSubmissionReadInFirestore(id: string, read: boolean): Promise<void> {
+  await updateDoc(doc(db, 'submissions', id), { read });
+}
+
+export async function deleteSubmissionFromFirestore(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'submissions', id));
 }

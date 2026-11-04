@@ -7,7 +7,44 @@
     { "source": "/policies/", "destination": "/index.html" }
   ],
   "redirects": [
-    { "source": "/admin.html", "destination": "/admin", "permanent": true }
+    { "source": "/admin.html", "destination": "/admin", "permanent": true },
+    { "source": "/web-development", "destination": "/#service-web-development", "permanent": true },
+    { "source": "/web-development/", "destination": "/#service-web-development", "permanent": true },
+    { "source": "/web-development.html", "destination": "/#service-web-development", "permanent": true },
+    { "source": "/web-design", "destination": "/#service-web-development", "permanent": true },
+    { "source": "/web-design/", "destination": "/#service-web-development", "permanent": true },
+    { "source": "/web-design.html", "destination": "/#service-web-development", "permanent": true },
+    { "source": "/brand-design", "destination": "/#service-brand-design", "permanent": true },
+    { "source": "/brand-design/", "destination": "/#service-brand-design", "permanent": true },
+    { "source": "/brand-design.html", "destination": "/#service-brand-design", "permanent": true },
+    { "source": "/digital-marketing", "destination": "/#service-digital-marketing", "permanent": true },
+    { "source": "/digital-marketing/", "destination": "/#service-digital-marketing", "permanent": true },
+    { "source": "/digital-marketing.html", "destination": "/#service-digital-marketing", "permanent": true },
+    { "source": "/mobile-apps", "destination": "/#service-mobile-apps", "permanent": true },
+    { "source": "/mobile-apps/", "destination": "/#service-mobile-apps", "permanent": true },
+    { "source": "/mobile-apps.html", "destination": "/#service-mobile-apps", "permanent": true },
+    { "source": "/seo-services", "destination": "/#service-seo-optimization", "permanent": true },
+    { "source": "/seo-services/", "destination": "/#service-seo-optimization", "permanent": true },
+    { "source": "/seo-services.html", "destination": "/#service-seo-optimization", "permanent": true },
+    { "source": "/social-media-marketing", "destination": "/#service-social-media", "permanent": true },
+    { "source": "/social-media-marketing/", "destination": "/#service-social-media", "permanent": true },
+    { "source": "/social-media-marketing.html", "destination": "/#service-social-media", "permanent": true },
+    { "source": "/blogs", "destination": "/#blog-hub", "permanent": true },
+    { "source": "/blogs/", "destination": "/#blog-hub", "permanent": true },
+    { "source": "/blogs.html", "destination": "/#blog-hub", "permanent": true },
+    { "source": "/blog", "destination": "/#blog-hub", "permanent": true },
+    { "source": "/blog/", "destination": "/#blog-hub", "permanent": true },
+    { "source": "/blog.html", "destination": "/#blog-hub", "permanent": true },
+    { "source": "/blog/:slug*", "destination": "/#blog-:slug*", "permanent": true },
+    { "source": "/privacy-policy", "destination": "/policies#privacy-policy", "permanent": true },
+    { "source": "/privacy-policy/", "destination": "/policies#privacy-policy", "permanent": true },
+    { "source": "/privacy-policy.html", "destination": "/policies#privacy-policy", "permanent": true },
+    { "source": "/privacy", "destination": "/policies#privacy-policy", "permanent": true },
+    { "source": "/privacy/", "destination": "/policies#privacy-policy", "permanent": true },
+    { "source": "/privacy.html", "destination": "/policies#privacy-policy", "permanent": true },
+    { "source": "/terms", "destination": "/policies#terms-of-service", "permanent": true },
+    { "source": "/terms/", "destination": "/policies#terms-of-service", "permanent": true },
+    { "source": "/terms.html", "destination": "/policies#terms-of-service", "permanent": true }
   ],
   "headers": [
     {
@@ -22,13 +59,6 @@
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Cache-Control", "value": "no-store" }
-      ]
-    },
-    {
-      "source": "/api/admin/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
     }
   ]
