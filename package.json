@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node scripts/build-vercel-admin.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 3000",
-    "test": "node --experimental-strip-types --test src/routing.test.ts src/utils/netlifyForm.test.ts src/netlifyConfig.test.ts src/adminServer.test.ts"
+    "test": "node --experimental-strip-types --test src/routing.test.ts src/utils/netlifyForm.test.ts src/netlifyConfig.test.ts src/adminServer.test.ts",
+    "build:api": "node scripts/build-vercel-admin.mjs"
   },
   "dependencies": {
     "@netlify/blobs": "^11.1.7",

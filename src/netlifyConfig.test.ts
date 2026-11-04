@@ -95,12 +95,12 @@ test('Vercel mirrors the admin SPA rewrites and API function entries', () => {
   const adminHeader = vercel.headers?.find((entry) => entry.source === '/admin');
   assert.ok(adminHeader?.headers.some((header) => header.key === 'X-Robots-Tag' && /noindex/.test(header.value)));
 
-  for (const name of ['login', 'logout', 'session', 'submissions']) {
-    const source = read(`api/admin/${name}.ts`);
-    assert.match(source, /export default/);
-    assert.match(source, /fetch\s*\(/);
-    assert.match(source, new RegExp(`admin-${name}\\.ts`));
-  }
+  const buildApi = read('scripts/build-vercel-admin.mjs');
+  assert.match(buildApi, /admin-login\.ts/);
+  assert.match(buildApi, /admin-logout\.ts/);
+  assert.match(buildApi, /admin-session\.ts/);
+  assert.match(buildApi, /admin-submissions\.ts/);
+  assert.match(read('package.json'), /build-vercel-admin\.mjs/);
 });
 
 test('static files match the real public urls and the form definition', () => {
