@@ -1,0 +1,243 @@
+# Redirects match top to bottom. Existing files (ads.txt, robots.txt, sitemap.xml,
+# assets, form-received.html) win because these rules are not forced.
+#
+# Legacy multi-page URLs 301 to the closest section of this app.
+# /web-design lands on Web Development: the new site has no separate web-design
+# service, and website design/build now lives there. Brand Design stays the
+# identity service. Unknown paths serve the SPA with HTTP 404 (not a 200 rewrite).
+
+# --- Legacy service pages ---
+[[redirects]]
+  from = "/web-development"
+  to = "/#service-web-development"
+  status = 301
+[[redirects]]
+  from = "/web-development/"
+  to = "/#service-web-development"
+  status = 301
+[[redirects]]
+  from = "/web-development.html"
+  to = "/#service-web-development"
+  status = 301
+
+[[redirects]]
+  from = "/web-design"
+  to = "/#service-web-development"
+  status = 301
+[[redirects]]
+  from = "/web-design/"
+  to = "/#service-web-development"
+  status = 301
+[[redirects]]
+  from = "/web-design.html"
+  to = "/#service-web-development"
+  status = 301
+
+[[redirects]]
+  from = "/brand-design"
+  to = "/#service-brand-design"
+  status = 301
+[[redirects]]
+  from = "/brand-design/"
+  to = "/#service-brand-design"
+  status = 301
+[[redirects]]
+  from = "/brand-design.html"
+  to = "/#service-brand-design"
+  status = 301
+
+[[redirects]]
+  from = "/digital-marketing"
+  to = "/#service-digital-marketing"
+  status = 301
+[[redirects]]
+  from = "/digital-marketing/"
+  to = "/#service-digital-marketing"
+  status = 301
+[[redirects]]
+  from = "/digital-marketing.html"
+  to = "/#service-digital-marketing"
+  status = 301
+
+[[redirects]]
+  from = "/mobile-apps"
+  to = "/#service-mobile-apps"
+  status = 301
+[[redirects]]
+  from = "/mobile-apps/"
+  to = "/#service-mobile-apps"
+  status = 301
+[[redirects]]
+  from = "/mobile-apps.html"
+  to = "/#service-mobile-apps"
+  status = 301
+
+[[redirects]]
+  from = "/seo-services"
+  to = "/#service-seo-optimization"
+  status = 301
+[[redirects]]
+  from = "/seo-services/"
+  to = "/#service-seo-optimization"
+  status = 301
+[[redirects]]
+  from = "/seo-services.html"
+  to = "/#service-seo-optimization"
+  status = 301
+
+[[redirects]]
+  from = "/social-media-marketing"
+  to = "/#service-social-media"
+  status = 301
+[[redirects]]
+  from = "/social-media-marketing/"
+  to = "/#service-social-media"
+  status = 301
+[[redirects]]
+  from = "/social-media-marketing.html"
+  to = "/#service-social-media"
+  status = 301
+
+# --- Legacy blog index and articles ---
+[[redirects]]
+  from = "/blogs"
+  to = "/#blog-hub"
+  status = 301
+[[redirects]]
+  from = "/blogs/"
+  to = "/#blog-hub"
+  status = 301
+[[redirects]]
+  from = "/blogs.html"
+  to = "/#blog-hub"
+  status = 301
+
+[[redirects]]
+  from = "/blog"
+  to = "/#blog-hub"
+  status = 301
+[[redirects]]
+  from = "/blog/"
+  to = "/#blog-hub"
+  status = 301
+[[redirects]]
+  from = "/blog.html"
+  to = "/#blog-hub"
+  status = 301
+
+[[redirects]]
+  from = "/blog/*"
+  to = "/#blog-:splat"
+  status = 301
+
+# --- Legacy legal pages ---
+[[redirects]]
+  from = "/privacy-policy"
+  to = "/policies#privacy-policy"
+  status = 301
+[[redirects]]
+  from = "/privacy-policy/"
+  to = "/policies#privacy-policy"
+  status = 301
+[[redirects]]
+  from = "/privacy-policy.html"
+  to = "/policies#privacy-policy"
+  status = 301
+
+[[redirects]]
+  from = "/privacy"
+  to = "/policies#privacy-policy"
+  status = 301
+[[redirects]]
+  from = "/privacy/"
+  to = "/policies#privacy-policy"
+  status = 301
+[[redirects]]
+  from = "/privacy.html"
+  to = "/policies#privacy-policy"
+  status = 301
+
+[[redirects]]
+  from = "/terms"
+  to = "/policies#terms-of-service"
+  status = 301
+[[redirects]]
+  from = "/terms/"
+  to = "/policies#terms-of-service"
+  status = 301
+[[redirects]]
+  from = "/terms.html"
+  to = "/policies#terms-of-service"
+  status = 301
+
+# Admin sign-in and the enquiry API. These must stay above the 404 fallback.
+# The functions read ADMIN_PASSWORD, ADMIN_SESSION_SECRET, and NETLIFY_API_TOKEN
+# from the Netlify Functions environment and fail closed when those are missing.
+[[redirects]]
+  from = "/api/admin/login"
+  to = "/.netlify/functions/admin-login"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/api/admin/logout"
+  to = "/.netlify/functions/admin-logout"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/api/admin/session"
+  to = "/.netlify/functions/admin-session"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/api/admin/submissions"
+  to = "/.netlify/functions/admin-submissions"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/admin.html"
+  to = "/admin"
+  status = 301
+
+# Real app paths. Must stay above the 404 fallback.
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/admin/"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/policies"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/policies/"
+  to = "/index.html"
+  status = 200
+
+# Unknown paths: SPA shell with a real HTTP 404. The app shows the Not Found page.
+# Do not change this to status 200 — that was the soft-404 catch-all.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404
+
+[[headers]]
+  for = "/admin"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/admin/"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/api/admin/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Content-Type-Options = "nosniff"

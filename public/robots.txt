@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /form-received
+Disallow: /form-received.html
+
+Sitemap: https://gauharaxe.org/sitemap.xml
