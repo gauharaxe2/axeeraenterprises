@@ -74,6 +74,35 @@ test('known app paths rewrite with 200 and everything else is a 404', () => {
   assert.equal(read('vite.config.ts').includes('dev-admin-stub'), false);
 });
 
+test('Vercel mirrors the admin SPA rewrites and API function entries', () => {
+  const vercel = JSON.parse(read('vercel.json')) as {
+    rewrites?: Array<{ source: string; destination: string }>;
+    redirects?: Array<{ source: string; destination: string; permanent?: boolean }>;
+    headers?: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
+  };
+  for (const path of ['/admin', '/admin/', '/policies', '/policies/']) {
+    const match = vercel.rewrites?.find((rule) => rule.source === path);
+    assert.equal(match?.destination, '/index.html', path);
+  }
+  assert.equal(
+    vercel.rewrites?.some((rule) => rule.source === '/(.*)' && rule.destination === '/index.html'),
+    false
+  );
+  const adminHtml = vercel.redirects?.find((rule) => rule.source === '/admin.html');
+  assert.equal(adminHtml?.destination, '/admin');
+  assert.equal(adminHtml?.permanent, true);
+
+  const adminHeader = vercel.headers?.find((entry) => entry.source === '/admin');
+  assert.ok(adminHeader?.headers.some((header) => header.key === 'X-Robots-Tag' && /noindex/.test(header.value)));
+
+  for (const name of ['login', 'logout', 'session', 'submissions']) {
+    const source = read(`api/admin/${name}.ts`);
+    assert.match(source, /export default/);
+    assert.match(source, /fetch\s*\(/);
+    assert.match(source, new RegExp(`admin-${name}\\.ts`));
+  }
+});
+
 test('static files match the real public urls and the form definition', () => {
   const robots = read('public/robots.txt');
   const sitemap = read('public/sitemap.xml');

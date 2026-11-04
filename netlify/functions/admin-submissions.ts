@@ -4,7 +4,7 @@ import { json, readEnv, readJson, resolveSiteId, resolveToken, type EnvFn } from
 import { createBlobReadStore, type ReadStore } from './_lib/readState.ts';
 
 const TOKEN_MISSING =
-  'Form submissions are not configured. Set NETLIFY_API_TOKEN in the Netlify Functions environment.';
+  'Form submissions are not configured. Set NETLIFY_API_TOKEN in the Functions environment.';
 const UPSTREAM = 'Could not reach Netlify Forms. Check the API token and site id.';
 
 export interface SubmissionsDeps {

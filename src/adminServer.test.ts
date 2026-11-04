@@ -13,6 +13,7 @@ import {
   type EnquiryRecord
 } from '../netlify/functions/_lib/forms.ts';
 import {
+  clientIp,
   LOGIN_DELAY_MS,
   SESSION_COOKIE,
   SESSION_TTL_SECONDS,
@@ -70,6 +71,27 @@ function cookiePair(response: Response): string {
   const header = response.headers.get('set-cookie') ?? '';
   return header.split(';')[0] ?? '';
 }
+
+test('clientIp prefers Netlify then proxy headers used on Vercel', () => {
+  assert.equal(
+    clientIp(new Request('https://example.com', { headers: { 'x-nf-client-connection-ip': '203.0.113.10' } })),
+    '203.0.113.10'
+  );
+  assert.equal(
+    clientIp(new Request('https://example.com', {
+      headers: {
+        'x-forwarded-for': '198.51.100.20, 10.0.0.1',
+        'x-real-ip': '192.0.2.9'
+      }
+    })),
+    '198.51.100.20'
+  );
+  assert.equal(
+    clientIp(new Request('https://example.com', { headers: { 'x-real-ip': '192.0.2.9' } })),
+    '192.0.2.9'
+  );
+  assert.equal(clientIp(new Request('https://example.com')), 'unknown');
+});
 
 test('login fails closed when the password or session secret is missing or short', async () => {
   for (const values of [
