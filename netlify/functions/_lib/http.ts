@@ -4,7 +4,7 @@ export const LOGIN_DELAY_MS = 800;
 export const MIN_SECRET_LENGTH = 16;
 
 const NOT_CONFIGURED =
-  'Admin sign-in is not configured. Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET (at least 16 characters) in the Netlify Functions environment.';
+  'Admin sign-in is not configured. Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET (at least 16 characters) in the Functions environment.';
 
 export function notConfiguredMessage(): string {
   return NOT_CONFIGURED;
@@ -111,9 +111,20 @@ export function originAllowed(request: Request): boolean {
   return [urlHost, forwarded, host].some((candidate) => candidate && candidate === originHost);
 }
 
+function usableIp(value: string | null | undefined): string {
+  const ip = value?.trim() ?? '';
+  if (!ip || ip.length > 80 || /[\s,]/.test(ip)) return '';
+  return ip;
+}
+
+/** Prefer Netlify's client IP, then common proxy headers used on Vercel. */
 export function clientIp(request: Request): string {
-  const netlifyIp = request.headers.get('x-nf-client-connection-ip')?.trim() ?? '';
-  if (netlifyIp && netlifyIp.length <= 80 && !/[\s,]/.test(netlifyIp)) return netlifyIp;
+  const netlifyIp = usableIp(request.headers.get('x-nf-client-connection-ip'));
+  if (netlifyIp) return netlifyIp;
+  const forwarded = usableIp(request.headers.get('x-forwarded-for')?.split(',')[0]);
+  if (forwarded) return forwarded;
+  const realIp = usableIp(request.headers.get('x-real-ip'));
+  if (realIp) return realIp;
   return 'unknown';
 }
 

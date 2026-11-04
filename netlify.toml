@@ -172,7 +172,8 @@
 
 # Admin sign-in and the enquiry API. These must stay above the 404 fallback.
 # The functions read ADMIN_PASSWORD, ADMIN_SESSION_SECRET, and NETLIFY_API_TOKEN
-# from the Netlify Functions environment and fail closed when those are missing.
+# from the Functions environment and fail closed when those are missing.
+# On Vercel the same handlers are exposed via api/admin/* and vercel.json.
 [[redirects]]
   from = "/api/admin/login"
   to = "/.netlify/functions/admin-login"
