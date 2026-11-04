@@ -96,7 +96,7 @@ test('Vercel mirrors the admin SPA rewrites and API function entries', () => {
   assert.ok(adminHeader?.headers.some((header) => header.key === 'X-Robots-Tag' && /noindex/.test(header.value)));
 
   for (const name of ['login', 'logout', 'session', 'submissions']) {
-    const source = read(`api/admin/${name}.js`);
+    const source = read(`api/admin/${name}.ts`);
     assert.match(source, /export default/);
     assert.match(source, /fetch\s*\(/);
     assert.match(source, new RegExp(`admin-${name}\\.ts`));
