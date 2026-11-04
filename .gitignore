@@ -5,3 +5,5 @@ dist/
 .env.*
 !.env.example
 *.log
+# Temporary esbuild entry stubs from scripts/build-vercel-admin.mjs.
+api/admin/*.entry.mjs
