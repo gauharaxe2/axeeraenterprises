@@ -23,6 +23,7 @@ import { NotFound } from './components/NotFound';
 import { PageView, BlogPost, ServiceItem, PolicyType } from './types';
 import { useAdminData } from './hooks/useAdminData';
 import { AppRoute, isAdminLocation, resolveRoute } from './routing';
+import { AdminGate, clearAdminSession, isAdminSessionActive } from './components/AdminGate';
 
 const AdminPanel = lazy(() =>
   import('./components/AdminPanel/SideAdminPanel').then((mod) => ({ default: mod.SideAdminPanel }))
@@ -92,8 +93,12 @@ export const App: React.FC = () => {
   const dataRef = useRef(data);
   dataRef.current = data;
 
+  const [adminGate, setAdminGate] = useState<'off' | 'gate' | 'open'>(() => {
+    if (!isAdminLocation(window.location.pathname, window.location.hash)) return 'off';
+    return isAdminSessionActive() ? 'open' : 'gate';
+  });
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() =>
-    isAdminLocation(window.location.pathname, window.location.hash)
+    isAdminLocation(window.location.pathname, window.location.hash) && isAdminSessionActive()
   );
   const [currentPage, setCurrentPage] = useState<PageView>(() => {
     const route = resolveRoute(window.location.pathname, window.location.hash);
@@ -158,10 +163,12 @@ export const App: React.FC = () => {
 
   const applyLocation = useCallback(() => {
     if (isAdminLocation(window.location.pathname, window.location.hash)) {
-      setIsAdminOpen(true);
+      setAdminGate((current) => (current === 'open' || isAdminSessionActive() ? 'open' : 'gate'));
+      setIsAdminOpen((current) => current || isAdminSessionActive());
       setCurrentPage('home');
       return;
     }
+    setAdminGate('off');
     setIsAdminOpen(false);
 
     const route = resolveRoute(window.location.pathname, window.location.hash);
@@ -213,7 +220,8 @@ export const App: React.FC = () => {
     }
 
     if (route.page === 'admin') {
-      setIsAdminOpen(true);
+      setAdminGate((current) => (current === 'open' || isAdminSessionActive() ? 'open' : 'gate'));
+      setIsAdminOpen((current) => current || isAdminSessionActive());
       setCurrentPage('home');
       return;
     }
@@ -252,7 +260,7 @@ export const App: React.FC = () => {
       meta.setAttribute('content', content);
       if (!robots) document.head.appendChild(meta);
     };
-    if (isAdminOpen || isAdminLocation(window.location.pathname, window.location.hash)) {
+    if (adminGate !== 'off' || isAdminLocation(window.location.pathname, window.location.hash)) {
       document.title = "Admin | Axe's Era Enterprise";
       noindex('noindex, nofollow');
       return;
@@ -264,7 +272,12 @@ export const App: React.FC = () => {
     }
     document.title = DEFAULT_TITLE;
     robots?.remove();
-  }, [currentPage, isAdminOpen]);
+  }, [currentPage, adminGate]);
+
+  const handleAdminSuccess = useCallback(() => {
+    setAdminGate('open');
+    setIsAdminOpen(true);
+  }, []);
 
   const handleSetCurrentPage = (page: PageView) => {
     if (page === 'home') {
@@ -290,6 +303,17 @@ export const App: React.FC = () => {
 
   const handleAdminClose = () => {
     setIsAdminOpen(false);
+    setAdminGate('off');
+    if (isAdminLocation(window.location.pathname, window.location.hash)) {
+      pushUrl('/');
+      setCurrentPage('home');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    clearAdminSession();
+    setIsAdminOpen(false);
+    setAdminGate('off');
     if (isAdminLocation(window.location.pathname, window.location.hash)) {
       pushUrl('/');
       setCurrentPage('home');
@@ -350,6 +374,10 @@ export const App: React.FC = () => {
     setCurrentPage('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (adminGate === 'gate') {
+    return <AdminGate onSuccess={handleAdminSuccess} />;
+  }
 
   return (
     <div className="app-container">
@@ -462,6 +490,7 @@ export const App: React.FC = () => {
           <AdminPanel
             isOpen={isAdminOpen}
             onClose={handleAdminClose}
+            onLogout={handleAdminLogout}
             data={data}
             syncStatus={syncStatus}
             onUpdateGeneral={updateGeneralInfo}
