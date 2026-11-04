@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "SiteSection": {
+      "title": "SiteSection",
+      "description": "Content section data synchronized between admin panel and public front UI",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Section key identifier (generalInfo, services, projects, blogs, team, testimonials, partnerships, partnerLogos, faqs)"
+        },
+        "data": {
+          "type": "string",
+          "description": "JSON serialized payload or structured content for the section"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "Source or user identifier that made the update"
+        }
+      },
+      "required": ["id"]
+    },
+    "ContactSubmission": {
+      "title": "ContactSubmission",
+      "description": "Client contact and project inquiry submissions",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Full name of the inquiring client"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Email address of the client"
+        },
+        "service": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Requested agency service"
+        },
+        "budget": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Project budget tier"
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Optional phone or WhatsApp contact number"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 3000,
+          "description": "Project brief and requirements"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["fullName", "email", "message"]
+    },
+    "TestDocument": {
+      "title": "TestDocument",
+      "description": "Health check connection document",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Status string"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/site_content/{sectionId}": {
+      "schema": "#/entities/SiteSection",
+      "description": "Live agency content sections synced between admin and public pages"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "#/entities/ContactSubmission",
+      "description": "Inquiry submissions from site visitors"
+    },
+    "/test/{docId}": {
+      "schema": "#/entities/TestDocument",
+      "description": "Test connection document"
+    }
+  }
+}

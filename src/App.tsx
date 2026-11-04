@@ -57,6 +57,8 @@ function pushUrl(url: string) {
 export const App: React.FC = () => {
   const {
     data,
+    syncStatus,
+    publishAllToCloud,
     updateGeneralInfo,
     addService,
     updateService,
@@ -126,6 +128,25 @@ export const App: React.FC = () => {
     return null;
   });
   const [notification, setNotification] = useState<NotificationState | null>(null);
+
+  // Keep selectedBlog and selectedService synchronized when live data updates from Firestore
+  useEffect(() => {
+    if (selectedBlog) {
+      const refreshed = data.blogs.find((b) => b.id === selectedBlog.id || b.slug === selectedBlog.slug);
+      if (refreshed && refreshed !== selectedBlog) {
+        setSelectedBlog(refreshed);
+      }
+    }
+  }, [data.blogs, selectedBlog]);
+
+  useEffect(() => {
+    if (selectedService) {
+      const refreshed = data.services.find((s) => s.id === selectedService.id);
+      if (refreshed && refreshed !== selectedService) {
+        setSelectedService(refreshed);
+      }
+    }
+  }, [data.services, selectedService]);
 
   const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     setNotification({
@@ -442,6 +463,7 @@ export const App: React.FC = () => {
             isOpen={isAdminOpen}
             onClose={handleAdminClose}
             data={data}
+            syncStatus={syncStatus}
             onUpdateGeneral={updateGeneralInfo}
             onAddService={addService}
             onUpdateService={updateService}
@@ -470,6 +492,7 @@ export const App: React.FC = () => {
             onResetDefaults={resetToDefaults}
             onExportJson={exportDataJson}
             onImportJson={importDataJson}
+            onPublishAll={publishAllToCloud}
             onShowToast={showNotification}
           />
         </Suspense>

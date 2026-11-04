@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Health check collection for connection testing
+    match /test/{docId} {
+      allow get: if isValidId(docId);
+      allow list: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // Site content sections synced between admin panel and public UI
+    match /site_content/{sectionId} {
+      allow get: if isValidId(sectionId);
+      allow list: if true;
+      allow create, update: if isValidId(sectionId) && request.resource.data != null;
+      allow delete: if isValidId(sectionId);
+    }
+
+    // Prospective client inquiry submissions
+    match /submissions/{submissionId} {
+      allow create: if isValidId(submissionId) &&
+        request.resource.data.keys().hasAll(['fullName', 'email', 'message']);
+      allow get: if isValidId(submissionId);
+      allow list: if true;
+      allow update, delete: if isValidId(submissionId);
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

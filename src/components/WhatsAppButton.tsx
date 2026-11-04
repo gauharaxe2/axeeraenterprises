@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageCircle } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 
 interface WhatsAppButtonProps {
   whatsappNumber?: string;
@@ -18,11 +18,12 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
         target="_blank"
         rel="noopener noreferrer"
         className="whatsapp-button"
-        aria-label="Contact us on WhatsApp"
+        aria-label="Contact us on WhatsApp (+92-315-7338694)"
+        title="Chat on WhatsApp"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        <MessageCircle size={30} fill="#ffffff" color="#25D366" />
+        <WhatsAppIcon size={34} color="#ffffff" />
       </a>
       {showTooltip && (
         <div className="whatsapp-tooltip">
@@ -32,3 +33,5 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
     </>
   );
 };
+
+export default WhatsAppButton;
