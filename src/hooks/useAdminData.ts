@@ -19,6 +19,7 @@ import { testimonialsData } from '../data/testimonials';
 import { initialPartnerships, initialPartnerLogos } from '../data/partnerships';
 import { faqsData } from '../data/faqs';
 import { db, testConnection, saveSectionToFirestore } from '../utils/firebase';
+import { mergeProjectsWithDefaults } from '../utils/mergeProjects';
 import { collection, onSnapshot } from 'firebase/firestore';
 
 const STORAGE_KEY = 'axes_era_admin_data_v3';
@@ -36,17 +37,6 @@ export interface AdminStoreData {
 }
 
 export type FirebaseSyncStatus = 'connected' | 'syncing' | 'offline';
-
-function mergeProjectsWithDefaults(loaded: Project[] | undefined): Project[] {
-  if (!Array.isArray(loaded) || loaded.length === 0) return projectsData;
-  const merged = [...loaded];
-  for (const def of projectsData) {
-    if (!merged.some((p) => p.id === def.id || (p.link && p.link === def.link))) {
-      merged.push(def);
-    }
-  }
-  return merged;
-}
 
 export const useAdminData = () => {
   const [syncStatus, setSyncStatus] = useState<FirebaseSyncStatus>('syncing');
@@ -157,8 +147,6 @@ export const useAdminData = () => {
 
         setSyncStatus('connected');
         const incomingUpdates: Partial<AdminStoreData> = {};
-        let needsProjectsSync = false;
-        let mergedProjectsToSync: Project[] = [];
 
         snapshot.docs.forEach((docSnap) => {
           const docData = docSnap.data();
@@ -174,15 +162,9 @@ export const useAdminData = () => {
               case 'services':
                 incomingUpdates.services = parsed;
                 break;
-              case 'projects': {
-                const mergedProjects = mergeProjectsWithDefaults(parsed);
-                if (Array.isArray(parsed) && mergedProjects.length > parsed.length) {
-                  needsProjectsSync = true;
-                  mergedProjectsToSync = mergedProjects;
-                }
-                incomingUpdates.projects = mergedProjects;
+              case 'projects':
+                incomingUpdates.projects = mergeProjectsWithDefaults(parsed);
                 break;
-              }
               case 'blogs':
                 incomingUpdates.blogs = parsed;
                 break;
@@ -209,10 +191,6 @@ export const useAdminData = () => {
 
         if (Object.keys(incomingUpdates).length > 0) {
           setData((prev) => ({ ...prev, ...incomingUpdates }));
-        }
-
-        if (needsProjectsSync && mergedProjectsToSync.length > 0) {
-          saveSectionToFirestore('projects', mergedProjectsToSync).catch(() => {});
         }
       },
       (error) => {
