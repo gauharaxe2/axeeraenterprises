@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Mail, RefreshCw, Trash2 } from 'lucide-react';
-import { Enquiry, fetchEnquiries, updateEnquiry } from '../../utils/adminClient';
+import { Enquiry, fetchEnquiries, updateEnquiry, watchEnquiries } from '../../utils/adminClient';
 
 interface QueriesPanelProps {
   onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
   onUnauthorized?: () => void;
+  onUnreadCountChange?: (count: number) => void;
 }
 
 function formatWhen(iso: string): string {
@@ -22,7 +23,11 @@ function mailHref(email: string): string | null {
   return `mailto:${email}`;
 }
 
-export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnauthorized }) => {
+export const QueriesPanel: React.FC<QueriesPanelProps> = ({
+  onShowToast,
+  onUnauthorized,
+  onUnreadCountChange
+}) => {
   const [rows, setRows] = useState<Enquiry[]>([]);
   const [truncated, setTruncated] = useState(false);
   const [formFound, setFormFound] = useState(true);
@@ -32,6 +37,9 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [live, setLive] = useState(true);
+  const unreadCbRef = useRef(onUnreadCountChange);
+  unreadCbRef.current = onUnreadCountChange;
 
   const fail = useCallback((caught: unknown) => {
     if (caught instanceof Error && caught.name === 'AdminUnauthorized') {
@@ -43,35 +51,65 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
     onShowToast(message, 'error');
   }, [onShowToast, onUnauthorized]);
 
+  const applyList = useCallback((result: {
+    submissions: Enquiry[];
+    truncated: boolean;
+    formFound: boolean;
+    readState: 'ok' | 'unavailable';
+  }) => {
+    setRows(result.submissions);
+    setTruncated(result.truncated);
+    setFormFound(result.formFound);
+    setReadState(result.readState);
+    setError('');
+    setLoading(false);
+    unreadCbRef.current?.(result.submissions.filter((row) => !row.read).length);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const result = await fetchEnquiries();
-      setRows(result.submissions);
-      setTruncated(result.truncated);
-      setFormFound(result.formFound);
-      setReadState(result.readState);
+      setLive(false);
+      applyList(result);
     } catch (caught) {
       if (caught instanceof Error && caught.name === 'AdminUnauthorized') {
         onUnauthorized?.();
         return;
       }
       setError(caught instanceof Error ? caught.message : 'Could not load enquiries.');
-    } finally {
       setLoading(false);
+      unreadCbRef.current?.(0);
     }
-  }, [onUnauthorized]);
+  }, [applyList, onUnauthorized]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    setLoading(true);
+    const unsubscribe = watchEnquiries(
+      (result) => {
+        setLive(true);
+        applyList(result);
+      },
+      (message) => {
+        setLive(false);
+        setError(message);
+        setLoading(false);
+        unreadCbRef.current?.(0);
+      }
+    );
+    return () => unsubscribe();
+  }, [applyList]);
 
   const markRead = async (row: Enquiry, read: boolean) => {
     setPendingId(row.id);
     try {
       await updateEnquiry('read', row.id, read);
-      setRows((current) => current.map((item) => (item.id === row.id ? { ...item, read } : item)));
+      setRows((current) => {
+        const next = current.map((item) => (item.id === row.id ? { ...item, read } : item));
+        unreadCbRef.current?.(next.filter((item) => !item.read).length);
+        return next;
+      });
       onShowToast(read ? 'Marked as read.' : 'Marked as unread.', 'success');
     } catch (caught) {
       fail(caught);
@@ -84,7 +122,11 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
     setPendingId(row.id);
     try {
       await updateEnquiry('delete', row.id);
-      setRows((current) => current.filter((item) => item.id !== row.id));
+      setRows((current) => {
+        const next = current.filter((item) => item.id !== row.id);
+        unreadCbRef.current?.(next.filter((item) => !item.read).length);
+        return next;
+      });
       setConfirmId(null);
       onShowToast('Enquiry deleted.', 'info');
     } catch (caught) {
@@ -109,7 +151,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
               ? 'Loading the contact form inbox…'
               : error
                 ? 'Inbox unavailable'
-                : `${rows.length} received · ${unreadCount} unread`}
+                : `${rows.length} received · ${unreadCount} unread${live ? ' · live' : ''}`}
           </p>
         </div>
         <button
@@ -124,8 +166,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
       </div>
 
       <p style={{ color: 'var(--text-light)', fontSize: '0.8rem' }}>
-        Verified contact-form submissions from Firebase, newest first.
-        Content edits in the other tabs sync through Firestore.
+        Visitor messages from the public contact form appear here automatically (newest first).
       </p>
 
       {readState === 'unavailable' && (
@@ -159,7 +200,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
 
       {!loading && formFound && visible.length === 0 && !error && (
         <div style={{ background: '#151d32', border: '1px solid #334155', borderRadius: '10px', padding: '1.25rem' }}>
-          <p style={{ margin: 0 }}>{unreadOnly ? 'No unread enquiries.' : 'No contact form submissions yet.'}</p>
+          <p style={{ margin: 0 }}>{unreadOnly ? 'No unread enquiries.' : 'No contact form submissions yet. When a visitor sends a message, it will show up here.'}</p>
         </div>
       )}
 

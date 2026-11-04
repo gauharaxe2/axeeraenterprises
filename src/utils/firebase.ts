@@ -10,7 +10,9 @@ import {
   deleteDoc,
   updateDoc,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot,
+  type Unsubscribe
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -156,6 +158,29 @@ function createdAtIso(value: unknown): string {
   return new Date().toISOString();
 }
 
+function mapSubmissionDoc(entry: { id: string; data: () => Record<string, unknown> }): EnquiryRecord {
+  const data = entry.data();
+  const companyFromBudget = asText(data.budget).replace(/^Company:\s*/i, '');
+  return {
+    id: entry.id,
+    createdAt: createdAtIso(data.createdAt),
+    name: asText(data.fullName) || asText(data.name),
+    email: asText(data.email),
+    company: asText(data.company) || companyFromBudget,
+    service: asText(data.service),
+    message: asText(data.message),
+    read: data.read === true
+  };
+}
+
+function sortEnquiries(rows: EnquiryRecord[]): EnquiryRecord[] {
+  return [...rows].sort((left, right) => {
+    const rightMs = Date.parse(right.createdAt);
+    const leftMs = Date.parse(left.createdAt);
+    return (Number.isFinite(rightMs) ? rightMs : 0) - (Number.isFinite(leftMs) ? leftMs : 0);
+  });
+}
+
 // Save inquiry submission to Firestore
 export async function saveSubmissionToFirestore(submission: ContactSubmissionInput): Promise<string | null> {
   const collectionPath = 'submissions';
@@ -178,28 +203,37 @@ export async function saveSubmissionToFirestore(submission: ContactSubmissionInp
 }
 
 export async function listSubmissionsFromFirestore(): Promise<EnquiryRecord[]> {
-  const snap = await getDocs(collection(db, 'submissions'));
-  const rows: EnquiryRecord[] = [];
-  snap.forEach((entry) => {
-    const data = entry.data();
-    const companyFromBudget = asText(data.budget).replace(/^Company:\s*/i, '');
-    rows.push({
-      id: entry.id,
-      createdAt: createdAtIso(data.createdAt),
-      name: asText(data.fullName) || asText(data.name),
-      email: asText(data.email),
-      company: asText(data.company) || companyFromBudget,
-      service: asText(data.service),
-      message: asText(data.message),
-      read: data.read === true
+  try {
+    const snap = await getDocs(collection(db, 'submissions'));
+    const rows: EnquiryRecord[] = [];
+    snap.forEach((entry) => {
+      rows.push(mapSubmissionDoc({ id: entry.id, data: () => entry.data() as Record<string, unknown> }));
     });
-  });
-  rows.sort((left, right) => {
-    const rightMs = Date.parse(right.createdAt);
-    const leftMs = Date.parse(left.createdAt);
-    return (Number.isFinite(rightMs) ? rightMs : 0) - (Number.isFinite(leftMs) ? leftMs : 0);
-  });
-  return rows;
+    return sortEnquiries(rows);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, 'submissions');
+  }
+}
+
+/** Live inbox updates for the admin Queries tab. */
+export function subscribeToSubmissions(
+  onChange: (rows: EnquiryRecord[]) => void,
+  onError?: (message: string) => void
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, 'submissions'),
+    (snap) => {
+      const rows: EnquiryRecord[] = [];
+      snap.forEach((entry) => {
+        rows.push(mapSubmissionDoc({ id: entry.id, data: () => entry.data() as Record<string, unknown> }));
+      });
+      onChange(sortEnquiries(rows));
+    },
+    (error) => {
+      console.warn('Firestore submissions listener warning:', error);
+      onError?.(error.message || 'Could not load enquiries.');
+    }
+  );
 }
 
 export async function setSubmissionReadInFirestore(id: string, read: boolean): Promise<void> {
