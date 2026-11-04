@@ -65,6 +65,7 @@ test('static files match the real public urls and the contact form no longer use
   const robots = read('public/robots.txt');
   const sitemap = read('public/sitemap.xml');
   const index = read('index.html');
+  const ads = read('public/ads.txt');
   const success = read('public/form-received.html');
   const services = read('src/data/services.ts');
 
@@ -75,6 +76,11 @@ test('static files match the real public urls and the contact form no longer use
   assert.equal(sitemap.includes('/web-development'), false);
   assert.equal(sitemap.includes('/admin'), false);
   assert.equal(sitemap.includes('/blogs'), false);
+
+  assert.match(index, /name="google-adsense-account"/);
+  assert.match(index, /ca-pub-1944222552097544/);
+  assert.match(index, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=ca-pub-1944222552097544/);
+  assert.match(ads, /google\.com, pub-1944222552097544, DIRECT, f08c47fec0942fa0/);
 
   assert.equal(index.includes('data-netlify'), false);
   assert.equal(index.includes('netlify-honeypot'), false);
