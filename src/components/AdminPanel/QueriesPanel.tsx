@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Mail, RefreshCw, Trash2 } from 'lucide-react';
 import { Enquiry, fetchEnquiries, updateEnquiry } from '../../utils/adminClient';
 
 interface QueriesPanelProps {
   onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
   onUnauthorized?: () => void;
+  onStatsChange?: (stats: { total: number; unread: number }) => void;
 }
 
 function formatWhen(iso: string): string {
@@ -22,7 +23,7 @@ function mailHref(email: string): string | null {
   return `mailto:${email}`;
 }
 
-export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnauthorized }) => {
+export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnauthorized, onStatsChange }) => {
   const [rows, setRows] = useState<Enquiry[]>([]);
   const [truncated, setTruncated] = useState(false);
   const [formFound, setFormFound] = useState(true);
@@ -32,6 +33,8 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const onStatsChangeRef = useRef(onStatsChange);
+  onStatsChangeRef.current = onStatsChange;
 
   const fail = useCallback((caught: unknown) => {
     if (caught instanceof Error && caught.name === 'AdminUnauthorized') {
@@ -43,6 +46,13 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
     onShowToast(message, 'error');
   }, [onShowToast, onUnauthorized]);
 
+  const publishStats = useCallback((next: Enquiry[]) => {
+    onStatsChangeRef.current?.({
+      total: next.length,
+      unread: next.filter((row) => !row.read).length
+    });
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -52,6 +62,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
       setTruncated(result.truncated);
       setFormFound(result.formFound);
       setReadState(result.readState);
+      publishStats(result.submissions);
     } catch (caught) {
       if (caught instanceof Error && caught.name === 'AdminUnauthorized') {
         onUnauthorized?.();
@@ -61,7 +72,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
     } finally {
       setLoading(false);
     }
-  }, [onUnauthorized]);
+  }, [onUnauthorized, publishStats]);
 
   useEffect(() => {
     void load();
@@ -71,7 +82,11 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
     setPendingId(row.id);
     try {
       await updateEnquiry('read', row.id, read);
-      setRows((current) => current.map((item) => (item.id === row.id ? { ...item, read } : item)));
+      setRows((current) => {
+        const next = current.map((item) => (item.id === row.id ? { ...item, read } : item));
+        publishStats(next);
+        return next;
+      });
       onShowToast(read ? 'Marked as read.' : 'Marked as unread.', 'success');
     } catch (caught) {
       fail(caught);
@@ -84,7 +99,11 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({ onShowToast, onUnaut
     setPendingId(row.id);
     try {
       await updateEnquiry('delete', row.id);
-      setRows((current) => current.filter((item) => item.id !== row.id));
+      setRows((current) => {
+        const next = current.filter((item) => item.id !== row.id);
+        publishStats(next);
+        return next;
+      });
       setConfirmId(null);
       onShowToast('Enquiry deleted.', 'info');
     } catch (caught) {

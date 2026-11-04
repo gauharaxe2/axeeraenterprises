@@ -1058,6 +1058,156 @@ section {
   font-size: 0.9rem;
 }
 
+/* Admin enquiry inbox — bottom-right popup */
+.inbox-popup {
+  position: fixed;
+  right: 30px;
+  bottom: 108px;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.inbox-popup > * {
+  pointer-events: auto;
+}
+
+.inbox-popup-launcher {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #1a2438 0%, #0f172a 100%);
+  color: var(--primary-color);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.inbox-popup-launcher:hover {
+  transform: translateY(-2px) scale(1.04);
+  border-color: var(--primary-color);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+}
+
+.inbox-popup-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.45);
+}
+
+.inbox-popup-panel {
+  width: min(420px, calc(100vw - 24px));
+  height: min(560px, calc(100vh - 160px));
+  background:
+    radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent 42%),
+    linear-gradient(165deg, #121a2c 0%, #0a1020 100%);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 18px 18px 14px 14px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: inboxPopupIn 0.22s ease;
+}
+
+@keyframes inboxPopupIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.inbox-popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1rem 1rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 12, 22, 0.72);
+}
+
+.inbox-popup-kicker {
+  margin: 0 0 2px;
+  color: var(--primary-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inbox-popup-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.inbox-popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.inbox-popup-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inbox-popup-icon-btn:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  color: #fff;
+}
+
+.inbox-popup-icon-btn.danger {
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.inbox-popup-body {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.inbox-popup-body h3 {
+  font-size: 1rem !important;
+}
+
 /* WhatsApp Floating Button */
 .whatsapp-button {
   position: fixed;
@@ -1201,5 +1351,16 @@ section {
   .whatsapp-tooltip {
     bottom: 80px;
     right: 20px;
+  }
+  .inbox-popup {
+    right: 20px;
+    bottom: 90px;
+  }
+  .inbox-popup-panel {
+    width: min(100vw - 16px, 420px);
+    height: min(70vh, 520px);
+  }
+  .inbox-popup-icon-btn span {
+    display: none;
   }
 }
