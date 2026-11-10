@@ -5,7 +5,6 @@ import { PageView } from '../types';
 interface NavbarProps {
   currentPage: PageView;
   setCurrentPage: (page: PageView) => void;
-  onNavigateSection?: (sectionId: string) => void;
   onOpenServicesPage?: () => void;
   onOpenPage?: (page: PageView) => void;
 }
@@ -13,7 +12,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   currentPage,
   setCurrentPage,
-  onNavigateSection,
   onOpenServicesPage,
   onOpenPage
 }) => {
@@ -27,29 +25,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleLinkClick = (sectionId?: string) => {
-    setMobileMenuOpen(false);
-    if (currentPage !== 'home') {
-      setCurrentPage('home');
-      if (sectionId) {
-        setTimeout(() => {
-          const el = document.getElementById(sectionId);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-          }
-        }, 100);
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } else {
-      if (sectionId && onNavigateSection) {
-        onNavigateSection(sectionId);
-      } else if (!sectionId) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
-  };
 
   const navigateToPage = (page: PageView) => {
     setMobileMenuOpen(false);

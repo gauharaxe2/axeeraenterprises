@@ -6,12 +6,7 @@ import {
   Handshake,
   Network,
   Globe,
-  ShieldCheck,
-  CheckCircle2,
-  Sparkles,
-  Layers,
-  Building2,
-  Users2
+  CheckCircle2
 } from 'lucide-react';
 import { PartnershipItem, PartnerLogo } from '../types';
 

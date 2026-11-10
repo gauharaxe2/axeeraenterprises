@@ -104,10 +104,42 @@ function isServiceId(value: string): value is ServiceId {
   return (SERVICE_IDS as readonly string[]).includes(value);
 }
 
+/** Real section pages. Vercel rewrites these to the SPA shell. */
+export const CONTENT_PAGE_PATHS = [
+  '/about',
+  '/services',
+  '/websites',
+  '/team',
+  '/testimonials',
+  '/partnership',
+  '/contact',
+  '/faq'
+] as const;
+
+const CONTENT_ROUTES: Record<(typeof CONTENT_PAGE_PATHS)[number], AppRoute> = {
+  '/about': { page: 'about' },
+  '/services': { page: 'services' },
+  '/websites': { page: 'websites' },
+  '/team': { page: 'team' },
+  '/testimonials': { page: 'testimonials' },
+  '/partnership': { page: 'partnership' },
+  '/contact': { page: 'contact' },
+  '/faq': { page: 'faq' }
+};
+
+function contentRoute(path: string): AppRoute | null {
+  if ((CONTENT_PAGE_PATHS as readonly string[]).includes(path)) {
+    return CONTENT_ROUTES[path as (typeof CONTENT_PAGE_PATHS)[number]];
+  }
+  return null;
+}
+
 /**
  * Resolve the public URL to a view.
- * `/`, `/policies`, and `/admin` are real app paths. Legacy URLs are 301'd by
- * the host redirects before this runs. Anything else is not found.
+ * `/`, `/policies`, `/admin`, and the expanded section pages (`/about`,
+ * `/services`, `/contact`, and the rest of CONTENT_PAGE_PATHS) are real app
+ * paths. Legacy URLs are 301'd by the host redirects before this runs.
+ * Anything else is not found.
  */
 export function resolveRoute(pathname: string, hash: string): AppRoute {
   if (isAdminLocation(pathname, hash)) {
@@ -119,6 +151,8 @@ export function resolveRoute(pathname: string, hash: string): AppRoute {
 
   const path = normalizePath(pathname);
   const fragment = parseHash(hash).toLowerCase();
+  const directPage = contentRoute(path);
+  if (directPage) return directPage;
 
   if (path !== '/' && path !== '/policies') {
     return { page: 'not-found' };
