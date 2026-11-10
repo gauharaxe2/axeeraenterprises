@@ -18,6 +18,7 @@ import {
   Images
 } from 'lucide-react';
 import { BlogPost } from '../types';
+import { SITE_LOGO_SRC } from '../brand';
 import { WhatsAppIcon } from './WhatsAppIcon';
 
 interface BlogArticleDetailProps {
@@ -565,9 +566,9 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               }}
             >
               <img
-                src="https://i.postimg.cc/q62QnRNR/Axe-s-Era-company-logo-20260808-065813-0000.png"
+                src={SITE_LOGO_SRC}
                 alt="Axe's Era"
-                style={{ width: '70px', height: '70px', borderRadius: '12px', objectFit: 'contain' }}
+                style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', background: '#000' }}
               />
               <div style={{ flex: 1 }}>
                 <h4 style={{ margin: '0 0 4px', fontSize: '1.1rem', color: '#ffffff' }}>
