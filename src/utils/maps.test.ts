@@ -22,3 +22,14 @@ test('map links pin the published headquarters address on Google Maps', () => {
     'https://www.google.com/maps/dir/?api=1&destination=30.2054412,71.4892754'
   );
 });
+
+test('a saved pin replaces the neighborhood fallback on Google Maps', () => {
+  const address = 'D-26, Wahdat Colony, Multan, 66000';
+  const pin = { lat: 30.21, lng: 71.48 };
+  assert.match(googleMapsEmbedUrl(address, pin), /q=30\.21,71\.48/);
+  assert.equal(googleMapsPlaceUrl(address, pin), 'https://www.google.com/maps/search/?api=1&query=30.21,71.48');
+  assert.equal(
+    googleMapsDirectionsUrl(address, pin),
+    'https://www.google.com/maps/dir/?api=1&destination=30.21,71.48'
+  );
+});
