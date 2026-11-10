@@ -7,9 +7,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   TrendingUp,
-  Award,
-  Users2,
-  ExternalLink
+  Award
 } from 'lucide-react';
 import { Testimonial } from '../types';
 
@@ -34,7 +32,7 @@ export const TestimonialsPage: React.FC<TestimonialsPageProps> = ({
   ];
 
   const enrichedTestimonials = useMemo(() => {
-    return testimonials.map((t, idx) => {
+    return testimonials.map((t) => {
       let category: 'ecommerce' | 'saas' | 'marketing' = 'ecommerce';
       let outcome = '+150% Inbound Sales';
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isAdminLocation, normalizePath, resolveRoute, SERVICE_IDS } from './routing.ts';
+import { CONTENT_PAGE_PATHS, isAdminLocation, normalizePath, resolveRoute, SERVICE_IDS } from './routing.ts';
 
 test('normalizePath strips trailing slash, html, and index', () => {
   assert.equal(normalizePath('/Policies/'), '/policies');
@@ -50,6 +50,11 @@ test('home, sections, services, blogs, and policies resolve', () => {
   assert.deepEqual(resolveRoute('/', '#partnership-page'), { page: 'partnership' });
   assert.deepEqual(resolveRoute('/', '#contact-page'), { page: 'contact' });
   assert.deepEqual(resolveRoute('/', '#faq-page'), { page: 'faq' });
+  for (const path of CONTENT_PAGE_PATHS) {
+    const page = path.slice(1);
+    assert.deepEqual(resolveRoute(path, ''), { page });
+    assert.deepEqual(resolveRoute(`${path}/`, ''), { page });
+  }
   assert.deepEqual(resolveRoute('/', '#blog-hub'), { page: 'blog-hub' });
   assert.deepEqual(resolveRoute('/', '#blog-what-is-web-development.html'), {
     page: 'blog-detail',

@@ -124,6 +124,7 @@ export interface ContactSubmissionInput {
   service?: string;
   company?: string;
   phone?: string;
+  budget?: string;
 }
 
 export interface EnquiryRecord {
@@ -134,6 +135,7 @@ export interface EnquiryRecord {
   company: string;
   service: string;
   message: string;
+  budget: string;
   read: boolean;
 }
 
@@ -160,15 +162,20 @@ function createdAtIso(value: unknown): string {
 
 function mapSubmissionDoc(entry: { id: string; data: () => Record<string, unknown> }): EnquiryRecord {
   const data = entry.data();
-  const companyFromBudget = asText(data.budget).replace(/^Company:\s*/i, '');
+  const storedCompany = asText(data.company);
+  const storedBudget = asText(data.budget);
+  const legacyCompany = !storedCompany && /^Company:\s*/i.test(storedBudget)
+    ? storedBudget.replace(/^Company:\s*/i, '').trim()
+    : '';
   return {
     id: entry.id,
     createdAt: createdAtIso(data.createdAt),
     name: asText(data.fullName) || asText(data.name),
     email: asText(data.email),
-    company: asText(data.company) || companyFromBudget,
+    company: storedCompany || legacyCompany,
     service: asText(data.service),
     message: asText(data.message),
+    budget: legacyCompany ? '' : storedBudget,
     read: data.read === true
   };
 }
@@ -192,6 +199,7 @@ export async function saveSubmissionToFirestore(submission: ContactSubmissionInp
       service: submission.service || '',
       company: submission.company || '',
       phone: submission.phone || '',
+      budget: submission.budget || '',
       read: false,
       createdAt: serverTimestamp()
     });

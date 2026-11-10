@@ -18,6 +18,13 @@ import { BlogHub } from './components/BlogHub';
 import { BlogArticleDetail } from './components/BlogArticleDetail';
 import { ServiceDetailView } from './components/ServiceDetailView';
 import { ServicesPage } from './components/ServicesPage';
+import { AboutPage } from './components/AboutPage';
+import { WebsitesPage } from './components/WebsitesPage';
+import { TeamPage } from './components/TeamPage';
+import { TestimonialsPage } from './components/TestimonialsPage';
+import { PartnershipPage } from './components/PartnershipPage';
+import { ContactPage } from './components/ContactPage';
+import { FaqPage } from './components/FaqPage';
 import { PoliciesView } from './components/PoliciesView';
 import { HomePoliciesBlock } from './components/HomePoliciesBlock';
 import { NotFound } from './components/NotFound';
@@ -35,10 +42,16 @@ const DEFAULT_TITLE = "Axe's Era Enterprise by Gauhar Axe - Digital Solutions";
 
 function pageFromRoute(route: AppRoute): PageView {
   switch (route.page) {
+    case 'about':
     case 'services':
-      return 'services';
+    case 'websites':
+    case 'team':
+    case 'testimonials':
+    case 'partnership':
+    case 'contact':
+    case 'faq':
     case 'policies':
-      return 'policies';
+      return route.page;
     case 'service-detail':
       return 'service-detail';
     case 'blog-hub':
@@ -233,10 +246,26 @@ export const App: React.FC = () => {
       return;
     }
 
-    setCurrentPage('home');
-    setPendingSection(route.section && route.section !== 'home' ? route.section : null);
-    if (!route.section || route.section === 'home') {
+    if (
+      route.page === 'about' ||
+      route.page === 'websites' ||
+      route.page === 'team' ||
+      route.page === 'testimonials' ||
+      route.page === 'partnership' ||
+      route.page === 'contact' ||
+      route.page === 'faq'
+    ) {
+      setCurrentPage(route.page);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (route.page === 'home') {
+      setCurrentPage('home');
+      setPendingSection(route.section && route.section !== 'home' ? route.section : null);
+      if (!route.section || route.section === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }, []);
 
@@ -282,6 +311,21 @@ export const App: React.FC = () => {
       robots?.remove();
       return;
     }
+    const pageTitles: Partial<Record<PageView, string>> = {
+      about: "About | Axe's Era Enterprise",
+      websites: "Websites | Axe's Era Enterprise",
+      team: "Our Team | Axe's Era Enterprise",
+      testimonials: "Testimonials | Axe's Era Enterprise",
+      partnership: "Partnership | Axe's Era Enterprise",
+      contact: "Contact | Axe's Era Enterprise",
+      faq: "FAQ | Axe's Era Enterprise"
+    };
+    const pageTitle = pageTitles[currentPage];
+    if (pageTitle) {
+      document.title = pageTitle;
+      robots?.remove();
+      return;
+    }
     document.title = DEFAULT_TITLE;
     robots?.remove();
   }, [currentPage, adminGate]);
@@ -307,6 +351,23 @@ export const App: React.FC = () => {
     if (page === 'policies') {
       pushUrl(`/policies#${selectedPolicy}`);
       setCurrentPage('policies');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    const sectionPaths: Partial<Record<PageView, string>> = {
+      about: '/about',
+      services: '/services',
+      websites: '/websites',
+      team: '/team',
+      testimonials: '/testimonials',
+      partnership: '/partnership',
+      contact: '/contact',
+      faq: '/faq'
+    };
+    const path = sectionPaths[page];
+    if (path) {
+      pushUrl(path);
+      setCurrentPage(page);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -357,7 +418,7 @@ export const App: React.FC = () => {
 
   const handleOpenServicesPage = () => {
     setCurrentPage('services');
-    pushUrl('/#services-page');
+    pushUrl('/services');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -403,7 +464,6 @@ export const App: React.FC = () => {
       <Navbar
         currentPage={currentPage}
         setCurrentPage={handleSetCurrentPage}
-        onNavigateSection={handleNavigateSection}
         onOpenServicesPage={handleOpenServicesPage}
       />
 
@@ -461,8 +521,71 @@ export const App: React.FC = () => {
           onBackToHome={handleBackToHome}
           onSelectService={handleSelectService}
           onContactClick={() => {
-            handleNavigateSection('contact');
+            handleSetCurrentPage('contact');
           }}
+        />
+      )}
+
+      {currentPage === 'about' && (
+        <AboutPage
+          generalInfo={data.generalInfo}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
+        />
+      )}
+
+      {currentPage === 'websites' && (
+        <WebsitesPage
+          projects={data.projects}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
+        />
+      )}
+
+      {currentPage === 'team' && (
+        <TeamPage
+          team={data.team}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
+        />
+      )}
+
+      {currentPage === 'testimonials' && (
+        <TestimonialsPage
+          testimonials={data.testimonials}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
+        />
+      )}
+
+      {currentPage === 'partnership' && (
+        <PartnershipPage
+          partnerships={data.partnerships}
+          partnerLogos={data.partnerLogos}
+          notice={data.generalInfo.partnershipNotice}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
+        />
+      )}
+
+      {currentPage === 'contact' && (
+        <ContactPage
+          address={data.generalInfo.contactAddress}
+          phone={data.generalInfo.contactPhone}
+          email={data.generalInfo.contactEmail}
+          whatsappNumber={data.generalInfo.whatsappNumber}
+          urgentNotice={data.generalInfo.urgentNotice}
+          servicesList={data.services}
+          onShowNotification={showNotification}
+          onBackToHome={handleBackToHome}
+        />
+      )}
+
+      {currentPage === 'faq' && (
+        <FaqPage
+          faqs={data.faqs}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
         />
       )}
 
@@ -478,7 +601,7 @@ export const App: React.FC = () => {
         <BlogArticleDetail
           blog={selectedBlog}
           onBackToBlogs={handleOpenBlogHub}
-          onContactClick={() => handleNavigateSection('contact')}
+          onContactClick={() => handleSetCurrentPage('contact')}
         />
       )}
 
@@ -486,7 +609,7 @@ export const App: React.FC = () => {
         <ServiceDetailView
           service={selectedService}
           onBackToHome={handleBackToHome}
-          onContactClick={() => handleNavigateSection('contact')}
+          onContactClick={() => handleSetCurrentPage('contact')}
         />
       )}
 
@@ -494,13 +617,13 @@ export const App: React.FC = () => {
         <PoliciesView
           initialPolicy={selectedPolicy}
           onBackToHome={handleBackToHome}
-          onContactClick={() => handleNavigateSection('contact')}
+          onContactClick={() => handleSetCurrentPage('contact')}
           onPolicyChange={(policy) => setSelectedPolicy(policy)}
         />
       )}
 
       {currentPage === 'not-found' && (
-        <NotFound onHome={handleBackToHome} onContact={() => handleNavigateSection('contact')} />
+        <NotFound onHome={handleBackToHome} onContact={() => handleSetCurrentPage('contact')} />
       )}
 
       <Footer
@@ -509,6 +632,7 @@ export const App: React.FC = () => {
         onOpenService={handleOpenServiceBySlug}
         onOpenPolicy={handleOpenPolicy}
         onOpenServicesPage={handleOpenServicesPage}
+        onOpenPage={handleSetCurrentPage}
       />
 
       <WhatsAppButton whatsappNumber={data.generalInfo.whatsappNumber} />

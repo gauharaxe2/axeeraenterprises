@@ -237,6 +237,11 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({
                 ) : display(row.email)}
                 {' · '}{display(row.company)}{' · '}{display(row.service)}
               </p>
+              {row.budget.trim() ? (
+                <p style={{ margin: '0.15rem 0 0', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                  Budget: {row.budget}
+                </p>
+              ) : null}
               <p style={{ margin: '0.5rem 0 0.9rem', whiteSpace: 'pre-wrap', color: '#e2e8f0' }}>{display(row.message)}</p>
               {confirmId === row.id ? (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

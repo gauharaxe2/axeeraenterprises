@@ -49,7 +49,28 @@ test('legacy urls permanently redirect to the closest app section', () => {
 
 test('known app paths rewrite to the SPA shell without a catch-all soft 404', () => {
   const vercel = JSON.parse(read('vercel.json')) as VercelConfig;
-  for (const path of ['/policies', '/policies/', '/admin', '/admin/']) {
+  for (const path of [
+    '/policies',
+    '/policies/',
+    '/admin',
+    '/admin/',
+    '/about',
+    '/about/',
+    '/services',
+    '/services/',
+    '/websites',
+    '/websites/',
+    '/team',
+    '/team/',
+    '/testimonials',
+    '/testimonials/',
+    '/partnership',
+    '/partnership/',
+    '/contact',
+    '/contact/',
+    '/faq',
+    '/faq/'
+  ]) {
     const match = vercel.rewrites?.find((rule) => rule.source === path);
     assert.equal(match?.destination, '/index.html', path);
   }

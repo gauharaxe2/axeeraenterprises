@@ -7,9 +7,7 @@ import {
   Globe2,
   TrendingUp,
   Layers,
-  Sparkles,
   ShieldCheck,
-  CheckCircle2,
   Code2
 } from 'lucide-react';
 import { Project } from '../types';

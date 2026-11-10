@@ -1,7 +1,7 @@
 import React from 'react';
 import { Facebook, Twitter, Linkedin, Instagram, Youtube, Scale, Shield, FileText } from 'lucide-react';
 import { WhatsAppIcon } from './WhatsAppIcon';
-import { PolicyType } from '../types';
+import { PageView, PolicyType } from '../types';
 
 interface FooterProps {
   onNavigateSection: (sectionId: string) => void;
