@@ -36,7 +36,7 @@ function phoneHref(display: string): string {
 }
 
 export const LocationPage: React.FC<LocationPageProps> = ({
-  address = 'D-26, Wahdat Colony, Multan, 66000',
+  address = 'D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan',
   phone = '+92-315-7338694 / +92-339-0096853',
   email = 'gauharaxe@outlook.com',
   mapLatitude,
@@ -111,7 +111,7 @@ export const LocationPage: React.FC<LocationPageProps> = ({
         description={
           savedPin
             ? 'Google Maps is pinned at the headquarters point saved for this studio.'
-            : 'The studio headquarters is D-26, Wahdat Colony, Multan. Google Maps below is pinned on that neighborhood.'
+            : 'The studio headquarters is D-26, Wahdat Colony, Multan, Punjab. Google Maps below is pinned at 30.2050672, 71.4902707.'
         }
       />
 

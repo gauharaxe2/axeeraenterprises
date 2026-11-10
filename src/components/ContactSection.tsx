@@ -21,7 +21,7 @@ interface ContactSectionProps {
 }
 
 export const ContactSection: React.FC<ContactSectionProps> = ({
-  address = "D-26, Wahdat Colony, Multan, 66000",
+  address = "D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan",
   phone = "+92-315-7338694 / +92-339-0096853",
   email = "gauharaxe@outlook.com",
   urgentNotice = "NOTE: If you don't get our response back via e-mail sooner, tap the WhatsApp button for an immediate live response!",

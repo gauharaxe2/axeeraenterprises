@@ -42,7 +42,7 @@ const consultationRoadmap = [
 ];
 
 export const ContactPage: React.FC<ContactPageProps> = ({
-  address = 'D-26, Wahdat Colony, Multan, 66000',
+  address = 'D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan',
   phone = '+92-315-7338694 / +92-339-0096853',
   email = 'gauharaxe@outlook.com',
   whatsappNumber = '923157338694',

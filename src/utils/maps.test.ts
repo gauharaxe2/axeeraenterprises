@@ -9,17 +9,17 @@ test('map links pin the published headquarters address on Google Maps', () => {
   assert.match(query, /Pakistan/);
 
   const embed = googleMapsEmbedUrl(address);
-  assert.match(embed, /^https:\/\/maps\.google\.com\/maps\?q=30\.2054412,71\.4892754/);
+  assert.match(embed, /^https:\/\/maps\.google\.com\/maps\?q=30\.2050672,71\.4902707/);
   assert.match(embed, /output=embed/);
   assert.match(decodeURIComponent(embed), /D-26, Wahdat Colony, Multan, 66000/);
 
   assert.equal(
     googleMapsPlaceUrl(address),
-    'https://www.google.com/maps/search/?api=1&query=30.2054412,71.4892754'
+    'https://www.google.com/maps/search/?api=1&query=30.2050672,71.4902707'
   );
   assert.equal(
     googleMapsDirectionsUrl(address),
-    'https://www.google.com/maps/dir/?api=1&destination=30.2054412,71.4892754'
+    'https://www.google.com/maps/dir/?api=1&destination=30.2050672,71.4902707'
   );
 });
 

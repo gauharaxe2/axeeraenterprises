@@ -1,7 +1,8 @@
 /**
- * Public geocode for Wahdat Colony, Multan. Used only until a pin is saved.
+ * Office pin for D-26, Wahdat Colony, Multan, Punjab, Pakistan.
+ * 30°12'18.2"N, 71°29'25.0"E.
  */
-export const WAHDAT_COLONY_PIN = { lat: 30.2054412, lng: 71.4892754 };
+export const WAHDAT_COLONY_PIN = { lat: 30.2050672, lng: 71.4902707 };
 
 export interface MapPin {
   lat: number;
@@ -30,7 +31,7 @@ function isStudioAddress(address: string): boolean {
   return /wahdat/i.test(address) && /multan/i.test(address);
 }
 
-/** Saved coordinates win. Otherwise the Multan studio neighborhood is the starting pin. */
+/** Saved coordinates win. Otherwise the office pin at D-26 is used. */
 export function activeMapPin(address: string, lat?: number, lng?: number): MapPin {
   if (isValidMapPin(lat, lng)) return { lat, lng: lng as number };
   if (isStudioAddress(address)) return WAHDAT_COLONY_PIN;
