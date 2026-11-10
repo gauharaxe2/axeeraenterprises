@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import {
-  ArrowLeft,
-  MapPin,
-  Phone,
-  Mail,
-  Send,
-  Clock,
-  CheckCircle2,
-  ExternalLink,
-  MessageSquare
-} from 'lucide-react';
+import { CheckCircle2, Clock, ExternalLink, Mail, MapPin, MessageSquare, Phone, Send } from 'lucide-react';
 import { ContactFormData, ServiceItem } from '../types';
 import { saveSubmissionToFirestore } from '../utils/firebase';
+import { buildContactEnquiry } from '../utils/contactEnquiry';
 import { WhatsAppIcon } from './WhatsAppIcon';
+import { EditorialHero, EditorialPage, EditorialSection, EditorialTopbar } from './editorial/Editorial';
 
 interface ContactPageProps {
   address?: string;
@@ -29,6 +21,24 @@ function phoneHref(display: string): string {
   const compact = display.replace(/[^\d+]/g, '');
   return compact ? `tel:${compact}` : 'tel:+923157338694';
 }
+
+const consultationRoadmap = [
+  {
+    step: '01',
+    title: 'Technical Review',
+    desc: 'Our principal architects review your requirements, target goals, and existing codebases.'
+  },
+  {
+    step: '02',
+    title: 'Discovery Session',
+    desc: 'A 30-minute discovery call directly with Gauhar Axe to nail architecture and deliverables.'
+  },
+  {
+    step: '03',
+    title: 'Fixed Proposal & SLA',
+    desc: 'You receive an exact milestone breakdown, sprint timeline, and guaranteed quote.'
+  }
+];
 
 export const ContactPage: React.FC<ContactPageProps> = ({
   address = 'D-26, Wahdat Colony, Multan, 66000',
@@ -53,17 +63,22 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const phoneNumbers = phone
+    .split('/')
+    .map((part) => part.trim())
+    .filter(Boolean);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [event.target.name]: event.target.value
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       onShowNotification('Please fill in all required fields.', 'error');
@@ -83,20 +98,18 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
     setIsSubmitting(true);
 
-    const trimmedTimeline = timeline.trim();
-    const message = trimmedTimeline
-      ? `${formData.message.trim()}\n\nTarget timeline: ${trimmedTimeline}`
-      : formData.message.trim();
-
     try {
-      const id = await saveSubmissionToFirestore({
-        fullName: formData.name.trim(),
-        email: formData.email.trim(),
-        company: formData.company.trim() || undefined,
-        service: formData.service || undefined,
-        message,
-        budget: budget.trim() || undefined
-      });
+      const id = await saveSubmissionToFirestore(
+        buildContactEnquiry({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          service: formData.service,
+          message: formData.message,
+          budget,
+          timeline
+        })
+      );
       if (!id) throw new Error('Form was not accepted');
 
       setFormData({
@@ -112,7 +125,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
       setIsSubmitted(true);
 
       onShowNotification(
-        "Thank you! Your consultation inquiry has been submitted. Gauhar Axe will review your request within 2–4 hours.",
+        'Thank you! Your consultation inquiry has been submitted. Gauhar Axe will review your request within 2–4 hours.',
         'success'
       );
     } catch {
@@ -125,396 +138,267 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     }
   };
 
-  const consultationRoadmap = [
-    {
-      step: '01',
-      title: 'Technical Review',
-      desc: 'Our principal architects review your requirements, target goals, and existing codebases.'
-    },
-    {
-      step: '02',
-      title: 'Discovery Session',
-      desc: 'A 30-minute discovery call directly with Gauhar Axe to nail architecture and deliverables.'
-    },
-    {
-      step: '03',
-      title: 'Fixed Proposal & SLA',
-      desc: 'You receive an exact milestone breakdown, sprint timeline, and guaranteed quote.'
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pt-24 pb-20 selection:bg-blue-600 selection:text-white">
-      {/* Top Header & Breadcrumbs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBackToHome}
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors group cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              <span>Back to Home</span>
-            </button>
-            <span className="text-slate-700">/</span>
-            <span className="text-sm font-medium text-blue-400">Contact & Consultation Portal</span>
-          </div>
-
+    <EditorialPage page="contact">
+      <EditorialTopbar
+        crumb="Contact & Consultation Portal"
+        onBack={onBackToHome}
+        action={
           <a
             href={`https://wa.me/${whatsappNumber}`}
+            className="btn btn-outline editorial-whatsapp editorial-top-action"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold tracking-wide transition-colors"
           >
-            <WhatsAppIcon className="w-3.5 h-3.5 fill-white" />
-            <span>Instant WhatsApp Chat</span>
+            <WhatsAppIcon size={16} color="currentColor" /> Instant WhatsApp Chat
           </a>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 tracking-wider uppercase mb-4">
-            <MessageSquare className="w-4 h-4" />
-            <span>Direct Executive Consultation</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-6 text-balance">
-            Let's Engineer Your Digital Growth Engine
-          </h1>
-          <p className="text-base sm:text-lg text-slate-400 leading-relaxed">
-            Partner with Axe's Era Enterprise. Schedule a technical discovery session directly with founder
-            Gauhar Axe to map your platform architecture, project scope, and deployment timeline.
-          </p>
-        </div>
-      </div>
+      <EditorialHero
+        eyebrow="Direct Executive Consultation"
+        title="Let's Engineer Your Digital Growth Engine"
+        description="Partner with Axe's Era Enterprise. Schedule a technical discovery session directly with founder Gauhar Axe to map your platform architecture, project scope, and deployment timeline."
+      />
 
-      {/* Main Form & Contact Information Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Column: Direct Channels & Office Info */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Urgent Notice Banner */}
-            <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300">
-              <div className="flex items-start gap-3">
-                <WhatsAppIcon className="w-5 h-5 fill-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-1 text-amber-400">
-                    Immediate WhatsApp Response
+      <EditorialSection id="contact-desk">
+        <div className="editorial-split contact-layout">
+          <div className="editorial-stack">
+            <div className="urgent-note">
+              <p style={{ margin: '0 0 0.35rem', color: '#fef08a', fontWeight: 700 }}>
+                <WhatsAppIcon size={16} color="#fef08a" /> Immediate WhatsApp Response
+              </p>
+              <p style={{ margin: 0, color: '#fef08a' }}>{urgentNotice}</p>
+            </div>
+
+            <div className="editorial-panel padded">
+              <h2 style={{ marginBottom: '1.1rem' }}>Headquarters & Communications</h2>
+              <div className="contact-item">
+                <div className="contact-icon">
+                  <MapPin size={22} aria-hidden="true" />
+                </div>
+                <div className="contact-text">
+                  <h3>Office Address</h3>
+                  <p>{address}</p>
+                  <p>Registered Headquarters, Pakistan</p>
+                </div>
+              </div>
+              <div className="contact-item">
+                <div className="contact-icon">
+                  <Phone size={22} aria-hidden="true" />
+                </div>
+                <div className="contact-text">
+                  <h3>Official Telephone</h3>
+                  <p>
+                    {phoneNumbers.map((number, index) => (
+                      <React.Fragment key={number}>
+                        {index > 0 ? ' / ' : ''}
+                        <a href={phoneHref(number)}>{number}</a>
+                      </React.Fragment>
+                    ))}
                   </p>
-                  <p className="text-xs leading-relaxed text-amber-200">
-                    {urgentNotice}
+                  <p>Mon–Sat: 9:00 AM – 7:00 PM PKT</p>
+                </div>
+              </div>
+              <div className="contact-item">
+                <div className="contact-icon">
+                  <Mail size={22} aria-hidden="true" />
+                </div>
+                <div className="contact-text">
+                  <h3>Executive E-Mail</h3>
+                  <p>
+                    <a href={`mailto:${email}`}>{email}</a>
                   </p>
+                  <p>Direct inbox reviewed by leadership</p>
+                </div>
+              </div>
+              <div className="contact-item">
+                <div className="contact-icon">
+                  <WhatsAppIcon size={22} color="#ffffff" />
+                </div>
+                <div className="contact-text">
+                  <h3>WhatsApp Direct Line</h3>
+                  <p>
+                    <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
+                      +{whatsappNumber} <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  </p>
+                  <p>Immediate live messaging & voice note sync</p>
                 </div>
               </div>
             </div>
 
-            {/* Contact Details Cards */}
-            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-6">
-              <h3 className="text-lg font-bold text-white border-b border-slate-800 pb-4">
-                Headquarters & Communications
+            <div className="editorial-panel padded">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Clock size={16} aria-hidden="true" color="var(--primary-color)" /> Engagement Hours
               </h3>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-400 shrink-0">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Office Address
-                  </h4>
-                  <p className="text-sm font-medium text-white mt-1">{address}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Registered Headquarters, Pakistan</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-emerald-400 shrink-0">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Official Telephone
-                  </h4>
-                  <p className="text-sm font-medium text-white mt-1">
-                    <a href={phoneHref(phone)} className="hover:text-blue-400 transition-colors">
-                      {phone}
-                    </a>
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Mon–Sat: 9:00 AM – 7:00 PM PKT</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center text-indigo-400 shrink-0">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Executive E-Mail
-                  </h4>
-                  <p className="text-sm font-medium text-white mt-1">
-                    <a href={`mailto:${email}`} className="hover:text-blue-400 transition-colors">
-                      {email}
-                    </a>
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Direct inbox reviewed by leadership</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-emerald-400 shrink-0">
-                  <WhatsAppIcon className="w-5 h-5 fill-emerald-400" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    WhatsApp Direct Line
-                  </h4>
-                  <p className="text-sm font-medium text-white mt-1">
-                    <a
-                      href={`https://wa.me/${whatsappNumber}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-emerald-400 transition-colors inline-flex items-center gap-1.5"
-                    >
-                      <span>+{whatsappNumber}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Immediate live messaging & voice note sync</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Operating Hours */}
-            <div className="p-6 rounded-2xl bg-slate-900/30 border border-slate-800/80">
-              <div className="flex items-center gap-3 mb-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
-                  Engagement Hours
-                </h4>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Headquarters operating hours: 09:00 - 19:00 (PKT). For active client emergencies and SLA
-                subscribers, infrastructure monitoring runs 24/7/365.
+              <p className="editorial-muted" style={{ marginTop: '0.55rem' }}>
+                Headquarters operating hours: 09:00 - 19:00 (PKT). For active client emergencies and SLA subscribers,
+                infrastructure monitoring runs 24/7/365.
               </p>
             </div>
           </div>
 
-          {/* Right Column: Full Discovery Consultation Form */}
-          <div className="lg:col-span-7">
-            <div className="p-8 sm:p-10 rounded-2xl bg-slate-900/50 border border-slate-800 shadow-2xl">
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                Request a Technical Discovery Session
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 mb-8">
-                Tell us about your project, target business goals, and timeline. All inquiries receive a confidential
-                review within 2–4 hours.
-              </p>
+          <div className="contact-form" id="contact-form-panel">
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <MessageSquare size={20} aria-hidden="true" color="var(--primary-color)" /> Request a Technical Discovery
+              Session
+            </h2>
+            <p className="editorial-muted" style={{ margin: '0.45rem 0 1.2rem' }}>
+              Tell us about your project, target business goals, and timeline. All inquiries receive a confidential review
+              within 2–4 hours.
+            </p>
 
-              {isSubmitted ? (
-                <div className="p-8 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-center">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-lg font-bold text-white mb-2">Message Successfully Transmitted</h4>
-                  <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto mb-6 leading-relaxed">
-                    Thank you for contacting Axe's Era Enterprise. Gauhar Axe will analyze your requirements and reach out via email or WhatsApp shortly.
-                  </p>
-                  <button
-                    onClick={() => setIsSubmitted(false)}
-                    className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition-colors cursor-pointer"
-                  >
-                    Send Another Inquiry
-                  </button>
+            {isSubmitted ? (
+              <div role="status" style={{ textAlign: 'center', padding: '1.5rem 0.5rem' }}>
+                <div className="editorial-check">
+                  <CheckCircle2 size={26} aria-hidden="true" />
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                  <p className="hidden" aria-hidden="true">
-                    <label>
-                      Don't fill this out if you're human:
-                      <input
-                        name="bot-field"
-                        value={botField}
-                        onChange={(e) => setBotField(e.target.value)}
-                        tabIndex={-1}
-                        autoComplete="off"
-                      />
-                    </label>
-                  </p>
+                <h3 style={{ marginTop: '0.8rem' }}>Message Successfully Transmitted</h3>
+                <p className="editorial-muted" style={{ margin: '0.6rem auto 1rem', maxWidth: '420px' }}>
+                  Thank you for contacting Axe's Era Enterprise. Gauhar Axe will analyze your requirements and reach out
+                  via email or WhatsApp shortly.
+                </p>
+                <button type="button" className="btn btn-outline" onClick={() => setIsSubmitted(false)}>
+                  Send Another Inquiry
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate>
+                <p hidden>
+                  <label>
+                    Don&apos;t fill this out if you&apos;re human:
+                    <input
+                      name="bot-field"
+                      value={botField}
+                      onChange={(event) => setBotField(event.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                  </label>
+                </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label htmlFor="contact-name" className="block text-xs font-medium text-slate-300 mb-2">
-                        Your Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        id="contact-name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="e.g. Alex Morgan"
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="contact-email" className="block text-xs font-medium text-slate-300 mb-2">
-                        Business E-Mail *
-                      </label>
-                      <input
-                        type="email"
-                        id="contact-email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="alex@company.com"
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label htmlFor="contact-company" className="block text-xs font-medium text-slate-300 mb-2">
-                        Company or Organization
-                      </label>
-                      <input
-                        type="text"
-                        id="contact-company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        placeholder="e.g. Apex Global"
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="contact-service" className="block text-xs font-medium text-slate-300 mb-2">
-                        Primary Capability Needed
-                      </label>
-                      <select
-                        id="contact-service"
-                        name="service"
-                        value={formData.service}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-                      >
-                        <option value="">Select Service (Optional)</option>
-                        {servicesList.map((s) => (
-                          <option key={s.id} value={s.title}>
-                            {s.title}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label htmlFor="contact-budget" className="block text-xs font-medium text-slate-300 mb-2">
-                        Estimated Budget Range
-                      </label>
-                      <select
-                        id="contact-budget"
-                        value={budget}
-                        onChange={(e) => setBudget(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-                      >
-                        <option value="">Select Budget (Optional)</option>
-                        <option value="$1,000 – $3,000">$1,000 – $3,000 (MVP / Sprint)</option>
-                        <option value="$3,000 – $10,000">$3,000 – $10,000 (Full Platform / App)</option>
-                        <option value="$10,000+">$10,000+ (Enterprise Custom System)</option>
-                        <option value="Flexible / Retainer">Monthly Retainer</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="contact-timeline" className="block text-xs font-medium text-slate-300 mb-2">
-                        Target Launch Timeline
-                      </label>
-                      <select
-                        id="contact-timeline"
-                        value={timeline}
-                        onChange={(e) => setTimeline(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-                      >
-                        <option value="">Select Timeline (Optional)</option>
-                        <option value="Immediate (< 2 Weeks)">Immediate (&lt; 2 Weeks)</option>
-                        <option value="1 Month">1 Month</option>
-                        <option value="2–3 Months">2–3 Months</option>
-                        <option value="Flexible">Flexible Planning</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="contact-message" className="block text-xs font-medium text-slate-300 mb-2">
-                      Project Goals, Scope & Specifications *
-                    </label>
-                    <textarea
-                      id="contact-message"
-                      name="message"
-                      value={formData.message}
+                <div className="editorial-form-grid two">
+                  <div className="form-group">
+                    <label htmlFor="contact-name">Your Full Name *</label>
+                    <input
+                      type="text"
+                      id="contact-name"
+                      name="name"
+                      value={formData.name}
                       onChange={handleChange}
                       required
-                      rows={5}
-                      placeholder="Describe your project, current bottlenecks, target deliverables, or provide relevant reference links..."
-                      className="w-full px-4 py-3 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-y"
+                      autoComplete="name"
+                      placeholder="e.g. Alex Morgan"
                     />
                   </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full py-3.5 px-6 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Encrypting & Transmitting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Submit Discovery Request</span>
-                          <Send className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
+                  <div className="form-group">
+                    <label htmlFor="contact-email">Business E-Mail *</label>
+                    <input
+                      type="email"
+                      id="contact-email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      autoComplete="email"
+                      placeholder="alex@company.com"
+                    />
                   </div>
-                </form>
-              )}
-            </div>
+                </div>
+
+                <div className="editorial-form-grid two">
+                  <div className="form-group">
+                    <label htmlFor="contact-company">Company or Organization</label>
+                    <input
+                      type="text"
+                      id="contact-company"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleChange}
+                      autoComplete="organization"
+                      placeholder="e.g. Apex Global"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="contact-service">Primary Capability Needed</label>
+                    <select id="contact-service" name="service" value={formData.service} onChange={handleChange}>
+                      <option value="">Select Service (Optional)</option>
+                      {servicesList.map((service) => (
+                        <option key={service.id} value={service.title}>
+                          {service.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="editorial-form-grid two">
+                  <div className="form-group">
+                    <label htmlFor="contact-budget">Estimated Budget Range</label>
+                    <select id="contact-budget" value={budget} onChange={(event) => setBudget(event.target.value)}>
+                      <option value="">Select Budget (Optional)</option>
+                      <option value="$1,000 – $3,000">$1,000 – $3,000 (MVP / Sprint)</option>
+                      <option value="$3,000 – $10,000">$3,000 – $10,000 (Full Platform / App)</option>
+                      <option value="$10,000+">$10,000+ (Enterprise Custom System)</option>
+                      <option value="Flexible / Retainer">Monthly Retainer</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="contact-timeline">Target Launch Timeline</label>
+                    <select id="contact-timeline" value={timeline} onChange={(event) => setTimeline(event.target.value)}>
+                      <option value="">Select Timeline (Optional)</option>
+                      <option value="Immediate (< 2 Weeks)">Immediate (&lt; 2 Weeks)</option>
+                      <option value="1 Month">1 Month</option>
+                      <option value="2–3 Months">2–3 Months</option>
+                      <option value="Flexible">Flexible Planning</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact-message">Project Goals, Scope & Specifications *</label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    rows={5}
+                    placeholder="Describe your project, current bottlenecks, target deliverables, or provide relevant reference links..."
+                  />
+                </div>
+
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ width: '100%' }}>
+                  {isSubmitting ? (
+                    <>
+                      <span className="editorial-spinner" aria-hidden="true" /> Encrypting & Transmitting...
+                    </>
+                  ) : (
+                    <>
+                      Submit Discovery Request <Send size={16} aria-hidden="true" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
-      </div>
+      </EditorialSection>
 
-      {/* 3-Step Consultation Journey */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 sm:p-12 rounded-2xl bg-slate-900/30 border border-slate-800">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <p className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-1">
-              What Happens Next
-            </p>
-            <h3 className="text-xl font-bold text-white">Our 3-Step Consultation Process</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {consultationRoadmap.map((item, idx) => (
-              <div key={idx} className="p-6 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                <span className="text-2xl font-black text-blue-400 font-mono mb-2 block">{item.step}</span>
-                <h4 className="text-sm font-semibold text-white mb-2">{item.title}</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
+      <EditorialSection id="consultation-steps" eyebrow="What Happens Next" title="Our 3-Step Consultation Process">
+        <div className="editorial-grid">
+          {consultationRoadmap.map((item) => (
+            <article key={item.step} className="editorial-card accent">
+              <div className="editorial-card-body">
+                <span className="editorial-step-index">{item.step}</span>
+                <h3>{item.title}</h3>
+                <p className="editorial-muted">{item.desc}</p>
               </div>
-            ))}
-          </div>
+            </article>
+          ))}
         </div>
-      </div>
-    </div>
+      </EditorialSection>
+    </EditorialPage>
   );
 };

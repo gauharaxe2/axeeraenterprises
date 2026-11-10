@@ -24,6 +24,10 @@
   ],
   "redirects": [
     { "source": "/admin.html", "destination": "/admin", "permanent": true },
+    { "source": "/FAQ", "destination": "/faq", "permanent": true },
+    { "source": "/FAQ/", "destination": "/faq", "permanent": true },
+    { "source": "/Faq", "destination": "/faq", "permanent": true },
+    { "source": "/Faq/", "destination": "/faq", "permanent": true },
     { "source": "/web-development", "destination": "/#service-web-development", "permanent": true },
     { "source": "/web-development/", "destination": "/#service-web-development", "permanent": true },
     { "source": "/web-development.html", "destination": "/#service-web-development", "permanent": true },

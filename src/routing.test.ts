@@ -50,6 +50,9 @@ test('home, sections, services, blogs, and policies resolve', () => {
   assert.deepEqual(resolveRoute('/', '#partnership-page'), { page: 'partnership' });
   assert.deepEqual(resolveRoute('/', '#contact-page'), { page: 'contact' });
   assert.deepEqual(resolveRoute('/', '#faq-page'), { page: 'faq' });
+  assert.deepEqual(resolveRoute('/FAQ', ''), { page: 'faq' });
+  assert.deepEqual(resolveRoute('/FAQ/', ''), { page: 'faq' });
+  assert.deepEqual(resolveRoute('/Faq', ''), { page: 'faq' });
   for (const path of CONTENT_PAGE_PATHS) {
     const page = path.slice(1);
     assert.deepEqual(resolveRoute(path, ''), { page });

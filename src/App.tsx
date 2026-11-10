@@ -33,12 +33,11 @@ import { useAdminData } from './hooks/useAdminData';
 import { AppRoute, isAdminLocation, resolveRoute } from './routing';
 import { AdminGate, clearAdminSession } from './components/AdminGate';
 import { isAdminSessionActive } from './utils/adminAuth';
+import { applyPrivateMeta, applyPublicMeta, DEFAULT_DESCRIPTION, DEFAULT_TITLE, metaForPage } from './pageMeta';
 
 const AdminPanel = lazy(() =>
   import('./components/AdminPanel/SideAdminPanel').then((mod) => ({ default: mod.SideAdminPanel }))
 );
-
-const DEFAULT_TITLE = "Axe's Era Enterprise by Gauhar Axe - Digital Solutions";
 
 function pageFromRoute(route: AppRoute): PageView {
   switch (route.page) {
@@ -289,45 +288,21 @@ export const App: React.FC = () => {
   }, [currentPage, pendingSection]);
 
   useEffect(() => {
-    const robots = document.querySelector('meta[name="robots"]');
-    const noindex = (content: string) => {
-      const meta = robots ?? document.createElement('meta');
-      meta.setAttribute('name', 'robots');
-      meta.setAttribute('content', content);
-      if (!robots) document.head.appendChild(meta);
-    };
     if (adminGate !== 'off' || isAdminLocation(window.location.pathname, window.location.hash)) {
-      document.title = "Admin | Axe's Era Enterprise";
-      noindex('noindex, nofollow');
+      applyPrivateMeta('admin');
       return;
     }
     if (currentPage === 'not-found') {
-      document.title = "Page not found | Axe's Era Enterprise";
-      noindex('noindex');
+      applyPrivateMeta('not-found');
       return;
     }
-    if (currentPage === 'services') {
-      document.title = "Enterprise Services & Capabilities | Axe's Era Enterprise";
-      robots?.remove();
-      return;
-    }
-    const pageTitles: Partial<Record<PageView, string>> = {
-      about: "About | Axe's Era Enterprise",
-      websites: "Websites | Axe's Era Enterprise",
-      team: "Our Team | Axe's Era Enterprise",
-      testimonials: "Testimonials | Axe's Era Enterprise",
-      partnership: "Partnership | Axe's Era Enterprise",
-      contact: "Contact | Axe's Era Enterprise",
-      faq: "FAQ | Axe's Era Enterprise"
-    };
-    const pageTitle = pageTitles[currentPage];
-    if (pageTitle) {
-      document.title = pageTitle;
-      robots?.remove();
-      return;
-    }
-    document.title = DEFAULT_TITLE;
-    robots?.remove();
+    applyPublicMeta(
+      metaForPage(currentPage) ?? {
+        title: DEFAULT_TITLE,
+        description: DEFAULT_DESCRIPTION,
+        path: '/'
+      }
+    );
   }, [currentPage, adminGate]);
 
   const handleAdminSuccess = useCallback(() => {

@@ -77,43 +77,42 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="footer-section">
             <h3>Company</h3>
             <ul>
+              {(
+                [
+                  ['About Us', '/about', 'about'],
+                  ['Our Team', '/team', 'team'],
+                  ['Websites', '/websites', 'websites'],
+                  ['Testimonials', '/testimonials', 'testimonials'],
+                  ['Partnership', '/partnership', 'partnership'],
+                  ['Contact', '/contact', 'contact'],
+                  ['FAQ', '/faq', 'faq']
+                ] as const
+              ).map(([label, href, page]) => (
+                <li key={href}>
+                  <a
+                    href={href}
+                    onClick={(event) => {
+                      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                      event.preventDefault();
+                      if (onOpenPage) onOpenPage(page);
+                      else onNavigateSection(page);
+                    }}
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))}
               <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('about') : onNavigateSection('about'))}>
-                  About Us
-                </button>
-              </li>
-              <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('team') : onNavigateSection('team'))}>
-                  Our Team
-                </button>
-              </li>
-              <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('websites') : onNavigateSection('websites'))}>
-                  Websites
-                </button>
-              </li>
-              <li>
-                <button onClick={onOpenBlogs}>Blogs Hub</button>
-              </li>
-              <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('testimonials') : onNavigateSection('testimonials'))}>
-                  Testimonials
-                </button>
-              </li>
-              <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('partnership') : onNavigateSection('partnership'))}>
-                  Partnership
-                </button>
-              </li>
-              <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('contact') : onNavigateSection('contact'))}>
-                  Contact
-                </button>
-              </li>
-              <li>
-                <button onClick={() => (onOpenPage ? onOpenPage('faq') : onNavigateSection('faq'))}>
-                  FAQ
-                </button>
+                <a
+                  href="/#blog-hub"
+                  onClick={(event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                    event.preventDefault();
+                    onOpenBlogs();
+                  }}
+                >
+                  Blogs Hub
+                </a>
               </li>
             </ul>
           </div>

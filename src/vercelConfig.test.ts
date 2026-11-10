@@ -47,6 +47,16 @@ test('legacy urls permanently redirect to the closest app section', () => {
   assert.equal(blogSplat?.permanent, true);
 });
 
+test('uppercase FAQ urls permanently redirect to the canonical faq page', () => {
+  const vercel = JSON.parse(read('vercel.json')) as VercelConfig;
+  for (const source of ['/FAQ', '/FAQ/', '/Faq', '/Faq/']) {
+    const match = vercel.redirects?.find((rule) => rule.source === source);
+    assert.ok(match, `missing redirect for ${source}`);
+    assert.equal(match?.destination, '/faq');
+    assert.equal(match?.permanent, true);
+  }
+});
+
 test('known app paths rewrite to the SPA shell without a catch-all soft 404', () => {
   const vercel = JSON.parse(read('vercel.json')) as VercelConfig;
   for (const path of [
