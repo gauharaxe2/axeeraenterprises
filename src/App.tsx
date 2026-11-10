@@ -33,7 +33,7 @@ import { PageView, BlogPost, ServiceItem, PolicyType } from './types';
 import { useAdminData } from './hooks/useAdminData';
 import { AppRoute, isAdminLocation, resolveRoute } from './routing';
 import { AdminGate, clearAdminSession } from './components/AdminGate';
-import { isAdminSessionActive, watchAdminAuth } from './utils/adminAuth';
+import { isAdminSessionActive } from './utils/adminAuth';
 import { applyPrivateMeta, applyPublicMeta, DEFAULT_DESCRIPTION, DEFAULT_TITLE, metaForPage } from './pageMeta';
 import { Preloader } from './components/Preloader';
 
@@ -150,7 +150,6 @@ export const App: React.FC = () => {
   });
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [preloaderPhase, setPreloaderPhase] = useState<'on' | 'out' | 'off'>('on');
-  const [canEditPin, setCanEditPin] = useState(() => isAdminSessionActive());
 
   // Keep selectedBlog and selectedService synchronized when live data updates from Firestore
   useEffect(() => {
@@ -336,8 +335,6 @@ export const App: React.FC = () => {
       document.body.style.overflow = '';
     };
   }, [pageOpenKey, adminGate]);
-
-  useEffect(() => watchAdminAuth(() => setCanEditPin(isAdminSessionActive())), []);
 
   const handleAdminSuccess = useCallback(() => {
     setAdminGate('open');
@@ -600,15 +597,6 @@ export const App: React.FC = () => {
           email={data.generalInfo.contactEmail}
           mapLatitude={data.generalInfo.mapLatitude}
           mapLongitude={data.generalInfo.mapLongitude}
-          canEditPin={canEditPin}
-          onSavePin={(pin) => {
-            updateGeneralInfo({
-              ...data.generalInfo,
-              mapLatitude: pin.lat,
-              mapLongitude: pin.lng
-            });
-            showNotification('Map pin saved. The public Google Map now uses this point.', 'success');
-          }}
           onBackToHome={handleBackToHome}
           onContactClick={() => handleSetCurrentPage('contact')}
         />

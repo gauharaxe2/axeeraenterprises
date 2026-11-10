@@ -28,7 +28,6 @@ import {
   Mail,
   UploadCloud
 } from 'lucide-react';
-import { MapPinPicker } from '../MapPinPicker';
 import {
   AdminTab,
   AgencyGeneralInfo,
@@ -668,18 +667,6 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 value={generalForm.contactAddress}
                 onChange={(e) => setGeneralForm({ ...generalForm, contactAddress: e.target.value })}
                 style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
-              />
-            </div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                Map pin
-              </label>
-              <MapPinPicker
-                latitude={generalForm.mapLatitude}
-                longitude={generalForm.mapLongitude}
-                onChange={(pin) =>
-                  setGeneralForm({ ...generalForm, mapLatitude: pin.lat, mapLongitude: pin.lng })
-                }
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>

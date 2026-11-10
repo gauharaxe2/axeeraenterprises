@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Clock, ExternalLink, Mail, MapPin, Navigation, Phone } from 'lucide-react';
-import { googleMapsDirectionsUrl, googleMapsEmbedUrl, googleMapsPlaceUrl, isValidMapPin, MapPin as Pin } from '../utils/maps';
+import { googleMapsDirectionsUrl, googleMapsEmbedUrl, googleMapsPlaceUrl, isValidMapPin } from '../utils/maps';
 import { SITE_ORIGIN } from '../pageMeta';
-import { MapPinPicker } from './MapPinPicker';
 import {
   EditorialHero,
   EditorialPage,
@@ -17,8 +16,6 @@ interface LocationPageProps {
   email?: string;
   mapLatitude?: number;
   mapLongitude?: number;
-  canEditPin?: boolean;
-  onSavePin?: (pin: Pin) => void;
   onBackToHome: () => void;
   onContactClick: () => void;
 }
@@ -41,8 +38,6 @@ export const LocationPage: React.FC<LocationPageProps> = ({
   email = 'gauharaxe@outlook.com',
   mapLatitude,
   mapLongitude,
-  canEditPin = false,
-  onSavePin,
   onBackToHome,
   onContactClick
 }) => {
@@ -50,17 +45,9 @@ export const LocationPage: React.FC<LocationPageProps> = ({
   const savedPin = isValidMapPin(mapLatitude, mapLongitude)
     ? { lat: mapLatitude, lng: mapLongitude as number }
     : null;
-  const [draftPin, setDraftPin] = useState<Pin | null>(savedPin);
-  const pin = canEditPin ? draftPin : savedPin;
-  const embedUrl = googleMapsEmbedUrl(address, pin);
-  const placeUrl = googleMapsPlaceUrl(address, pin);
-  const directionsUrl = googleMapsDirectionsUrl(address, pin);
-
-  useEffect(() => {
-    setDraftPin(savedPin);
-    // Only reset the draft when the saved coordinates change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapLatitude, mapLongitude]);
+  const embedUrl = googleMapsEmbedUrl(address, savedPin);
+  const placeUrl = googleMapsPlaceUrl(address, savedPin);
+  const directionsUrl = googleMapsDirectionsUrl(address, savedPin);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -129,29 +116,6 @@ export const LocationPage: React.FC<LocationPageProps> = ({
           </div>
 
           <div className="editorial-stack">
-            {canEditPin ? (
-              <article className="editorial-panel padded">
-                <h2>Place the pin</h2>
-                <div style={{ marginTop: '0.8rem' }}>
-                  <MapPinPicker
-                    latitude={draftPin?.lat}
-                    longitude={draftPin?.lng}
-                    onChange={setDraftPin}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  style={{ marginTop: '0.9rem' }}
-                  onClick={() => {
-                    if (draftPin) onSavePin?.(draftPin);
-                  }}
-                  disabled={!draftPin}
-                >
-                  Save this pin
-                </button>
-              </article>
-            ) : null}
             <article className="editorial-panel padded">
               <h2>Pinned address</h2>
               <div className="contact-item" style={{ marginTop: '1rem' }}>
