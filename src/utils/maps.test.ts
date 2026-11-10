@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { googleMapsDirectionsUrl, googleMapsEmbedUrl, googleMapsPlaceUrl, mapsQuery } from './maps.ts';
+
+test('map links pin the published headquarters address on Google Maps', () => {
+  const address = 'D-26, Wahdat Colony, Multan, 66000';
+  const query = mapsQuery(address);
+  assert.match(query, /Wahdat Colony/);
+  assert.match(query, /Pakistan/);
+
+  const embed = googleMapsEmbedUrl(address);
+  assert.match(embed, /^https:\/\/maps\.google\.com\/maps\?q=30\.2050672,71\.4902707/);
+  assert.match(embed, /output=embed/);
+  assert.match(decodeURIComponent(embed), /D-26, Wahdat Colony, Multan, 66000/);
+
+  assert.equal(
+    googleMapsPlaceUrl(address),
+    'https://www.google.com/maps/search/?api=1&query=30.2050672,71.4902707'
+  );
+  assert.equal(
+    googleMapsDirectionsUrl(address),
+    'https://www.google.com/maps/dir/?api=1&destination=30.2050672,71.4902707'
+  );
+});
+
+test('a saved pin replaces the neighborhood fallback on Google Maps', () => {
+  const address = 'D-26, Wahdat Colony, Multan, 66000';
+  const pin = { lat: 30.21, lng: 71.48 };
+  assert.match(googleMapsEmbedUrl(address, pin), /q=30\.21,71\.48/);
+  assert.equal(googleMapsPlaceUrl(address, pin), 'https://www.google.com/maps/search/?api=1&query=30.21,71.48');
+  assert.equal(
+    googleMapsDirectionsUrl(address, pin),
+    'https://www.google.com/maps/dir/?api=1&destination=30.21,71.48'
+  );
+});

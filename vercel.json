@@ -19,6 +19,8 @@
     { "source": "/partnership/", "destination": "/index.html" },
     { "source": "/contact", "destination": "/index.html" },
     { "source": "/contact/", "destination": "/index.html" },
+    { "source": "/location", "destination": "/index.html" },
+    { "source": "/location/", "destination": "/index.html" },
     { "source": "/faq", "destination": "/index.html" },
     { "source": "/faq/", "destination": "/index.html" }
   ],

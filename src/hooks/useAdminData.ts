@@ -20,9 +20,25 @@ import { initialPartnerships, initialPartnerLogos } from '../data/partnerships';
 import { faqsData } from '../data/faqs';
 import { db, testConnection, saveSectionToFirestore } from '../utils/firebase';
 import { mergeProjectsWithDefaults } from '../utils/mergeProjects';
+import { isValidMapPin, WAHDAT_COLONY_PIN } from '../utils/maps';
 import { collection, onSnapshot } from 'firebase/firestore';
 
 const STORAGE_KEY = 'axes_era_admin_data_v3';
+
+const PREVIOUS_OFFICE_ADDRESS = 'D-26, Wahdat Colony, Multan, 66000';
+const OFFICE_ADDRESS = 'D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan';
+
+function withOfficePin(info: AgencyGeneralInfo): AgencyGeneralInfo {
+  const contactAddress =
+    info.contactAddress.trim() === PREVIOUS_OFFICE_ADDRESS ? OFFICE_ADDRESS : info.contactAddress;
+  if (isValidMapPin(info.mapLatitude, info.mapLongitude) && contactAddress === info.contactAddress) return info;
+  return {
+    ...info,
+    contactAddress,
+    mapLatitude: isValidMapPin(info.mapLatitude, info.mapLongitude) ? info.mapLatitude : WAHDAT_COLONY_PIN.lat,
+    mapLongitude: isValidMapPin(info.mapLatitude, info.mapLongitude) ? info.mapLongitude : WAHDAT_COLONY_PIN.lng
+  };
+}
 
 export interface AdminStoreData {
   generalInfo: AgencyGeneralInfo;
@@ -73,7 +89,7 @@ export const useAdminData = () => {
         });
 
         return {
-          generalInfo: parsed.generalInfo || initialGeneralInfo,
+          generalInfo: withOfficePin(parsed.generalInfo || initialGeneralInfo),
           services: parsed.services || servicesData,
           projects: mergeProjectsWithDefaults(parsed.projects),
           blogs: loadedBlogs,
@@ -157,7 +173,7 @@ export const useAdminData = () => {
             const parsed = JSON.parse(docData.data);
             switch (sectionId) {
               case 'generalInfo':
-                incomingUpdates.generalInfo = parsed;
+                incomingUpdates.generalInfo = withOfficePin(parsed);
                 break;
               case 'services':
                 incomingUpdates.services = parsed;
@@ -508,7 +524,7 @@ export const useAdminData = () => {
         }
 
         const importedData: AdminStoreData = {
-          generalInfo: parsed.generalInfo || initialGeneralInfo,
+          generalInfo: withOfficePin(parsed.generalInfo || initialGeneralInfo),
           services: parsed.services || servicesData,
           projects: parsed.projects || projectsData,
           blogs: parsed.blogs || blogsData,

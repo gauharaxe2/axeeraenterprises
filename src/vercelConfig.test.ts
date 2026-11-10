@@ -78,6 +78,8 @@ test('known app paths rewrite to the SPA shell without a catch-all soft 404', ()
     '/partnership/',
     '/contact',
     '/contact/',
+    '/location',
+    '/location/',
     '/faq',
     '/faq/'
   ]) {

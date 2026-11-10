@@ -118,6 +118,9 @@ export interface AgencyGeneralInfo {
     retention: number;
   };
   contactAddress: string;
+  /** Saved headquarters pin. Empty until it is placed on the map. */
+  mapLatitude?: number;
+  mapLongitude?: number;
   contactPhone: string;
   contactEmail: string;
   whatsappNumber: string;
@@ -147,6 +150,7 @@ export type PageView =
   | 'testimonials'
   | 'partnership'
   | 'contact'
+  | 'location'
   | 'faq'
   | 'policies'
   | 'not-found';

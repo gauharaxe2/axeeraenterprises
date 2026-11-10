@@ -12,6 +12,7 @@ test('the seven redesigned pages keep titles and canonical paths', () => {
     '/testimonials': "Testimonials | Axe's Era Enterprise",
     '/partnership': "Partnership | Axe's Era Enterprise",
     '/contact': "Contact | Axe's Era Enterprise",
+    '/location': "Location | Axe's Era Enterprise",
     '/faq': "FAQ | Axe's Era Enterprise"
   };
 

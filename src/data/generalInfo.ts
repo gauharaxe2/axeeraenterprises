@@ -13,7 +13,9 @@ export const initialGeneralInfo: AgencyGeneralInfo = {
     projects: 10,
     retention: 99
   },
-  contactAddress: "D-26, Wahdat Colony, Multan, 66000",
+  contactAddress: "D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan",
+  mapLatitude: 30.2050672,
+  mapLongitude: 71.4902707,
   contactPhone: "+92-315-7338694 / +92-339-0096853",
   contactEmail: "gauharaxe@outlook.com",
   whatsappNumber: "923157338694",

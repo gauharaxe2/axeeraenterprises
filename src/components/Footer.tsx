@@ -85,6 +85,7 @@ export const Footer: React.FC<FooterProps> = ({
                   ['Testimonials', '/testimonials', 'testimonials'],
                   ['Partnership', '/partnership', 'partnership'],
                   ['Contact', '/contact', 'contact'],
+                  ['Location', '/location', 'location'],
                   ['FAQ', '/faq', 'faq']
                 ] as const
               ).map(([label, href, page]) => (
