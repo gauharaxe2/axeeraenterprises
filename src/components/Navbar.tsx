@@ -6,12 +6,16 @@ interface NavbarProps {
   currentPage: PageView;
   setCurrentPage: (page: PageView) => void;
   onNavigateSection?: (sectionId: string) => void;
+  onOpenServicesPage?: () => void;
+  onOpenPage?: (page: PageView) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentPage,
   setCurrentPage,
-  onNavigateSection
+  onNavigateSection,
+  onOpenServicesPage,
+  onOpenPage
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,16 +51,23 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const handleBlogsClick = () => {
+  const navigateToPage = (page: PageView) => {
     setMobileMenuOpen(false);
-    setCurrentPage('blogs');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (onOpenPage) {
+      onOpenPage(page);
+    } else {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const handlePoliciesClick = () => {
+  const handleServicesClick = () => {
     setMobileMenuOpen(false);
-    setCurrentPage('policies');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (onOpenServicesPage) {
+      onOpenServicesPage();
+    } else {
+      navigateToPage('services');
+    }
   };
 
   return (
@@ -64,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="nav-container">
         <div
           className="nav-brand"
-          onClick={() => handleLinkClick()}
+          onClick={() => navigateToPage('home')}
           role="button"
           tabIndex={0}
         >
@@ -81,67 +92,67 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className={`nav-menu ${mobileMenuOpen ? 'open' : ''}`} id="nav-menu">
           <button
             className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
-            onClick={() => handleLinkClick('home')}
+            onClick={() => navigateToPage('home')}
           >
             Home
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('about')}
+            className={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
+            onClick={() => navigateToPage('about')}
           >
             About
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('services')}
+            className={`nav-link ${currentPage === 'services' || currentPage === 'service-detail' ? 'active' : ''}`}
+            onClick={handleServicesClick}
           >
             Services
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('websites')}
+            className={`nav-link ${currentPage === 'websites' ? 'active' : ''}`}
+            onClick={() => navigateToPage('websites')}
           >
             Websites
           </button>
           <button
             className={`nav-link ${currentPage === 'blogs' || currentPage === 'blog-detail' ? 'active' : ''}`}
-            onClick={handleBlogsClick}
+            onClick={() => navigateToPage('blogs')}
           >
             Our Blogs
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('team')}
+            className={`nav-link ${currentPage === 'team' ? 'active' : ''}`}
+            onClick={() => navigateToPage('team')}
           >
             Team
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('testimonials')}
+            className={`nav-link ${currentPage === 'testimonials' ? 'active' : ''}`}
+            onClick={() => navigateToPage('testimonials')}
           >
             Testimonials
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('partnership')}
+            className={`nav-link ${currentPage === 'partnership' ? 'active' : ''}`}
+            onClick={() => navigateToPage('partnership')}
           >
             Partnership
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('contact')}
+            className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`}
+            onClick={() => navigateToPage('contact')}
           >
             Contact
           </button>
           <button
-            className="nav-link"
-            onClick={() => handleLinkClick('faq')}
+            className={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}
+            onClick={() => navigateToPage('faq')}
           >
             FAQ
           </button>
           <button
             className={`nav-link ${currentPage === 'policies' ? 'active' : ''}`}
-            onClick={handlePoliciesClick}
+            onClick={() => navigateToPage('policies')}
           >
             Our Policies
           </button>

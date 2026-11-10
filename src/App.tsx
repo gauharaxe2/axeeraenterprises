@@ -17,6 +17,7 @@ import { NotificationToast, NotificationState } from './components/NotificationT
 import { BlogHub } from './components/BlogHub';
 import { BlogArticleDetail } from './components/BlogArticleDetail';
 import { ServiceDetailView } from './components/ServiceDetailView';
+import { ServicesPage } from './components/ServicesPage';
 import { PoliciesView } from './components/PoliciesView';
 import { HomePoliciesBlock } from './components/HomePoliciesBlock';
 import { NotFound } from './components/NotFound';
@@ -34,6 +35,8 @@ const DEFAULT_TITLE = "Axe's Era Enterprise by Gauhar Axe - Digital Solutions";
 
 function pageFromRoute(route: AppRoute): PageView {
   switch (route.page) {
+    case 'services':
+      return 'services';
     case 'policies':
       return 'policies';
     case 'service-detail':
@@ -178,6 +181,12 @@ export const App: React.FC = () => {
       return;
     }
 
+    if (route.page === 'services') {
+      setCurrentPage('services');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (route.page === 'policies') {
       setSelectedPolicy(route.policy);
       setCurrentPage('policies');
@@ -268,6 +277,11 @@ export const App: React.FC = () => {
       noindex('noindex');
       return;
     }
+    if (currentPage === 'services') {
+      document.title = "Enterprise Services & Capabilities | Axe's Era Enterprise";
+      robots?.remove();
+      return;
+    }
     document.title = DEFAULT_TITLE;
     robots?.remove();
   }, [currentPage, adminGate]);
@@ -341,6 +355,12 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenServicesPage = () => {
+    setCurrentPage('services');
+    pushUrl('/#services-page');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleOpenServiceBySlug = (slug: string) => {
     const service =
       data.services.find((item) => item.id === slug || item.slug === slug) || data.services[0];
@@ -384,6 +404,7 @@ export const App: React.FC = () => {
         currentPage={currentPage}
         setCurrentPage={handleSetCurrentPage}
         onNavigateSection={handleNavigateSection}
+        onOpenServicesPage={handleOpenServicesPage}
       />
 
       {currentPage === 'home' && (
@@ -406,6 +427,7 @@ export const App: React.FC = () => {
             services={data.services}
             onSelectService={handleSelectService}
             onContactClick={() => handleNavigateSection('contact')}
+            onOpenServicesPage={handleOpenServicesPage}
           />
           <CaseStudies projects={data.projects} />
           <HomeBlogsPreview
@@ -431,6 +453,17 @@ export const App: React.FC = () => {
           <HomePoliciesBlock onOpenPolicy={handleOpenPolicy} />
           <FaqSection faqs={data.faqs} />
         </main>
+      )}
+
+      {currentPage === 'services' && (
+        <ServicesPage
+          services={data.services}
+          onBackToHome={handleBackToHome}
+          onSelectService={handleSelectService}
+          onContactClick={() => {
+            handleNavigateSection('contact');
+          }}
+        />
       )}
 
       {currentPage === 'blogs' && (
@@ -475,6 +508,7 @@ export const App: React.FC = () => {
         onOpenBlogs={handleOpenBlogHub}
         onOpenService={handleOpenServiceBySlug}
         onOpenPolicy={handleOpenPolicy}
+        onOpenServicesPage={handleOpenServicesPage}
       />
 
       <WhatsAppButton whatsappNumber={data.generalInfo.whatsappNumber} />

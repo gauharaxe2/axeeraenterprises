@@ -8,13 +8,17 @@ interface FooterProps {
   onOpenBlogs: () => void;
   onOpenService: (serviceSlug: string) => void;
   onOpenPolicy: (policyType: PolicyType) => void;
+  onOpenServicesPage?: () => void;
+  onOpenPage?: (page: PageView) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onNavigateSection,
   onOpenBlogs,
   onOpenService,
-  onOpenPolicy
+  onOpenPolicy,
+  onOpenServicesPage,
+  onOpenPage
 }) => {
   return (
     <footer className="footer">
@@ -57,6 +61,16 @@ export const Footer: React.FC<FooterProps> = ({
                   Mobile Apps
                 </button>
               </li>
+              {onOpenServicesPage && (
+                <li style={{ marginTop: '6px' }}>
+                  <button
+                    onClick={onOpenServicesPage}
+                    style={{ color: 'var(--primary-color)', fontWeight: 700 }}
+                  >
+                    All Enterprise Services (7) →
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -64,28 +78,42 @@ export const Footer: React.FC<FooterProps> = ({
             <h3>Company</h3>
             <ul>
               <li>
-                <button onClick={() => onNavigateSection('about')}>About Us</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('about') : onNavigateSection('about'))}>
+                  About Us
+                </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('team')}>Our Team</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('team') : onNavigateSection('team'))}>
+                  Our Team
+                </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('websites')}>Websites</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('websites') : onNavigateSection('websites'))}>
+                  Websites
+                </button>
               </li>
               <li>
                 <button onClick={onOpenBlogs}>Blogs Hub</button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('testimonials')}>Testimonials</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('testimonials') : onNavigateSection('testimonials'))}>
+                  Testimonials
+                </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('partnership')}>Partnership</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('partnership') : onNavigateSection('partnership'))}>
+                  Partnership
+                </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('contact')}>Contact</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('contact') : onNavigateSection('contact'))}>
+                  Contact
+                </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('faq')}>FAQ</button>
+                <button onClick={() => (onOpenPage ? onOpenPage('faq') : onNavigateSection('faq'))}>
+                  FAQ
+                </button>
               </li>
             </ul>
           </div>

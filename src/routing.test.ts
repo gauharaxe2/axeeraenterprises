@@ -42,6 +42,14 @@ test('home, sections, services, blogs, and policies resolve', () => {
     page: 'home',
     section: 'services'
   });
+  assert.deepEqual(resolveRoute('/', '#services-page'), { page: 'services' });
+  assert.deepEqual(resolveRoute('/', '#about-page'), { page: 'about' });
+  assert.deepEqual(resolveRoute('/', '#websites-page'), { page: 'websites' });
+  assert.deepEqual(resolveRoute('/', '#team-page'), { page: 'team' });
+  assert.deepEqual(resolveRoute('/', '#testimonials-page'), { page: 'testimonials' });
+  assert.deepEqual(resolveRoute('/', '#partnership-page'), { page: 'partnership' });
+  assert.deepEqual(resolveRoute('/', '#contact-page'), { page: 'contact' });
+  assert.deepEqual(resolveRoute('/', '#faq-page'), { page: 'faq' });
   assert.deepEqual(resolveRoute('/', '#blog-hub'), { page: 'blog-hub' });
   assert.deepEqual(resolveRoute('/', '#blog-what-is-web-development.html'), {
     page: 'blog-detail',

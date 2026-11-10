@@ -4,9 +4,10 @@ import { Project } from '../types';
 
 interface CaseStudiesProps {
   projects: Project[];
+  onOpenWebsitesPage?: () => void;
 }
 
-export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects }) => {
+export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsitesPage }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'ecommerce' | 'saas' | 'web'>('all');
 
   const filteredProjects = projects.filter((item) => {
@@ -100,6 +101,25 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects }) => {
             </div>
           ))}
         </div>
+
+        {onOpenWebsitesPage && (
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <button
+              type="button"
+              onClick={onOpenWebsitesPage}
+              className="btn btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.95rem',
+                padding: '0.75rem 1.75rem'
+              }}
+            >
+              Explore Complete Case Studies & Live Deployments (Websites Page) →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -15,12 +15,14 @@ interface ServicesGridProps {
   services: ServiceItem[];
   onSelectService: (service: ServiceItem) => void;
   onContactClick: () => void;
+  onOpenServicesPage?: () => void;
 }
 
 export const ServicesGrid: React.FC<ServicesGridProps> = ({
   services,
   onSelectService,
-  onContactClick
+  onContactClick,
+  onOpenServicesPage
 }) => {
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -74,6 +76,28 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
             </div>
           ))}
         </div>
+
+        {onOpenServicesPage && (
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <button
+              onClick={onOpenServicesPage}
+              className="btn btn-outline"
+              style={{
+                padding: '12px 28px',
+                fontSize: '1rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                border: '1px solid var(--primary-color)',
+                color: 'var(--primary-color)',
+                cursor: 'pointer'
+              }}
+            >
+              Explore Complete Services & Engineering Deliverables ({services.length} Core Pillars) <ArrowRight size={18} />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

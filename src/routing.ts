@@ -36,6 +36,14 @@ const POLICIES: Record<string, PolicyId> = {
 
 export type AppRoute =
   | { page: 'home'; section?: HomeSection }
+  | { page: 'about' }
+  | { page: 'services' }
+  | { page: 'websites' }
+  | { page: 'team' }
+  | { page: 'testimonials' }
+  | { page: 'partnership' }
+  | { page: 'contact' }
+  | { page: 'faq' }
   | { page: 'policies'; policy: PolicyId }
   | { page: 'service-detail'; serviceId: ServiceId }
   | { page: 'blog-hub' }
@@ -122,6 +130,38 @@ export function resolveRoute(pathname: string, hash: string): AppRoute {
 
   if (POLICIES[fragment]) {
     return { page: 'policies', policy: POLICIES[fragment] };
+  }
+
+  if (fragment === 'services-page' || fragment === 'services-hub' || fragment === 'all-services') {
+    return { page: 'services' };
+  }
+
+  if (fragment === 'about-page' || fragment === 'about-us') {
+    return { page: 'about' };
+  }
+
+  if (fragment === 'websites-page' || fragment === 'case-studies-page' || fragment === 'portfolio-page') {
+    return { page: 'websites' };
+  }
+
+  if (fragment === 'team-page' || fragment === 'our-team-page') {
+    return { page: 'team' };
+  }
+
+  if (fragment === 'testimonials-page' || fragment === 'reviews-page') {
+    return { page: 'testimonials' };
+  }
+
+  if (fragment === 'partnership-page' || fragment === 'partners-page') {
+    return { page: 'partnership' };
+  }
+
+  if (fragment === 'contact-page' || fragment === 'contact-us') {
+    return { page: 'contact' };
+  }
+
+  if (fragment === 'faq-page' || fragment === 'faqs-page' || fragment === 'knowledge-base') {
+    return { page: 'faq' };
   }
 
   if (fragment.startsWith('service-')) {

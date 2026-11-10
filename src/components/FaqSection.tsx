@@ -4,9 +4,10 @@ import { FaqItem } from '../types';
 
 interface FaqSectionProps {
   faqs: FaqItem[];
+  onOpenFaqPage?: () => void;
 }
 
-export const FaqSection: React.FC<FaqSectionProps> = ({ faqs }) => {
+export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFaq = (index: number) => {
@@ -42,6 +43,25 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ faqs }) => {
             );
           })}
         </div>
+
+        {onOpenFaqPage && (
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <button
+              type="button"
+              onClick={onOpenFaqPage}
+              className="btn btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.95rem',
+                padding: '0.75rem 1.75rem'
+              }}
+            >
+              Browse Complete Knowledge Base & FAQs (FAQ Page) →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

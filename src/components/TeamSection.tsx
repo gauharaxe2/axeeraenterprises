@@ -4,9 +4,10 @@ import { TeamMemberData } from '../types';
 
 interface TeamSectionProps {
   team: TeamMemberData[];
+  onOpenTeamPage?: () => void;
 }
 
-export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
+export const TeamSection: React.FC<TeamSectionProps> = ({ team, onOpenTeamPage }) => {
   const isSingle = team.length <= 1;
 
   return (
@@ -146,6 +147,25 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team }) => {
             </div>
           ))}
         </div>
+
+        {onOpenTeamPage && (
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <button
+              type="button"
+              onClick={onOpenTeamPage}
+              className="btn btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.95rem',
+                padding: '0.75rem 1.75rem'
+              }}
+            >
+              Meet Founder & Engineering Leadership (Team Page) →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -11,6 +11,7 @@ interface AboutProps {
     projects: number;
     retention: number;
   };
+  onOpenAboutPage?: () => void;
 }
 
 export const About: React.FC<AboutProps> = ({
@@ -23,7 +24,8 @@ export const About: React.FC<AboutProps> = ({
     experts: 1,
     projects: 10,
     retention: 99
-  }
+  },
+  onOpenAboutPage
 }) => {
   const [counts, setCounts] = useState({
     years: 0,
@@ -79,6 +81,25 @@ export const About: React.FC<AboutProps> = ({
                 <p>Client Retention</p>
               </div>
             </div>
+
+            {onOpenAboutPage && (
+              <div style={{ marginTop: '2rem' }}>
+                <button
+                  type="button"
+                  onClick={onOpenAboutPage}
+                  className="btn btn-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.9rem',
+                    padding: '0.65rem 1.4rem'
+                  }}
+                >
+                  Explore Full Story, Vision & Milestones (About Page) →
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="about-image">

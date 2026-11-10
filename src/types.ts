@@ -137,9 +137,17 @@ export type PolicyType = 'legal-notice' | 'privacy-policy' | 'terms-of-service';
 
 export type PageView =
   | 'home'
+  | 'about'
+  | 'services'
+  | 'websites'
   | 'blogs'
   | 'blog-detail'
   | 'service-detail'
+  | 'team'
+  | 'testimonials'
+  | 'partnership'
+  | 'contact'
+  | 'faq'
   | 'policies'
   | 'not-found';
 

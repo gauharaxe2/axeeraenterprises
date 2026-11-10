@@ -6,12 +6,14 @@ interface PartnershipSectionProps {
   partnerships: PartnershipItem[];
   partnerLogos?: PartnerLogo[];
   notice?: string;
+  onOpenPartnershipPage?: () => void;
 }
 
 export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
   partnerships,
   partnerLogos = [],
-  notice = "We are currently expanding our strategic partner network. Check back soon for new enterprise announcements!"
+  notice = "We are currently expanding our strategic partner network. Check back soon for new enterprise announcements!",
+  onOpenPartnershipPage
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -310,6 +312,25 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
             {notice}
           </p>
         </div>
+
+        {onOpenPartnershipPage && (
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <button
+              type="button"
+              onClick={onOpenPartnershipPage}
+              className="btn btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.95rem',
+                padding: '0.75rem 1.75rem'
+              }}
+            >
+              Explore Enterprise Alliances & Partner Program (Partnership Page) →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

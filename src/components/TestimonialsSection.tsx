@@ -4,9 +4,13 @@ import { Testimonial } from '../types';
 
 interface TestimonialsSectionProps {
   testimonials: Testimonial[];
+  onOpenTestimonialsPage?: () => void;
 }
 
-export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testimonials }) => {
+export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
+  testimonials,
+  onOpenTestimonialsPage
+}) => {
   return (
     <section id="testimonials" className="testimonials">
       <div className="container">
@@ -39,6 +43,25 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testim
             </div>
           ))}
         </div>
+
+        {onOpenTestimonialsPage && (
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <button
+              type="button"
+              onClick={onOpenTestimonialsPage}
+              className="btn btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.95rem',
+                padding: '0.75rem 1.75rem'
+              }}
+            >
+              Explore All Verified Client Reviews & Ratings (Testimonials Page) →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
