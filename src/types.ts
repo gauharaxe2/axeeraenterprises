@@ -147,6 +147,7 @@ export type PageView =
   | 'testimonials'
   | 'partnership'
   | 'contact'
+  | 'location'
   | 'faq'
   | 'policies'
   | 'not-found';

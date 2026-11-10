@@ -43,6 +43,7 @@ export type AppRoute =
   | { page: 'testimonials' }
   | { page: 'partnership' }
   | { page: 'contact' }
+  | { page: 'location' }
   | { page: 'faq' }
   | { page: 'policies'; policy: PolicyId }
   | { page: 'service-detail'; serviceId: ServiceId }
@@ -113,6 +114,7 @@ export const CONTENT_PAGE_PATHS = [
   '/testimonials',
   '/partnership',
   '/contact',
+  '/location',
   '/faq'
 ] as const;
 
@@ -124,6 +126,7 @@ const CONTENT_ROUTES: Record<(typeof CONTENT_PAGE_PATHS)[number], AppRoute> = {
   '/testimonials': { page: 'testimonials' },
   '/partnership': { page: 'partnership' },
   '/contact': { page: 'contact' },
+  '/location': { page: 'location' },
   '/faq': { page: 'faq' }
 };
 
@@ -192,6 +195,10 @@ export function resolveRoute(pathname: string, hash: string): AppRoute {
 
   if (fragment === 'contact-page' || fragment === 'contact-us') {
     return { page: 'contact' };
+  }
+
+  if (fragment === 'location' || fragment === 'location-page' || fragment === 'our-location') {
+    return { page: 'location' };
   }
 
   if (fragment === 'faq-page' || fragment === 'faqs-page' || fragment === 'knowledge-base') {

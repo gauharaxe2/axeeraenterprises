@@ -4,7 +4,7 @@ import { ContactFormData, ServiceItem } from '../types';
 import { saveSubmissionToFirestore } from '../utils/firebase';
 import { buildContactEnquiry } from '../utils/contactEnquiry';
 import { WhatsAppIcon } from './WhatsAppIcon';
-import { EditorialHero, EditorialPage, EditorialSection, EditorialTopbar } from './editorial/Editorial';
+import { EditorialHero, EditorialPage, EditorialSection, EditorialTopbar, openInApp } from './editorial/Editorial';
 
 interface ContactPageProps {
   address?: string;
@@ -15,6 +15,7 @@ interface ContactPageProps {
   servicesList?: ServiceItem[];
   onShowNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   onBackToHome: () => void;
+  onOpenLocation?: () => void;
 }
 
 function phoneHref(display: string): string {
@@ -48,7 +49,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   urgentNotice = "NOTE: If you don't get our response back via e-mail sooner, tap the WhatsApp button for an immediate live response!",
   servicesList = [],
   onShowNotification,
-  onBackToHome
+  onBackToHome,
+  onOpenLocation
 }) => {
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
@@ -181,6 +183,16 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                   <h3>Office Address</h3>
                   <p>{address}</p>
                   <p>Registered Headquarters, Pakistan</p>
+                  <p>
+                    <a
+                      href="/location"
+                      onClick={(event) => {
+                        if (onOpenLocation) openInApp(event, onOpenLocation);
+                      }}
+                    >
+                      View the pinned Google Map
+                    </a>
+                  </p>
                 </div>
               </div>
               <div className="contact-item">

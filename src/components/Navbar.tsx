@@ -13,6 +13,7 @@ const NAV_LINKS: { page: PageView; href: string; label: string }[] = [
   { page: 'testimonials', href: '/testimonials', label: 'Testimonials' },
   { page: 'partnership', href: '/partnership', label: 'Partnership' },
   { page: 'contact', href: '/contact', label: 'Contact' },
+  { page: 'location', href: '/location', label: 'Location' },
   { page: 'faq', href: '/faq', label: 'FAQ' },
   { page: 'policies', href: '/policies', label: 'Our Policies' }
 ];

@@ -59,6 +59,12 @@ const PAGES: Record<string, PublicPageMeta> = {
       'Contact Axe\'s Era Enterprise at D-26, Wahdat Colony, Multan, 66000. Phone +92-315-7338694 / +92-339-0096853. Email gauharaxe@outlook.com.',
     path: '/contact'
   },
+  location: {
+    title: "Location | Axe's Era Enterprise",
+    description:
+      'Axe\'s Era Enterprise headquarters at D-26, Wahdat Colony, Multan, 66000, Pakistan, with a Google Maps pin and directions.',
+    path: '/location'
+  },
   faq: {
     title: "FAQ | Axe's Era Enterprise",
     description:

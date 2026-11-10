@@ -24,6 +24,7 @@ import { TeamPage } from './components/TeamPage';
 import { TestimonialsPage } from './components/TestimonialsPage';
 import { PartnershipPage } from './components/PartnershipPage';
 import { ContactPage } from './components/ContactPage';
+import { LocationPage } from './components/LocationPage';
 import { FaqPage } from './components/FaqPage';
 import { PoliciesView } from './components/PoliciesView';
 import { HomePoliciesBlock } from './components/HomePoliciesBlock';
@@ -49,6 +50,7 @@ function pageFromRoute(route: AppRoute): PageView {
     case 'testimonials':
     case 'partnership':
     case 'contact':
+    case 'location':
     case 'faq':
     case 'policies':
       return route.page;
@@ -254,6 +256,7 @@ export const App: React.FC = () => {
       route.page === 'testimonials' ||
       route.page === 'partnership' ||
       route.page === 'contact' ||
+      route.page === 'location' ||
       route.page === 'faq'
     ) {
       setCurrentPage(route.page);
@@ -365,6 +368,7 @@ export const App: React.FC = () => {
       testimonials: '/testimonials',
       partnership: '/partnership',
       contact: '/contact',
+      location: '/location',
       faq: '/faq'
     };
     const path = sectionPaths[page];
@@ -582,6 +586,17 @@ export const App: React.FC = () => {
           servicesList={data.services}
           onShowNotification={showNotification}
           onBackToHome={handleBackToHome}
+          onOpenLocation={() => handleSetCurrentPage('location')}
+        />
+      )}
+
+      {currentPage === 'location' && (
+        <LocationPage
+          address={data.generalInfo.contactAddress}
+          phone={data.generalInfo.contactPhone}
+          email={data.generalInfo.contactEmail}
+          onBackToHome={handleBackToHome}
+          onContactClick={() => handleSetCurrentPage('contact')}
         />
       )}
 
