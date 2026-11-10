@@ -147,8 +147,9 @@ p {
 .nav-brand img {
   height: 48px;
   width: 48px;
-  border-radius: 8px;
+  border-radius: 50%;
   object-fit: cover;
+  background: #000;
 }
 
 .nav-brand h1 {
@@ -1212,5 +1213,112 @@ section {
   .whatsapp-tooltip {
     bottom: 80px;
     right: 20px;
+  }
+}
+
+/* Opening preloader — shown on first load and every page change */
+.site-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  background: #000000;
+  color: #ffffff;
+}
+
+.site-preloader.is-leaving {
+  animation: preloaderFade 0.36s ease forwards;
+  pointer-events: none;
+}
+
+.site-preloader-mark {
+  position: relative;
+  width: min(210px, 52vw);
+  height: min(210px, 52vw);
+  display: grid;
+  place-items: center;
+  margin-bottom: 1rem;
+}
+
+.site-preloader-mark img {
+  width: 86%;
+  height: 86%;
+  object-fit: cover;
+  border-radius: 50%;
+  position: relative;
+  z-index: 1;
+}
+
+.site-preloader-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 211, 238, 0.22);
+  border-top-color: #22d3ee;
+  border-right-color: #e879f9;
+  animation: preloaderSpin 0.9s linear infinite;
+}
+
+.site-preloader-name {
+  margin: 0;
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #ffffff;
+}
+
+.site-preloader-name span {
+  color: #22d3ee;
+}
+
+.site-preloader-sub {
+  margin: 0.15rem 0 0;
+  color: #94a3b8;
+  font-size: 0.92rem;
+}
+
+.site-preloader-bar {
+  width: 168px;
+  height: 3px;
+  margin-top: 1.15rem;
+  border-radius: 99px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.site-preloader-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #e879f9, #22d3ee);
+  animation: preloaderFill linear forwards;
+}
+
+@keyframes preloaderSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes preloaderFill {
+  to { width: 100%; }
+}
+
+@keyframes preloaderFade {
+  to { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-preloader-ring,
+  .site-preloader-bar span,
+  .site-preloader.is-leaving {
+    animation: none;
+  }
+
+  .site-preloader-bar span {
+    width: 100%;
   }
 }

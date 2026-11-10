@@ -34,6 +34,7 @@ import { AppRoute, isAdminLocation, resolveRoute } from './routing';
 import { AdminGate, clearAdminSession } from './components/AdminGate';
 import { isAdminSessionActive } from './utils/adminAuth';
 import { applyPrivateMeta, applyPublicMeta, DEFAULT_DESCRIPTION, DEFAULT_TITLE, metaForPage } from './pageMeta';
+import { Preloader } from './components/Preloader';
 
 const AdminPanel = lazy(() =>
   import('./components/AdminPanel/SideAdminPanel').then((mod) => ({ default: mod.SideAdminPanel }))
@@ -146,6 +147,7 @@ export const App: React.FC = () => {
     return null;
   });
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  const [preloaderPhase, setPreloaderPhase] = useState<'on' | 'out' | 'off'>('on');
 
   // Keep selectedBlog and selectedService synchronized when live data updates from Firestore
   useEffect(() => {
@@ -305,6 +307,32 @@ export const App: React.FC = () => {
     );
   }, [currentPage, adminGate]);
 
+  const pageOpenKey = `${currentPage}|${selectedBlog?.slug ?? ''}|${selectedService?.id ?? ''}|${currentPage === 'policies' ? selectedPolicy : ''}`;
+  const preloaderHoldMs = 1100;
+
+  useEffect(() => {
+    if (adminGate !== 'off') {
+      setPreloaderPhase('off');
+      document.body.style.overflow = '';
+      return;
+    }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const hold = reduceMotion ? 280 : preloaderHoldMs;
+    const fade = reduceMotion ? 0 : 360;
+    setPreloaderPhase('on');
+    document.body.style.overflow = 'hidden';
+    const holdTimer = window.setTimeout(() => setPreloaderPhase('out'), hold);
+    const doneTimer = window.setTimeout(() => {
+      setPreloaderPhase('off');
+      document.body.style.overflow = '';
+    }, hold + fade);
+    return () => {
+      window.clearTimeout(holdTimer);
+      window.clearTimeout(doneTimer);
+      document.body.style.overflow = '';
+    };
+  }, [pageOpenKey, adminGate]);
+
   const handleAdminSuccess = useCallback(() => {
     setAdminGate('open');
     setIsAdminOpen(true);
@@ -435,7 +463,8 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="app-container">
+    <>
+    <div className="app-container" aria-hidden={preloaderPhase !== 'off'}>
       <Navbar
         currentPage={currentPage}
         setCurrentPage={handleSetCurrentPage}
@@ -659,6 +688,8 @@ export const App: React.FC = () => {
         </Suspense>
       )}
     </div>
+    <Preloader phase={preloaderPhase} durationMs={preloaderHoldMs} />
+    </>
   );
 };
 

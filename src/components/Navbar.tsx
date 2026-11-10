@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { PageView } from '../types';
+import { SITE_LOGO_SRC } from '../brand';
 
 const NAV_LINKS: { page: PageView; href: string; label: string }[] = [
   { page: 'home', href: '/', label: 'Home' },
@@ -71,10 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           event.preventDefault();
           navigateToPage('home');
         }}>
-          <img
-            src="https://i.postimg.cc/q62QnRNR/Axe-s-Era-company-logo-20260808-065813-0000.png"
-            alt="Axe's Era Logo"
-          />
+          <img src={SITE_LOGO_SRC} alt="Axe's Era logo" />
           <div>
             <h1>Axe's Era Enterprise</h1>
             <p>by Gauhar Axe</p>
