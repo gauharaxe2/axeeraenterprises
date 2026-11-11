@@ -473,6 +473,7 @@ export const App: React.FC = () => {
         currentPage={currentPage}
         setCurrentPage={handleSetCurrentPage}
         onOpenServicesPage={handleOpenServicesPage}
+        onOpenPage={handleSetCurrentPage}
       />
 
       {currentPage === 'home' && (
@@ -480,8 +481,8 @@ export const App: React.FC = () => {
           <Hero
             title={data.generalInfo.heroTitle}
             subtitle={data.generalInfo.heroSubtitle}
-            onStartProject={() => handleNavigateSection('contact')}
-            onExploreCaseStudies={() => handleNavigateSection('websites')}
+            onStartProject={() => handleSetCurrentPage('contact')}
+            onExploreCaseStudies={() => handleSetCurrentPage('websites')}
           />
           <TrustSignals />
           <About
@@ -490,25 +491,36 @@ export const App: React.FC = () => {
             paragraph2={data.generalInfo.aboutParagraph2}
             imageUrl={data.generalInfo.aboutImageUrl}
             stats={data.generalInfo.stats}
+            onOpenAboutPage={() => handleSetCurrentPage('about')}
           />
           <ServicesGrid
             services={data.services}
             onSelectService={handleSelectService}
-            onContactClick={() => handleNavigateSection('contact')}
+            onContactClick={() => handleSetCurrentPage('contact')}
             onOpenServicesPage={handleOpenServicesPage}
           />
-          <CaseStudies projects={data.projects} />
+          <CaseStudies
+            projects={data.projects}
+            onOpenWebsitesPage={() => handleSetCurrentPage('websites')}
+          />
           <HomeBlogsPreview
             blogs={data.blogs}
             onOpenBlogHub={handleOpenBlogHub}
             onOpenArticle={handleSelectBlog}
           />
-          <TeamSection team={data.team} />
-          <TestimonialsSection testimonials={data.testimonials} />
+          <TeamSection
+            team={data.team}
+            onOpenTeamPage={() => handleSetCurrentPage('team')}
+          />
+          <TestimonialsSection
+            testimonials={data.testimonials}
+            onOpenTestimonialsPage={() => handleSetCurrentPage('testimonials')}
+          />
           <PartnershipSection
             partnerships={data.partnerships}
             partnerLogos={data.partnerLogos}
             notice={data.generalInfo.partnershipNotice}
+            onOpenPartnershipPage={() => handleSetCurrentPage('partnership')}
           />
           <ContactSection
             address={data.generalInfo.contactAddress}
@@ -519,7 +531,10 @@ export const App: React.FC = () => {
             onShowNotification={showNotification}
           />
           <HomePoliciesBlock onOpenPolicy={handleOpenPolicy} />
-          <FaqSection faqs={data.faqs} />
+          <FaqSection
+            faqs={data.faqs}
+            onOpenFaqPage={() => handleSetCurrentPage('faq')}
+          />
         </main>
       )}
 

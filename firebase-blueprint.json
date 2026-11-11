@@ -76,6 +76,33 @@
           "description": "Status string"
         }
       }
+    },
+    "NewsletterSubscriber": {
+      "title": "NewsletterSubscriber",
+      "description": "Email address submissions for company newsletter and industry insights",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Subscriber email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Subscription timestamp"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Acquisition source (e.g. footer)"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Subscription status (e.g. active, subscribed)"
+        }
+      },
+      "required": ["email"]
     }
   },
   "firestore": {
@@ -86,6 +113,10 @@
     "/submissions/{submissionId}": {
       "schema": "#/entities/ContactSubmission",
       "description": "Inquiry submissions from site visitors"
+    },
+    "/newsletter_subscribers/{subscriberId}": {
+      "schema": "#/entities/NewsletterSubscriber",
+      "description": "Newsletter email subscriptions collected from visitors"
     },
     "/test/{docId}": {
       "schema": "#/entities/TestDocument",

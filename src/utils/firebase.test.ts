@@ -13,18 +13,20 @@ test('firebase-applet-config.json exists and contains required Firestore configu
   assert.ok(content.firestoreDatabaseId, 'firestoreDatabaseId must be defined');
 });
 
-test('firebase-blueprint.json defines SiteSection, ContactSubmission and paths', () => {
+test('firebase-blueprint.json defines SiteSection, ContactSubmission, NewsletterSubscriber and paths', () => {
   const blueprintPath = resolve(process.cwd(), 'firebase-blueprint.json');
   assert.equal(existsSync(blueprintPath), true, 'firebase-blueprint.json should exist');
 
   const blueprint = JSON.parse(readFileSync(blueprintPath, 'utf8'));
   assert.ok(blueprint.entities.SiteSection, 'SiteSection entity should exist');
   assert.ok(blueprint.entities.ContactSubmission, 'ContactSubmission entity should exist');
+  assert.ok(blueprint.entities.NewsletterSubscriber, 'NewsletterSubscriber entity should exist');
   assert.ok(blueprint.firestore['/site_content/{sectionId}'], '/site_content path must be mapped');
   assert.ok(blueprint.firestore['/submissions/{submissionId}'], '/submissions path must be mapped');
+  assert.ok(blueprint.firestore['/newsletter_subscribers/{subscriberId}'], '/newsletter_subscribers path must be mapped');
 });
 
-test('firestore.rules is valid rules_version 2 with site_content and submissions match blocks', () => {
+test('firestore.rules is valid rules_version 2 with site_content, submissions, and newsletter_subscribers match blocks', () => {
   const rulesPath = resolve(process.cwd(), 'firestore.rules');
   assert.equal(existsSync(rulesPath), true, 'firestore.rules should exist');
 
@@ -32,4 +34,6 @@ test('firestore.rules is valid rules_version 2 with site_content and submissions
   assert.match(rules, /rules_version = '2';/);
   assert.match(rules, /match \/site_content\/\{sectionId\}/);
   assert.match(rules, /match \/submissions\/\{submissionId\}/);
+  assert.match(rules, /match \/newsletter_subscribers\/\{subscriberId\}/);
 });
+

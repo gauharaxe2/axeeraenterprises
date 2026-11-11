@@ -251,3 +251,52 @@ export async function setSubmissionReadInFirestore(id: string, read: boolean): P
 export async function deleteSubmissionFromFirestore(id: string): Promise<void> {
   await deleteDoc(doc(db, 'submissions', id));
 }
+
+export interface NewsletterSubscriptionInput {
+  email: string;
+  source?: string;
+}
+
+export interface NewsletterSubscriptionResult {
+  success: boolean;
+  id?: string;
+  error?: string;
+}
+
+/**
+ * Subscribe an email address to the newsletter_subscribers collection in Firestore.
+ */
+export async function subscribeToNewsletter(
+  input: NewsletterSubscriptionInput
+): Promise<NewsletterSubscriptionResult> {
+  const email = (input.email || '').trim().toLowerCase();
+  const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    return { success: false, error: 'Please enter a valid email address.' };
+  }
+  if (email.length > 150) {
+    return { success: false, error: 'Email address must be 150 characters or less.' };
+  }
+
+  const collectionPath = 'newsletter_subscribers';
+  try {
+    const docRef = await addDoc(collection(db, collectionPath), {
+      email,
+      source: input.source || 'footer',
+      status: 'active',
+      createdAt: serverTimestamp()
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Failed to save newsletter subscription to Firestore:', error);
+    try {
+      handleFirestoreError(error, OperationType.CREATE, collectionPath);
+    } catch {
+      // Retain graceful return for caller UI
+    }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Subscription failed. Please try again later.'
+    };
+  }
+}
