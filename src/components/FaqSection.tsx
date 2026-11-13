@@ -11,6 +11,7 @@ interface FaqSectionProps {
 export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) => {
   const { strings } = useLanguage();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const visibleFaqs = faqs.slice(0, 5);
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -25,7 +26,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) =
         </div>
 
         <div className="faq-grid">
-          {faqs.map((faq, index) => {
+          {visibleFaqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
               <div key={faq.id || index} className="faq-item">
