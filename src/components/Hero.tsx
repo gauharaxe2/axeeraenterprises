@@ -21,6 +21,8 @@ export const Hero: React.FC<HeroProps> = ({
 
   return (
     <section id="home" className="hero">
+      <div className="hero-bg-image" aria-hidden="true" />
+      <div className="hero-bg-overlay" aria-hidden="true" />
       <div className="hero-content">
         <div className="hero-text">
           <h1>{displayTitle}</h1>

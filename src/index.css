@@ -496,6 +496,32 @@ body.lang-ar .nav-link {
   overflow: hidden;
 }
 
+.hero-bg-image {
+  position: absolute;
+  inset: 0;
+  background-color: #ffffff;
+  background-image: url('/assets/aistudio/axe_260fcf1b.jpeg');
+  background-size: contain;
+  background-position: center 46%;
+  background-repeat: no-repeat;
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(10, 16, 32, 0.88) 0%,
+    rgba(15, 23, 42, 0.68) 55%,
+    rgba(6, 10, 22, 0.82) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .hero-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -561,6 +587,7 @@ body.lang-ar .nav-link {
   transform: translateX(-50%);
   animation: bounce 2s infinite;
   cursor: pointer;
+  z-index: 2;
 }
 
 .scroll-arrow {
