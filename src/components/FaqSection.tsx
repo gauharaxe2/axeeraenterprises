@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { FaqItem } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FaqSectionProps {
   faqs: FaqItem[];
@@ -8,6 +9,7 @@ interface FaqSectionProps {
 }
 
 export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) => {
+  const { strings } = useLanguage();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFaq = (index: number) => {
@@ -18,8 +20,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) =
     <section id="faq" className="faq">
       <div className="container">
         <div className="section-header">
-          <h2>Frequently Asked Questions</h2>
-          <p>Find answers to common questions about our services and digital processes.</p>
+          <h2>{strings.faq.sectionTitle}</h2>
+          <p>{strings.faq.sectionSubtitle}</p>
         </div>
 
         <div className="faq-grid">
@@ -58,7 +60,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) =
                 padding: '0.75rem 1.75rem'
               }}
             >
-              Browse Complete Knowledge Base & FAQs (FAQ Page) →
+              {strings.faq.cta}
             </button>
           </div>
         )}

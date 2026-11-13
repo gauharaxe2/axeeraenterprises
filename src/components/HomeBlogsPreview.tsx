@@ -1,6 +1,7 @@
 import React from 'react';
 import { BookOpen, ArrowRight } from 'lucide-react';
 import { BlogPost } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HomeBlogsPreviewProps {
   blogs: BlogPost[];
@@ -13,16 +14,15 @@ export const HomeBlogsPreview: React.FC<HomeBlogsPreviewProps> = ({
   onOpenBlogHub,
   onOpenArticle
 }) => {
+  const { strings } = useLanguage();
   const featured = blogs.slice(0, 3);
 
   return (
     <section id="blogs" className="blogs">
       <div className="container">
         <div className="section-header">
-          <h2>Our Blogs</h2>
-          <p>
-            The ultimate guide to web development, business websites, and digital growth in 2026.
-          </p>
+          <h2>{strings.blogs.sectionTitle}</h2>
+          <p>{strings.blogs.sectionSubtitle}</p>
         </div>
 
         <div className="services-grid" style={{ marginBottom: '2.5rem' }}>
@@ -82,7 +82,7 @@ export const HomeBlogsPreview: React.FC<HomeBlogsPreviewProps> = ({
                       onOpenArticle(blog);
                     }}
                   >
-                    Read Article <ArrowRight size={16} />
+                    {strings.blogs.readArticle} <ArrowRight size={16} />
                   </button>
                 </div>
               </div>
@@ -97,7 +97,7 @@ export const HomeBlogsPreview: React.FC<HomeBlogsPreviewProps> = ({
             style={{ padding: '14px 36px', fontSize: '1.05rem' }}
           >
             <BookOpen size={18} style={{ marginRight: '8px' }} />
-            Explore All {blogs.length} Articles Across 9 Categories
+            {strings.blogs.exploreAll}
           </button>
         </div>
       </div>

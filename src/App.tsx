@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { TrustSignals } from './components/TrustSignals';
@@ -36,6 +36,7 @@ import { AdminGate, clearAdminSession } from './components/AdminGate';
 import { isAdminSessionActive } from './utils/adminAuth';
 import { applyPrivateMeta, applyPublicMeta, DEFAULT_DESCRIPTION, DEFAULT_TITLE, metaForPage } from './pageMeta';
 import { Preloader } from './components/Preloader';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
 const AdminPanel = lazy(() =>
   import('./components/AdminPanel/SideAdminPanel').then((mod) => ({ default: mod.SideAdminPanel }))
@@ -74,7 +75,7 @@ function pushUrl(url: string) {
   }
 }
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const {
     data,
     syncStatus,
@@ -108,6 +109,18 @@ export const App: React.FC = () => {
     exportDataJson,
     importDataJson
   } = useAdminData();
+
+  const {
+    translateGeneralInfo,
+    translateServices,
+    translateProjects,
+    translateFaqs
+  } = useLanguage();
+
+  const activeGeneralInfo = useMemo(() => translateGeneralInfo(data.generalInfo), [translateGeneralInfo, data.generalInfo]);
+  const activeServices = useMemo(() => translateServices(data.services), [translateServices, data.services]);
+  const activeProjects = useMemo(() => translateProjects(data.projects), [translateProjects, data.projects]);
+  const activeFaqs = useMemo(() => translateFaqs(data.faqs), [translateFaqs, data.faqs]);
 
   const dataRef = useRef(data);
   dataRef.current = data;
@@ -479,28 +492,28 @@ export const App: React.FC = () => {
       {currentPage === 'home' && (
         <main>
           <Hero
-            title={data.generalInfo.heroTitle}
-            subtitle={data.generalInfo.heroSubtitle}
+            title={activeGeneralInfo.heroTitle}
+            subtitle={activeGeneralInfo.heroSubtitle}
             onStartProject={() => handleSetCurrentPage('contact')}
             onExploreCaseStudies={() => handleSetCurrentPage('websites')}
           />
           <TrustSignals />
           <About
-            title={data.generalInfo.aboutTitle}
-            paragraph1={data.generalInfo.aboutParagraph1}
-            paragraph2={data.generalInfo.aboutParagraph2}
-            imageUrl={data.generalInfo.aboutImageUrl}
-            stats={data.generalInfo.stats}
+            title={activeGeneralInfo.aboutTitle}
+            paragraph1={activeGeneralInfo.aboutParagraph1}
+            paragraph2={activeGeneralInfo.aboutParagraph2}
+            imageUrl={activeGeneralInfo.aboutImageUrl}
+            stats={activeGeneralInfo.stats}
             onOpenAboutPage={() => handleSetCurrentPage('about')}
           />
           <ServicesGrid
-            services={data.services}
+            services={activeServices}
             onSelectService={handleSelectService}
             onContactClick={() => handleSetCurrentPage('contact')}
             onOpenServicesPage={handleOpenServicesPage}
           />
           <CaseStudies
-            projects={data.projects}
+            projects={activeProjects}
             onOpenWebsitesPage={() => handleSetCurrentPage('websites')}
           />
           <HomeBlogsPreview
@@ -519,20 +532,20 @@ export const App: React.FC = () => {
           <PartnershipSection
             partnerships={data.partnerships}
             partnerLogos={data.partnerLogos}
-            notice={data.generalInfo.partnershipNotice}
+            notice={activeGeneralInfo.partnershipNotice}
             onOpenPartnershipPage={() => handleSetCurrentPage('partnership')}
           />
           <ContactSection
-            address={data.generalInfo.contactAddress}
-            phone={data.generalInfo.contactPhone}
-            email={data.generalInfo.contactEmail}
-            urgentNotice={data.generalInfo.urgentNotice}
-            servicesList={data.services}
+            address={activeGeneralInfo.contactAddress}
+            phone={activeGeneralInfo.contactPhone}
+            email={activeGeneralInfo.contactEmail}
+            urgentNotice={activeGeneralInfo.urgentNotice}
+            servicesList={activeServices}
             onShowNotification={showNotification}
           />
           <HomePoliciesBlock onOpenPolicy={handleOpenPolicy} />
           <FaqSection
-            faqs={data.faqs}
+            faqs={activeFaqs}
             onOpenFaqPage={() => handleSetCurrentPage('faq')}
           />
         </main>
@@ -540,7 +553,7 @@ export const App: React.FC = () => {
 
       {currentPage === 'services' && (
         <ServicesPage
-          services={data.services}
+          services={activeServices}
           onBackToHome={handleBackToHome}
           onSelectService={handleSelectService}
           onContactClick={() => {
@@ -551,7 +564,7 @@ export const App: React.FC = () => {
 
       {currentPage === 'about' && (
         <AboutPage
-          generalInfo={data.generalInfo}
+          generalInfo={activeGeneralInfo}
           onBackToHome={handleBackToHome}
           onContactClick={() => handleSetCurrentPage('contact')}
         />
@@ -559,7 +572,7 @@ export const App: React.FC = () => {
 
       {currentPage === 'websites' && (
         <WebsitesPage
-          projects={data.projects}
+          projects={activeProjects}
           onBackToHome={handleBackToHome}
           onContactClick={() => handleSetCurrentPage('contact')}
         />
@@ -585,7 +598,7 @@ export const App: React.FC = () => {
         <PartnershipPage
           partnerships={data.partnerships}
           partnerLogos={data.partnerLogos}
-          notice={data.generalInfo.partnershipNotice}
+          notice={activeGeneralInfo.partnershipNotice}
           onBackToHome={handleBackToHome}
           onContactClick={() => handleSetCurrentPage('contact')}
         />
@@ -593,12 +606,12 @@ export const App: React.FC = () => {
 
       {currentPage === 'contact' && (
         <ContactPage
-          address={data.generalInfo.contactAddress}
-          phone={data.generalInfo.contactPhone}
-          email={data.generalInfo.contactEmail}
-          whatsappNumber={data.generalInfo.whatsappNumber}
-          urgentNotice={data.generalInfo.urgentNotice}
-          servicesList={data.services}
+          address={activeGeneralInfo.contactAddress}
+          phone={activeGeneralInfo.contactPhone}
+          email={activeGeneralInfo.contactEmail}
+          whatsappNumber={activeGeneralInfo.whatsappNumber}
+          urgentNotice={activeGeneralInfo.urgentNotice}
+          servicesList={activeServices}
           onShowNotification={showNotification}
           onBackToHome={handleBackToHome}
           onOpenLocation={() => handleSetCurrentPage('location')}
@@ -607,11 +620,11 @@ export const App: React.FC = () => {
 
       {currentPage === 'location' && (
         <LocationPage
-          address={data.generalInfo.contactAddress}
-          phone={data.generalInfo.contactPhone}
-          email={data.generalInfo.contactEmail}
-          mapLatitude={data.generalInfo.mapLatitude}
-          mapLongitude={data.generalInfo.mapLongitude}
+          address={activeGeneralInfo.contactAddress}
+          phone={activeGeneralInfo.contactPhone}
+          email={activeGeneralInfo.contactEmail}
+          mapLatitude={activeGeneralInfo.mapLatitude}
+          mapLongitude={activeGeneralInfo.mapLongitude}
           onBackToHome={handleBackToHome}
           onContactClick={() => handleSetCurrentPage('contact')}
         />
@@ -619,7 +632,7 @@ export const App: React.FC = () => {
 
       {currentPage === 'faq' && (
         <FaqPage
-          faqs={data.faqs}
+          faqs={activeFaqs}
           onBackToHome={handleBackToHome}
           onContactClick={() => handleSetCurrentPage('contact')}
         />
@@ -722,6 +735,14 @@ export const App: React.FC = () => {
     </div>
     <Preloader phase={preloaderPhase} durationMs={preloaderHoldMs} />
     </>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 };
 

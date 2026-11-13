@@ -1,12 +1,15 @@
 import React from 'react';
 import { Scale, Shield, FileText, ArrowRight, Lock, CheckCircle2 } from 'lucide-react';
 import { PolicyType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HomePoliciesBlockProps {
   onOpenPolicy: (type: PolicyType) => void;
 }
 
 export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPolicy }) => {
+  const { strings } = useLanguage();
+
   return (
     <section
       id="policies"
@@ -33,7 +36,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
             }}
           >
             <Lock size={15} />
-            <span>Governance & Trust</span>
+            <span>{strings.policies.badge}</span>
           </div>
 
           <h2
@@ -45,7 +48,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
               letterSpacing: '-0.02em'
             }}
           >
-            Our Policies
+            {strings.policies.sectionTitle}
           </h2>
 
           <p
@@ -57,7 +60,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
               lineHeight: 1.6
             }}
           >
-            Axe's Era Enterprise operates with uncompromised integrity. Explore our official legal disclosures, data protection frameworks, and client engagement covenants.
+            {strings.policies.sectionSubtitle}
           </p>
         </div>
 
@@ -133,7 +136,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                   marginBottom: '0.75rem'
                 }}
               >
-                Legal Notice
+                {strings.policies.legalNoticeTitle}
               </h3>
 
               <p
@@ -144,7 +147,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                   marginBottom: '1.5rem'
                 }}
               >
-                Official enterprise registry, ownership by founder Gauhar Axe (Gauhar Nadeem), professional licensing, intellectual property safeguards, and digital liability disclaimers.
+                {strings.policies.legalNoticeDesc}
               </p>
 
               <div
@@ -183,7 +186,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                 fontWeight: 700
               }}
             >
-              Read Legal Notice <ArrowRight size={16} />
+              {strings.policies.readNotice} <ArrowRight size={16} />
             </button>
           </div>
 
@@ -251,7 +254,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                   marginBottom: '0.75rem'
                 }}
               >
-                Privacy Policy
+                {strings.policies.privacyPolicyTitle}
               </h3>
 
               <p
@@ -262,7 +265,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                   marginBottom: '1.5rem'
                 }}
               >
-                Our commitment to zero data monetization. Transparent collection of client consultation notes, secure sub-processors (AWS, Cloudflare, Stripe), and full global GDPR/CCPA user rights.
+                {strings.policies.privacyPolicyDesc}
               </p>
 
               <div
@@ -301,7 +304,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                 fontWeight: 700
               }}
             >
-              Read Privacy Policy <ArrowRight size={16} />
+              {strings.policies.readPrivacy} <ArrowRight size={16} />
             </button>
           </div>
 
@@ -369,7 +372,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                   marginBottom: '0.75rem'
                 }}
               >
-                Terms of Service
+                {strings.policies.termsOfServiceTitle}
               </h3>
 
               <p
@@ -380,7 +383,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                   marginBottom: '1.5rem'
                 }}
               >
-                Clear terms governing custom web development, mobile applications, milestone deliverables, proprietary source code ownership transfer upon payment, and 30-day post-launch warranty.
+                {strings.policies.termsOfServiceDesc}
               </p>
 
               <div
@@ -419,7 +422,7 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
                 fontWeight: 700
               }}
             >
-              Read Terms of Service <ArrowRight size={16} />
+              {strings.policies.readTerms} <ArrowRight size={16} />
             </button>
           </div>
         </div>

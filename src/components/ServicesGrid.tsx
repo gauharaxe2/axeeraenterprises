@@ -10,6 +10,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { ServiceItem } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ServicesGridProps {
   services: ServiceItem[];
@@ -24,6 +25,8 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
   onContactClick,
   onOpenServicesPage
 }) => {
+  const { strings } = useLanguage();
+
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'Laptop':
@@ -49,8 +52,8 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
     <section id="services" className="services">
       <div className="container">
         <div className="section-header">
-          <h2>Our Services</h2>
-          <p>Comprehensive digital solutions tailored to your business needs</p>
+          <h2>{strings.services.sectionTitle}</h2>
+          <p>{strings.services.sectionSubtitle}</p>
         </div>
 
         <div className="services-grid">
@@ -70,7 +73,7 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
                     }
                   }}
                 >
-                  Learn More <ArrowRight size={16} />
+                  {strings.services.learnMore} <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -94,7 +97,7 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
                 cursor: 'pointer'
               }}
             >
-              Explore Complete Services & Engineering Deliverables ({services.length} Core Pillars) <ArrowRight size={18} />
+              {strings.services.exploreAll} <ArrowRight size={18} />
             </button>
           </div>
         )}

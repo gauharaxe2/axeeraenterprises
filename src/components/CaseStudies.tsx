@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Project } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CaseStudiesProps {
   projects: Project[];
@@ -8,6 +9,7 @@ interface CaseStudiesProps {
 }
 
 export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsitesPage }) => {
+  const { strings } = useLanguage();
   const [activeFilter, setActiveFilter] = useState<'all' | 'ecommerce' | 'saas' | 'web'>('all');
 
   const filteredProjects = projects.filter((item) => {
@@ -19,10 +21,8 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
     <section id="websites" className="portfolio">
       <div className="container">
         <div className="section-header">
-          <h2>Featured Case Studies</h2>
-          <p>
-            Explore our proven track record of delivering scalable digital products with measurable ROI.
-          </p>
+          <h2>{strings.caseStudies.sectionTitle}</h2>
+          <p>{strings.caseStudies.sectionSubtitle}</p>
         </div>
 
         <div className="portfolio-filter">
@@ -30,25 +30,25 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
             className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
             onClick={() => setActiveFilter('all')}
           >
-            All Projects ({projects.length})
+            {strings.caseStudies.filterAll} ({projects.length})
           </button>
           <button
             className={`filter-btn ${activeFilter === 'ecommerce' ? 'active' : ''}`}
             onClick={() => setActiveFilter('ecommerce')}
           >
-            E-Commerce
+            {strings.caseStudies.filterEcommerce}
           </button>
           <button
             className={`filter-btn ${activeFilter === 'saas' ? 'active' : ''}`}
             onClick={() => setActiveFilter('saas')}
           >
-            SaaS & Analytics
+            {strings.caseStudies.filterSaas}
           </button>
           <button
             className={`filter-btn ${activeFilter === 'web' ? 'active' : ''}`}
             onClick={() => setActiveFilter('web')}
           >
-            Marketplaces
+            {strings.caseStudies.filterMarketplaces}
           </button>
         </div>
 
@@ -67,7 +67,7 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
                     rel="noopener noreferrer"
                     className="portfolio-link"
                   >
-                    View Live Site <ExternalLink size={16} />
+                    {strings.caseStudies.viewLiveSite} <ExternalLink size={16} />
                   </a>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
                 padding: '0.75rem 1.75rem'
               }}
             >
-              Explore Complete Case Studies & Live Deployments (Websites Page) →
+              {strings.caseStudies.exploreAll}
             </button>
           </div>
         )}

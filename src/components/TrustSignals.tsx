@@ -1,11 +1,15 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 export const TrustSignals: React.FC = () => {
+  const { strings } = useLanguage();
+
   return (
     <div
+      className="trust-signals-bar"
       style={{
         background: 'rgba(15, 23, 42, 0.95)',
-        padding: '3rem 0',
+        padding: '2.5rem 0',
         borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
         textAlign: 'center'
@@ -15,14 +19,14 @@ export const TrustSignals: React.FC = () => {
         <p
           style={{
             color: 'var(--text-light)',
-            fontSize: '0.9rem',
+            fontSize: '0.85rem',
             textTransform: 'uppercase',
-            letterSpacing: '2px',
-            marginBottom: '1.5rem',
+            letterSpacing: '1.5px',
+            marginBottom: '1.25rem',
             fontWeight: 600
           }}
         >
-          Trusted by global organizations and technology partners
+          {strings.trustSignals.title}
         </p>
         <div
           style={{
@@ -31,7 +35,7 @@ export const TrustSignals: React.FC = () => {
             alignItems: 'center',
             gap: '3.5rem',
             flexWrap: 'wrap',
-            opacity: 0.85
+            opacity: 0.88
           }}
         >
           {/* Brand badges */}

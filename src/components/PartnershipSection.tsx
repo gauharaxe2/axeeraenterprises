@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Handshake, Network, Globe, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { PartnershipItem, PartnerLogo } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PartnershipSectionProps {
   partnerships: PartnershipItem[];
@@ -12,13 +13,15 @@ interface PartnershipSectionProps {
 export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
   partnerships,
   partnerLogos = [],
-  notice = "We are currently expanding our strategic partner network. Check back soon for new enterprise announcements!",
+  notice,
   onOpenPartnershipPage
 }) => {
+  const { strings } = useLanguage();
+  const displayNotice = notice || strings.partnerships.notice;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // How many logos visible per slide based on screen width
+  // Show 4 items per view
   const itemsPerView = 4;
   const maxIndex = Math.max(0, partnerLogos.length - itemsPerView);
 
@@ -28,7 +31,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, 3200);
+    }, 3400);
 
     return () => clearInterval(timer);
   }, [isPaused, partnerLogos.length, maxIndex]);
@@ -58,8 +61,8 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
     <section id="partnership" className="partnership">
       <div className="container">
         <div className="section-header">
-          <h2>Our Partnerships</h2>
-          <p>Collaborating with industry leaders to deliver exceptional results.</p>
+          <h2>{strings.partnerships.sectionTitle}</h2>
+          <p>{strings.partnerships.sectionSubtitle}</p>
         </div>
 
         {/* 3 Strategic Pillars */}
@@ -100,10 +103,10 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                   marginBottom: '0.4rem'
                 }}
               >
-                Official Technology Ecosystem
+                {strings.partnerships.ecosystemBadge}
               </span>
               <h3 style={{ color: '#fff', fontSize: '1.6rem', margin: 0 }}>
-                Enterprise & Solution Partners
+                {strings.partnerships.partnersHeading}
               </h3>
             </div>
 
@@ -114,7 +117,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                   display: 'flex',
                   gap: '1.5rem',
                   transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                  transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+                  transition: 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)'
                 }}
               >
                 {partnerLogos.map((logo) => (
@@ -122,7 +125,8 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                     key={logo.id}
                     style={{
                       flex: `0 0 calc(${100 / itemsPerView}% - 1.15rem)`,
-                      minWidth: '220px',
+                      minWidth: '180px',
+                      boxSizing: 'border-box',
                       background: 'rgba(30, 41, 59, 0.7)',
                       border: '1px solid rgba(255, 255, 255, 0.08)',
                       borderRadius: '12px',
@@ -309,7 +313,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
 
         <div style={{ textAlign: 'center', padding: '1rem 0' }}>
           <p style={{ fontSize: '1.15rem', color: 'var(--primary-color)', fontWeight: 500 }}>
-            {notice}
+            {displayNotice}
           </p>
         </div>
 
@@ -327,7 +331,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                 padding: '0.75rem 1.75rem'
               }}
             >
-              Explore Enterprise Alliances & Partner Program (Partnership Page) →
+              {strings.partnerships.cta}
             </button>
           </div>
         )}

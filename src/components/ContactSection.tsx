@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import { ContactFormData, ServiceItem } from '../types';
 import { saveSubmissionToFirestore } from '../utils/firebase';
 import { WhatsAppIcon } from './WhatsAppIcon';
+import { useLanguage } from '../context/LanguageContext';
 
 const WHATSAPP_URL = 'https://wa.me/923157338694';
 
@@ -24,10 +25,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   address = "D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan",
   phone = "+92-315-7338694 / +92-339-0096853",
   email = "gauharaxe@outlook.com",
-  urgentNotice = "NOTE: If you don't get our response back via e-mail sooner, tap the WhatsApp button for an immediate live response!",
+  urgentNotice,
   servicesList = [],
   onShowNotification
 }) => {
+  const { strings } = useLanguage();
+  const displayUrgentNotice = urgentNotice || strings.contact.urgentNotice;
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -115,21 +118,19 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     <section id="contact" className="contact">
       <div className="container">
         <div className="section-header">
-          <h2>Let's Build Something Extraordinary Together</h2>
-          <p>
-            Ready to transform your digital presence? Book a strategic consultation with our experts.
-          </p>
+          <h2>{strings.contact.sectionTitle}</h2>
+          <p>{strings.contact.sectionSubtitle}</p>
         </div>
 
         <div className="contact-content">
           <div className="contact-info">
-            <h3>Get In Touch</h3>
+            <h3>{strings.contact.getInTouch}</h3>
             <p style={{ color: 'var(--text-light)', lineHeight: 1.7, marginBottom: '1.25rem' }}>
-              Partner with Axe's Era Enterprise to architect your next digital success story. We are ready to listen, strategize, and execute with technical precision.
+              {strings.contact.description}
             </p>
 
             <div className="urgent-note">
-              {urgentNotice}
+              {displayUrgentNotice}
             </div>
 
             <div className="contact-details">
@@ -138,7 +139,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <MapPin size={22} />
                 </div>
                 <div className="contact-text">
-                  <h4>Address</h4>
+                  <h4>{strings.contact.addressLabel}</h4>
                   <p>{address}</p>
                 </div>
               </div>
@@ -148,7 +149,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <Phone size={22} />
                 </div>
                 <div className="contact-text">
-                  <h4>Phone</h4>
+                  <h4>{strings.contact.phoneLabel}</h4>
                   <p>{phone}</p>
                 </div>
               </div>
@@ -158,7 +159,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <Mail size={22} />
                 </div>
                 <div className="contact-text">
-                  <h4>Email</h4>
+                  <h4>{strings.contact.emailLabel}</h4>
                   <p>{email}</p>
                 </div>
               </div>
@@ -184,7 +185,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   type="text"
                   id="name"
                   name="name"
-                  placeholder="Your Name *"
+                  placeholder={strings.contact.namePlaceholder}
                   value={formData.name}
                   onChange={handleChange}
                   required
@@ -196,7 +197,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   type="email"
                   id="email"
                   name="email"
-                  placeholder="Your Email *"
+                  placeholder={strings.contact.emailPlaceholder}
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -208,7 +209,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   type="text"
                   id="company"
                   name="company"
-                  placeholder="Company Name"
+                  placeholder={strings.contact.companyPlaceholder}
                   value={formData.company}
                   onChange={handleChange}
                 />
@@ -221,7 +222,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   value={formData.service}
                   onChange={handleChange}
                 >
-                  <option value="">Select Service (Optional)</option>
+                  <option value="">{strings.contact.servicePlaceholder}</option>
                   {servicesList.length > 0 ? (
                     servicesList.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -246,7 +247,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <textarea
                   id="message"
                   name="message"
-                  placeholder="Tell us about your project, goals, and timeline *"
+                  placeholder={strings.contact.messagePlaceholder}
                   rows={5}
                   value={formData.message}
                   onChange={handleChange}
@@ -311,10 +312,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 style={{ width: '100%', opacity: isSubmitting ? 0.7 : 1 }}
               >
                 {isSubmitting ? (
-                  'Sending Inquiry...'
+                  strings.contact.sendingButton
                 ) : (
                   <>
-                    <Send size={18} /> Send Message
+                    <Send size={18} /> {strings.contact.sendButton}
                   </>
                 )}
               </button>

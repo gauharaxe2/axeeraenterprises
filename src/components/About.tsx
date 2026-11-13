@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AboutProps {
   title?: string;
@@ -15,9 +16,9 @@ interface AboutProps {
 }
 
 export const About: React.FC<AboutProps> = ({
-  title = "Your Digital Transformation Partner",
-  paragraph1 = "Founded by Gauhar Axe, Axe's Era Enterprise has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results.",
-  paragraph2 = "We believe in building long-term partnerships with our clients, understanding their unique challenges, and crafting tailored solutions that drive real business impact.",
+  title,
+  paragraph1,
+  paragraph2,
   imageUrl = "https://i.postimg.cc/64KnkhQJ/Picsart-26-08-08-06-41-12-297.jpg",
   stats = {
     years: 3,
@@ -27,6 +28,10 @@ export const About: React.FC<AboutProps> = ({
   },
   onOpenAboutPage
 }) => {
+  const { strings } = useLanguage();
+  const displayTitle = title || strings.about.heading;
+  const displayParagraph1 = paragraph1 || strings.about.paragraph1;
+  const displayParagraph2 = paragraph2 || strings.about.paragraph2;
   const [counts, setCounts] = useState({
     years: 0,
     experts: 0,
@@ -51,34 +56,32 @@ export const About: React.FC<AboutProps> = ({
     <section id="about" className="about">
       <div className="container">
         <div className="section-header">
-          <h2>About Our Agency</h2>
-          <p>
-            We're passionate about creating digital solutions that help businesses thrive in the modern world.
-          </p>
+          <h2>{strings.about.sectionTitle}</h2>
+          <p>{strings.about.sectionSubtitle}</p>
         </div>
 
         <div className="about-content">
           <div className="about-text">
-            <h3>{title}</h3>
-            <p>{paragraph1}</p>
-            <p>{paragraph2}</p>
+            <h3>{displayTitle}</h3>
+            <p>{displayParagraph1}</p>
+            <p>{displayParagraph2}</p>
 
             <div className="about-stats">
               <div className="stat-item">
                 <h4>{counts.years}</h4>
-                <p>Years of Experience</p>
+                <p>{strings.about.yearsLabel}</p>
               </div>
               <div className="stat-item">
                 <h4>{counts.experts}</h4>
-                <p>Digital Experts</p>
+                <p>{strings.about.expertsLabel}</p>
               </div>
               <div className="stat-item">
                 <h4>{counts.projects}+</h4>
-                <p>Projects Delivered</p>
+                <p>{strings.about.projectsLabel}</p>
               </div>
               <div className="stat-item">
                 <h4>{counts.retention}%</h4>
-                <p>Client Retention</p>
+                <p>{strings.about.retentionLabel}</p>
               </div>
             </div>
 
@@ -96,7 +99,7 @@ export const About: React.FC<AboutProps> = ({
                     padding: '0.65rem 1.4rem'
                   }}
                 >
-                  Explore Full Story, Vision & Milestones (About Page) →
+                  {strings.about.cta}
                 </button>
               </div>
             )}

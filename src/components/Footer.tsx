@@ -17,6 +17,7 @@ import {
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { PageView, PolicyType } from '../types';
 import { subscribeToNewsletter } from '../utils/firebase';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FooterProps {
   onNavigateSection: (sectionId: string) => void;
@@ -35,6 +36,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenServicesPage,
   onOpenPage
 }) => {
+  const { strings } = useLanguage();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [feedback, setFeedback] = useState('');
@@ -44,7 +46,7 @@ export const Footer: React.FC<FooterProps> = ({
     const cleanEmail = email.trim();
     if (!cleanEmail) {
       setStatus('error');
-      setFeedback('Please enter your email address.');
+      setFeedback(strings.footer.newsletterEmailRequired);
       return;
     }
 
@@ -55,15 +57,15 @@ export const Footer: React.FC<FooterProps> = ({
       const result = await subscribeToNewsletter({ email: cleanEmail, source: 'footer_form' });
       if (result.success) {
         setStatus('success');
-        setFeedback("You're subscribed! Welcome to Axe's Era insights.");
+        setFeedback(strings.footer.newsletterSuccess);
         setEmail('');
       } else {
         setStatus('error');
-        setFeedback(result.error || 'Failed to subscribe. Please try again.');
+        setFeedback(result.error || strings.footer.newsletterError);
       }
     } catch {
       setStatus('error');
-      setFeedback('Unable to subscribe at this moment. Please try again.');
+      setFeedback(strings.footer.newsletterError);
     }
   };
 
@@ -74,38 +76,42 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="footer-section">
             <div className="footer-brand">
               <h2>
-                Axe's Era <span>Enterprise</span>
+                {strings.brand.name.includes("Axe's Era") ? (
+                  <>Axe's Era <span>Enterprise</span></>
+                ) : (
+                  <span>{strings.brand.name}</span>
+                )}
               </h2>
               <p style={{ color: 'rgba(255, 255, 255, 0.75)', lineHeight: 1.6 }}>
-                Transforming businesses through innovative digital architecture, conversion-engineered design, and high-performance applications.
+                {strings.footer.brandDesc}
               </p>
               <p style={{ color: 'var(--primary-color)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                Founded by Gauhar Axe (Gauhar Nadeem)
+                {strings.footer.founderInfo}
               </p>
             </div>
           </div>
 
           <div className="footer-section">
-            <h3>Services</h3>
+            <h3>{strings.footer.servicesHeading}</h3>
             <ul>
               <li>
                 <button onClick={() => onOpenService('web-development')}>
-                  Web Development
+                  {strings.services.items['web-development']?.title || 'Web Development'}
                 </button>
               </li>
               <li>
                 <button onClick={() => onOpenService('brand-design')}>
-                  Brand Design
+                  {strings.services.items['brand-design']?.title || 'Brand Design'}
                 </button>
               </li>
               <li>
                 <button onClick={() => onOpenService('digital-marketing')}>
-                  Digital Marketing
+                  {strings.services.items['digital-marketing']?.title || 'Digital Marketing'}
                 </button>
               </li>
               <li>
                 <button onClick={() => onOpenService('mobile-apps')}>
-                  Mobile Apps
+                  {strings.services.items['mobile-apps']?.title || 'Mobile Apps'}
                 </button>
               </li>
               {onOpenServicesPage && (
@@ -114,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({
                     onClick={onOpenServicesPage}
                     style={{ color: 'var(--primary-color)', fontWeight: 700 }}
                   >
-                    All Enterprise Services (7) →
+                    {strings.footer.allServicesCta}
                   </button>
                 </li>
               )}
@@ -122,7 +128,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           <div className="footer-section">
-            <h3>Company</h3>
+            <h3>{strings.footer.companyHeading}</h3>
             <ul>
               {(
                 [
@@ -135,21 +141,24 @@ export const Footer: React.FC<FooterProps> = ({
                   ['Location', '/location', 'location'],
                   ['FAQ', '/faq', 'faq']
                 ] as const
-              ).map(([label, href, page]) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    onClick={(event) => {
-                      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-                      event.preventDefault();
-                      if (onOpenPage) onOpenPage(page);
-                      else onNavigateSection(page);
-                    }}
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
+              ).map(([label, href, page]) => {
+                const navLabel = (strings.nav as Record<string, string>)[page] || label;
+                return (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      onClick={(event) => {
+                        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                        event.preventDefault();
+                        if (onOpenPage) onOpenPage(page);
+                        else onNavigateSection(page);
+                      }}
+                    >
+                      {navLabel}
+                    </a>
+                  </li>
+                );
+              })}
               <li>
                 <a
                   href="/#blog-hub"
@@ -159,7 +168,7 @@ export const Footer: React.FC<FooterProps> = ({
                     onOpenBlogs();
                   }}
                 >
-                  Blogs Hub
+                  {strings.nav.blogs || 'Blogs Hub'}
                 </a>
               </li>
             </ul>
@@ -167,7 +176,7 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Block's heading: Our Policies */}
           <div className="footer-section">
-            <h3>Our Policies</h3>
+            <h3>{strings.footer.policiesHeading}</h3>
             <ul>
               <li>
                 <button
@@ -178,7 +187,7 @@ export const Footer: React.FC<FooterProps> = ({
                     gap: '6px'
                   }}
                 >
-                  <Scale size={14} style={{ color: 'var(--primary-color)' }} /> Legal Notice
+                  <Scale size={14} style={{ color: 'var(--primary-color)' }} /> {strings.policies.legalNoticeTitle}
                 </button>
               </li>
               <li>
@@ -190,7 +199,7 @@ export const Footer: React.FC<FooterProps> = ({
                     gap: '6px'
                   }}
                 >
-                  <Shield size={14} style={{ color: 'var(--primary-color)' }} /> Privacy Policy
+                  <Shield size={14} style={{ color: 'var(--primary-color)' }} /> {strings.policies.privacyPolicyTitle}
                 </button>
               </li>
               <li>
@@ -202,14 +211,14 @@ export const Footer: React.FC<FooterProps> = ({
                     gap: '6px'
                   }}
                 >
-                  <FileText size={14} style={{ color: 'var(--primary-color)' }} /> Terms of Service
+                  <FileText size={14} style={{ color: 'var(--primary-color)' }} /> {strings.policies.termsOfServiceTitle}
                 </button>
               </li>
             </ul>
           </div>
 
           <div className="footer-section">
-            <h3>Connect</h3>
+            <h3>{strings.footer.connectHeading}</h3>
             <div className="social-links">
               <a
                 href="https://www.facebook.com/gauharaxe"
@@ -313,7 +322,7 @@ export const Footer: React.FC<FooterProps> = ({
                     letterSpacing: '-0.01em'
                   }}
                 >
-                  Stay Ahead with Axe's Era Insights
+                  {strings.footer.newsletterHeading}
                 </h3>
               </div>
               <p
@@ -324,7 +333,7 @@ export const Footer: React.FC<FooterProps> = ({
                   lineHeight: 1.5
                 }}
               >
-                Join forward-thinking executives receiving our monthly blueprints on conversion architecture and digital engineering. Zero spam.
+                {strings.footer.newsletterDesc}
               </p>
             </div>
 
@@ -369,7 +378,7 @@ export const Footer: React.FC<FooterProps> = ({
                       setEmail(e.target.value);
                       if (status !== 'idle') setStatus('idle');
                     }}
-                    placeholder="Enter your corporate email..."
+                    placeholder={strings.footer.newsletterPlaceholder}
                     aria-label="Corporate email address for newsletter subscription"
                     disabled={status === 'loading'}
                     style={{
@@ -423,11 +432,11 @@ export const Footer: React.FC<FooterProps> = ({
                 >
                   {status === 'loading' ? (
                     <>
-                      <Loader2 size={16} className="animate-spin" /> Subscribing...
+                      <Loader2 size={16} className="animate-spin" /> {strings.footer.newsletterSubscribing}
                     </>
                   ) : (
                     <>
-                      Subscribe <ArrowRight size={16} />
+                      {strings.footer.newsletterButton} <ArrowRight size={16} />
                     </>
                   )}
                 </button>
@@ -482,7 +491,7 @@ export const Footer: React.FC<FooterProps> = ({
             }}
           >
             <p style={{ margin: 0 }}>
-              &copy; 2024–2026 Axe's Era Enterprise by Gauhar Axe. All rights reserved.
+              {strings.footer.copyright}
             </p>
             <div
               style={{
@@ -503,7 +512,7 @@ export const Footer: React.FC<FooterProps> = ({
                   padding: 0
                 }}
               >
-                Legal Notice
+                {strings.policies.legalNoticeTitle}
               </button>
               <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>•</span>
               <button
@@ -516,7 +525,7 @@ export const Footer: React.FC<FooterProps> = ({
                   padding: 0
                 }}
               >
-                Privacy Policy
+                {strings.policies.privacyPolicyTitle}
               </button>
               <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>•</span>
               <button
@@ -529,7 +538,7 @@ export const Footer: React.FC<FooterProps> = ({
                   padding: 0
                 }}
               >
-                Terms of Service
+                {strings.policies.termsOfServiceTitle}
               </button>
             </div>
           </div>

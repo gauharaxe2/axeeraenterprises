@@ -952,7 +952,7 @@
 
 @media (max-width: 640px) {
   .editorial-hero {
-    padding: 2.4rem 0 2rem;
+    padding: 2.2rem 0 1.6rem;
   }
 
   .editorial-section,
@@ -964,12 +964,20 @@
   .editorial-wrap,
   .editorial-topbar-inner,
   .editorial-hero-inner {
-    width: min(1200px, calc(100% - 1.5rem));
+    width: min(1200px, calc(100% - 1.25rem));
   }
 
   .editorial-crumbs {
     width: 100%;
     order: 3;
+  }
+
+  .editorial-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .editorial-grid {
+    gap: 1.25rem;
   }
 }
 

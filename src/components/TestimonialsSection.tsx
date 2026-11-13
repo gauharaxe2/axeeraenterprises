@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import { Testimonial } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TestimonialsSectionProps {
   testimonials: Testimonial[];
@@ -11,12 +12,14 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   testimonials,
   onOpenTestimonialsPage
 }) => {
+  const { strings } = useLanguage();
+
   return (
     <section id="testimonials" className="testimonials">
       <div className="container">
         <div className="section-header">
-          <h2>Client Success Stories</h2>
-          <p>Hear directly from the visionaries and organizations we've partnered with.</p>
+          <h2>{strings.testimonials.sectionTitle}</h2>
+          <p>{strings.testimonials.sectionSubtitle}</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
@@ -58,7 +61,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                 padding: '0.75rem 1.75rem'
               }}
             >
-              Explore All Verified Client Reviews & Ratings (Testimonials Page) →
+              {strings.testimonials.cta}
             </button>
           </div>
         )}

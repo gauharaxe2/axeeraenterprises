@@ -1,6 +1,7 @@
 import React from 'react';
 import { Linkedin, Twitter, Youtube, Facebook, Instagram, Github } from 'lucide-react';
 import { TeamMemberData } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TeamSectionProps {
   team: TeamMemberData[];
@@ -8,18 +9,15 @@ interface TeamSectionProps {
 }
 
 export const TeamSection: React.FC<TeamSectionProps> = ({ team, onOpenTeamPage }) => {
+  const { strings } = useLanguage();
   const isSingle = team.length <= 1;
 
   return (
     <section id="team" className="team">
       <div className="container">
         <div className="section-header">
-          <h2>{isSingle ? 'Meet Our Founder' : 'Meet Our Team'}</h2>
-          <p>
-            {isSingle
-              ? 'Visionary leadership driving digital excellence'
-              : 'Our world-class team of designers, engineers, and digital strategists'}
-          </p>
+          <h2>{strings.team.sectionTitle}</h2>
+          <p>{strings.team.sectionSubtitle}</p>
         </div>
 
         <div
@@ -162,7 +160,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team, onOpenTeamPage }
                 padding: '0.75rem 1.75rem'
               }}
             >
-              Meet Founder & Engineering Leadership (Team Page) →
+              {strings.team.cta}
             </button>
           </div>
         )}
