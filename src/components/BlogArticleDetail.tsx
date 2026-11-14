@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Calendar,
@@ -20,6 +20,7 @@ import {
 import { BlogPost } from '../types';
 import { SITE_LOGO_SRC } from '../brand';
 import { WhatsAppIcon } from './WhatsAppIcon';
+import { calculateReadingProgress, estimateReadingTime } from '../utils/blogUtils';
 
 interface BlogArticleDetailProps {
   blog: BlogPost;
@@ -35,9 +36,65 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const articleContentRef = useRef<HTMLElement | null>(null);
+
+  const readingStats = useMemo(() => estimateReadingTime(blog), [blog]);
+
+  const updateReadingProgress = useCallback(() => {
+    const contentEl = articleContentRef.current;
+    if (!contentEl) {
+      setReadingProgress(0);
+      return;
+    }
+
+    const rect = contentEl.getBoundingClientRect();
+    const nextProgress = calculateReadingProgress({
+      scrollY: window.scrollY,
+      articleTop: rect.top + window.scrollY,
+      articleHeight: rect.height,
+      viewportHeight: window.innerHeight,
+      documentHeight: document.documentElement.scrollHeight
+    });
+    setReadingProgress(nextProgress);
+  }, []);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+    updateReadingProgress();
+
+    let rafId: number | null = null;
+    const handleScrollOrResize = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        updateReadingProgress();
+      });
+    };
+
+    window.addEventListener('scroll', handleScrollOrResize, { passive: true });
+    window.addEventListener('resize', handleScrollOrResize, { passive: true });
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && articleContentRef.current) {
+      resizeObserver = new ResizeObserver(handleScrollOrResize);
+      resizeObserver.observe(articleContentRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize);
+      window.removeEventListener('resize', handleScrollOrResize);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [blog.id, blog.slug, updateReadingProgress]);
 
   // Combine primary cover image, section images, and additional gallery images without duplicates
-  const allImages = React.useMemo(() => {
+  const allImages = useMemo(() => {
     const list: string[] = [];
     if (blog.imageUrl && !list.includes(blog.imageUrl)) list.push(blog.imageUrl);
     if (blog.sections && Array.isArray(blog.sections)) {
@@ -76,6 +133,23 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
 
   return (
     <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-primary, #0b1120)', color: '#f8fafc' }}>
+      {/* Fixed Top Reading Progress Bar */}
+      <div
+        className="reading-progress-track"
+        role="progressbar"
+        aria-label="Article reading progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(readingProgress)}
+        data-testid="reading-progress-bar"
+        data-progress={Math.round(readingProgress)}
+      >
+        <div
+          className="reading-progress-fill"
+          style={{ transform: `scaleX(${readingProgress / 100})` }}
+        />
+      </div>
+
       {/* Article Header Hero */}
       <section
         style={{
@@ -175,9 +249,18 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               {blog.date || '2026 Insights'}
             </span>
             <span>•</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={15} color="var(--primary-color, #d4af37)" />
-              {blog.readTime || '5 min read'}
+            <span
+              data-testid="time-to-read"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontVariantNumeric: 'tabular-nums',
+                color: '#cbd5e1'
+              }}
+            >
+              <Clock size={15} color="var(--primary-color, #d4af37)" aria-hidden="true" />
+              Time to Read: {readingStats.minutes} min ({readingStats.wordCount.toLocaleString()} words)
             </span>
             {allImages.length > 1 && (
               <>
@@ -247,7 +330,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
       </section>
 
       {/* Main Article Content */}
-      <section style={{ padding: '60px 20px 100px' }}>
+      <section ref={articleContentRef} style={{ padding: '60px 20px 100px' }}>
         <div className="container" style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div
             style={{

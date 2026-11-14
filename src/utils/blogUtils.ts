@@ -68,3 +68,94 @@ export function collectArticleImages(
 
   return list;
 }
+
+export const DEFAULT_WORDS_PER_MINUTE = 200;
+
+export interface ReadingStats {
+  wordCount: number;
+  minutes: number;
+}
+
+export interface ReadingProgressMetrics {
+  scrollY: number;
+  articleTop: number;
+  articleHeight: number;
+  viewportHeight: number;
+  documentHeight?: number;
+}
+
+/**
+ * Counts whitespace-delimited words in a string.
+ */
+export function countWords(text?: string | null): number {
+  if (!text) return 0;
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).filter(Boolean).length;
+}
+
+/**
+ * Computes total readable word count across an article's title, summary,
+ * and structured sections (or legacy paragraphs when sections are absent).
+ */
+export function getArticleWordCount(
+  blog: Pick<BlogPost, 'title' | 'summary' | 'paragraphs' | 'sections'>
+): number {
+  let total = countWords(blog.title) + countWords(blog.summary);
+
+  if (blog.sections && blog.sections.length > 0) {
+    blog.sections.forEach((section) => {
+      total += countWords(section.heading);
+      section.paragraphs.forEach((para) => {
+        total += countWords(para);
+      });
+    });
+  } else if (blog.paragraphs && blog.paragraphs.length > 0) {
+    blog.paragraphs.forEach((para) => {
+      total += countWords(para);
+    });
+  }
+
+  return total;
+}
+
+/**
+ * Estimates reading time in whole minutes (minimum 1 min) from article word count.
+ */
+export function estimateReadingTime(
+  blog: Pick<BlogPost, 'title' | 'summary' | 'paragraphs' | 'sections'>,
+  wordsPerMinute = DEFAULT_WORDS_PER_MINUTE
+): ReadingStats {
+  const safeWpm = wordsPerMinute > 0 ? wordsPerMinute : DEFAULT_WORDS_PER_MINUTE;
+  const wordCount = getArticleWordCount(blog);
+  const minutes = wordCount === 0 ? 1 : Math.max(1, Math.ceil(wordCount / safeWpm));
+  return { wordCount, minutes };
+}
+
+/**
+ * Calculates article reading progress as a clamped percentage [0, 100].
+ */
+export function calculateReadingProgress({
+  scrollY,
+  articleTop,
+  articleHeight,
+  viewportHeight,
+  documentHeight
+}: ReadingProgressMetrics): number {
+  if (scrollY <= 0) return 0;
+
+  const articleBottom = articleTop + Math.max(0, articleHeight);
+  const scrollableDistance = articleBottom - viewportHeight;
+
+  if (scrollableDistance <= 0) {
+    if (typeof documentHeight === 'number' && documentHeight > viewportHeight) {
+      const docScrollable = documentHeight - viewportHeight;
+      const pct = (scrollY / docScrollable) * 100;
+      return Math.min(100, Math.max(0, Math.round(pct * 10) / 10));
+    }
+    return 100;
+  }
+
+  const raw = (scrollY / scrollableDistance) * 100;
+  return Math.min(100, Math.max(0, Math.round(raw * 10) / 10));
+}

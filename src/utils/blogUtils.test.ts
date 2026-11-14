@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeBlogSections, aggregateParagraphs, collectArticleImages } from './blogUtils';
+import {
+  normalizeBlogSections,
+  aggregateParagraphs,
+  collectArticleImages,
+  countWords,
+  getArticleWordCount,
+  estimateReadingTime,
+  calculateReadingProgress
+} from './blogUtils';
 import { BlogPost, BlogSection } from '../types';
 
 test('normalizeBlogSections preserves existing structured sections', () => {
@@ -101,4 +109,122 @@ test('collectArticleImages collects unique cover, section, and gallery images wi
     'https://example.com/image-2.jpg',
     'https://example.com/gallery.jpg'
   ]);
+});
+
+test('countWords handles empty strings, punctuation, and irregular whitespace', () => {
+  assert.equal(countWords(''), 0);
+  assert.equal(countWords('   \n\t  '), 0);
+  assert.equal(countWords('Hello   world\nfrom   Axe'), 4);
+});
+
+test('getArticleWordCount prefers structured sections when present and falls back to paragraphs', () => {
+  const structuredPost: BlogPost = {
+    id: 'p1',
+    title: 'Two Words',
+    slug: 'p1',
+    imageUrl: '',
+    summary: 'Three summary words',
+    paragraphs: ['Ignored legacy paragraph with many extra words'],
+    sections: [
+      {
+        id: 's1',
+        heading: 'Section Heading',
+        paragraphs: ['One two three four']
+      }
+    ]
+  };
+  assert.equal(getArticleWordCount(structuredPost), 2 + 3 + 2 + 4);
+
+  const legacyPost: BlogPost = {
+    id: 'p2',
+    title: 'One',
+    slug: 'p2',
+    imageUrl: '',
+    summary: 'Two three',
+    paragraphs: ['Four five six']
+  };
+  assert.equal(getArticleWordCount(legacyPost), 6);
+});
+
+test('estimateReadingTime rounds up to whole minutes with a 1-minute floor', () => {
+  const shortPost: BlogPost = {
+    id: 'short',
+    title: 'Short Post',
+    slug: 'short',
+    imageUrl: '',
+    summary: 'Brief summary',
+    paragraphs: ['Only ten words in this entire very short article body.']
+  };
+  const shortStats = estimateReadingTime(shortPost, 200);
+  assert.equal(shortStats.wordCount, 14);
+  assert.equal(shortStats.minutes, 1);
+
+  const fourHundredFiftyWords = Array.from({ length: 450 }, (_, i) => `word${i}`).join(' ');
+  const longPost: BlogPost = {
+    id: 'long',
+    title: '',
+    slug: 'long',
+    imageUrl: '',
+    summary: '',
+    paragraphs: [fourHundredFiftyWords]
+  };
+  const longStats = estimateReadingTime(longPost, 200);
+  assert.equal(longStats.wordCount, 450);
+  assert.equal(longStats.minutes, 3);
+});
+
+test('calculateReadingProgress tracks scroll from 0 to 100 and clamps bounds', () => {
+  assert.equal(
+    calculateReadingProgress({
+      scrollY: 0,
+      articleTop: 400,
+      articleHeight: 2000,
+      viewportHeight: 900
+    }),
+    0
+  );
+
+  // articleBottom = 2400, scrollable = 2400 - 900 = 1500
+  assert.equal(
+    calculateReadingProgress({
+      scrollY: 750,
+      articleTop: 400,
+      articleHeight: 2000,
+      viewportHeight: 900
+    }),
+    50
+  );
+
+  assert.equal(
+    calculateReadingProgress({
+      scrollY: 1500,
+      articleTop: 400,
+      articleHeight: 2000,
+      viewportHeight: 900
+    }),
+    100
+  );
+
+  // Past article bottom into footer stays clamped at 100
+  assert.equal(
+    calculateReadingProgress({
+      scrollY: 2200,
+      articleTop: 400,
+      articleHeight: 2000,
+      viewportHeight: 900
+    }),
+    100
+  );
+
+  // Short article fitting in viewport uses document scroll fallback when available
+  assert.equal(
+    calculateReadingProgress({
+      scrollY: 150,
+      articleTop: 100,
+      articleHeight: 400,
+      viewportHeight: 900,
+      documentHeight: 1200
+    }),
+    50
+  );
 });

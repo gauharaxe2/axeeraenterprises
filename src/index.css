@@ -1710,4 +1710,42 @@ section {
   .site-preloader-bar span {
     width: 100%;
   }
+
+  .reading-progress-fill {
+    transition: none;
+  }
+}
+
+/* Blog Article Reading Progress Bar */
+.reading-progress-track {
+  position: fixed;
+  top: 74px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(15, 23, 42, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.reading-progress-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #b5952f 0%, #d4af37 55%, #f5d061 100%);
+  transform-origin: left center;
+  transition: transform 80ms linear;
+  will-change: transform;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.35);
+}
+
+[dir='rtl'] .reading-progress-fill {
+  transform-origin: right center;
+}
+
+@media (max-width: 480px) {
+  .reading-progress-track {
+    top: 68px;
+  }
 }
