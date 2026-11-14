@@ -1,7 +1,8 @@
 import React from 'react';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { BookOpen, ArrowRight, Images, Clock } from 'lucide-react';
 import { BlogPost } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { estimateReadingTime } from '../utils/blogUtils';
 
 interface HomeBlogsPreviewProps {
   blogs: BlogPost[];
@@ -25,79 +26,100 @@ export const HomeBlogsPreview: React.FC<HomeBlogsPreviewProps> = ({
           <p>{strings.blogs.sectionSubtitle}</p>
         </div>
 
-        <div className="services-grid" style={{ marginBottom: '2.5rem' }}>
-          {featured.map((blog) => (
-            <div
-              key={blog.id}
-              className="blog-card"
-              onClick={() => onOpenArticle(blog)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div style={{ position: 'relative' }}>
-                <img src={blog.imageUrl} alt={blog.title} />
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    background: 'rgba(11, 17, 32, 0.85)',
-                    border: '1px solid rgba(212, 175, 55, 0.3)',
-                    color: 'var(--primary-color, #d4af37)',
-                    padding: '3px 10px',
-                    borderRadius: '9999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}
-                >
-                  {blog.category || '🌐 Web Development'}
-                </span>
-                {blog.images && blog.images.length > 1 && (
+        <div className="services-grid">
+          {featured.map((blog) => {
+            const { minutes } = estimateReadingTime(blog);
+            const photoCount =
+              1 +
+              (blog.images ? blog.images.length : 0) +
+              (blog.sections ? blog.sections.filter((s) => s.imageUrl).length : 0);
+
+            return (
+              <div
+                key={blog.id}
+                className="blog-card"
+                style={{ cursor: 'pointer' }}
+                onClick={() => onOpenArticle(blog)}
+              >
+                <div style={{ position: 'relative' }}>
+                  <img src={blog.imageUrl} alt={blog.title} />
+                  {blog.category && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        left: '12px',
+                        background: 'rgba(15, 23, 42, 0.88)',
+                        color: 'var(--primary-color)',
+                        border: '1px solid rgba(212, 175, 55, 0.4)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        padding: '4px 10px',
+                        borderRadius: '9999px'
+                      }}
+                    >
+                      {blog.category}
+                    </span>
+                  )}
+                  {photoCount > 1 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: '10px',
+                        right: '10px',
+                        background: 'rgba(0, 0, 0, 0.72)',
+                        color: '#fff',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Images size={12} /> {photoCount} {strings.blogs.photosLabel}
+                    </span>
+                  )}
+                </div>
+
+                <div className="blog-content">
                   <span
-                    style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      background: 'rgba(15, 23, 42, 0.85)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: '#ffffff',
-                      padding: '3px 8px',
-                      borderRadius: '9999px',
-                      fontSize: '0.72rem',
-                      fontWeight: 600
-                    }}
+                    className="blog-date"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                   >
-                    📷 {blog.images.length} Photos
+                    <span>{blog.date || '2026 Insights'}</span>
+                    <span>•</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={13} /> {minutes} {strings.blogs.readTimeLabel}
+                    </span>
                   </span>
-                )}
-              </div>
-              <div className="blog-content">
-                <span className="blog-date">{blog.date || '2026 Insights'} • {blog.readTime || '5 min read'}</span>
-                <h3>{blog.title}</h3>
-                <p>{blog.summary}</p>
-                <div style={{ marginTop: 'auto' }}>
+                  <h3>{blog.title}</h3>
+                  <p>{blog.summary}</p>
                   <button
+                    type="button"
                     className="service-link"
                     onClick={(e) => {
                       e.stopPropagation();
                       onOpenArticle(blog);
                     }}
                   >
-                    {strings.blogs.readArticle} <ArrowRight size={16} />
+                    {strings.blogs.readArticle} <ArrowRight size={15} />
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
           <button
+            type="button"
             onClick={onOpenBlogHub}
             className="btn btn-outline"
-            style={{ padding: '14px 36px', fontSize: '1.05rem' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}
           >
-            <BookOpen size={18} style={{ marginRight: '8px' }} />
-            {strings.blogs.exploreAll}
+            <BookOpen size={18} /> {strings.blogs.exploreAll}
           </button>
         </div>
       </div>

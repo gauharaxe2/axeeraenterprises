@@ -35,11 +35,16 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ faqs, onOpenFaqPage }) =
                   onClick={() => toggleFaq(index)}
                   role="button"
                   tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') toggleFaq(index);
+                  }}
                 >
                   <span>{faq.question}</span>
-                  <span style={{ color: 'var(--primary-color)' }}>
-                    {isOpen ? <Minus size={20} /> : <Plus size={20} />}
-                  </span>
+                  {isOpen ? (
+                    <Minus size={18} color="var(--primary-color)" />
+                  ) : (
+                    <Plus size={18} color="var(--primary-color)" />
+                  )}
                 </div>
                 {isOpen && <div className="faq-body">{faq.answer}</div>}
               </div>

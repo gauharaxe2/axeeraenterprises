@@ -125,7 +125,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
               }}
             >
               <Lock size={15} />
-              <span>Axe's Era Enterprise Governance</span>
+              <span>Axe's Era Enterprises Governance</span>
             </div>
 
             <h1
@@ -516,7 +516,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Building size={22} color="var(--primary-color)" />
                 <h4 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>
-                  Axe's Era Enterprise Official Legal Desk
+                  Axe's Era Enterprises Official Legal Desk
                 </h4>
               </div>
               <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6 }}>

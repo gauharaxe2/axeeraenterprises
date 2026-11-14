@@ -14,16 +14,16 @@ export const Preloader: React.FC<PreloaderProps> = ({ phase, durationMs }) => {
       className={`site-preloader${phase === 'out' ? ' is-leaving' : ''}`}
       role="status"
       aria-live="polite"
-      aria-label="Loading Axe's Era Enterprise"
+      aria-label="Loading Axe's Era Enterprises by Gauhar Nadeem"
     >
       <div className="site-preloader-mark">
         <span className="site-preloader-ring" aria-hidden="true" />
         <img src={SITE_LOGO_SRC} alt="" />
       </div>
       <p className="site-preloader-name">
-        Axe's Era <span>Enterprise</span>
+        Axe's Era <span>Enterprises</span>
       </p>
-      <p className="site-preloader-sub">by Gauhar Axe</p>
+      <p className="site-preloader-sub">by Gauhar Nadeem</p>
       <div className="site-preloader-bar" aria-hidden="true">
         <span style={{ animationDuration: `${durationMs}ms` }} />
       </div>

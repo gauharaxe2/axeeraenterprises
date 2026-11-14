@@ -89,7 +89,7 @@ export const blogsData: BlogPost[] = [
     summary: 'Web development is the work involved in engineering high-performance websites and web applications, ranging from interactive frontends to robust cloud backends.',
     paragraphs: [
       'Web development is the holistic process of designing, programming, testing, deploying, and maintaining websites and web applications that run seamlessly across the global internet. It encompasses everything from a single high-converting landing page to distributed cloud platforms serving millions of concurrent active users.',
-      'At Axe\'s Era Enterprise, founded by Gauhar Axe, we engineer web platforms across three unified pillars: Frontend client interfaces, resilient serverless and microservices backend systems, and automated CI/CD cloud deployments.',
+      'At Axe\'s Era Enterprises, founded by Gauhar Axe, we engineer web platforms across three unified pillars: Frontend client interfaces, resilient serverless and microservices backend systems, and automated CI/CD cloud deployments.',
       'Modern web development in 2026 demands strict adherence to Core Web Vitals, enterprise-grade cybersecurity standards, real-time reactive state management, and seamless multi-device responsiveness.'
     ],
     sections: [
@@ -98,7 +98,7 @@ export const blogsData: BlogPost[] = [
         heading: '1. What is Web Development? Architectural Foundation',
         paragraphs: [
           'Web development is the holistic process of designing, programming, testing, deploying, and maintaining websites and web applications that run seamlessly across the global internet. It encompasses everything from a single high-converting landing page to distributed cloud platforms serving millions of concurrent active users.',
-          'At Axe\'s Era Enterprise, founded by Gauhar Axe, we engineer web platforms across three unified pillars: Frontend client interfaces, resilient serverless and microservices backend systems, and automated CI/CD cloud deployments.'
+          'At Axe\'s Era Enterprises, founded by Gauhar Axe, we engineer web platforms across three unified pillars: Frontend client interfaces, resilient serverless and microservices backend systems, and automated CI/CD cloud deployments.'
         ],
         imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80',
         imageCaption: 'Modern software engineering workflow & IDE architecture'

@@ -19,7 +19,7 @@ export const About: React.FC<AboutProps> = ({
   title,
   paragraph1,
   paragraph2,
-  imageUrl = "https://i.postimg.cc/64KnkhQJ/Picsart-26-08-08-06-41-12-297.jpg",
+  imageUrl = 'https://i.postimg.cc/64KnkhQJ/Picsart-26-08-08-06-41-12-297.jpg',
   stats = {
     years: 3,
     experts: 1,
@@ -33,23 +33,19 @@ export const About: React.FC<AboutProps> = ({
   const displayParagraph1 = paragraph1 || strings.about.paragraph1;
   const displayParagraph2 = paragraph2 || strings.about.paragraph2;
   const [counts, setCounts] = useState({
-    years: 0,
-    experts: 0,
-    projects: 0,
-    retention: 0
+    years: stats.years,
+    experts: stats.experts,
+    projects: stats.projects,
+    retention: stats.retention
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCounts({
-        years: stats.years,
-        experts: stats.experts,
-        projects: stats.projects,
-        retention: stats.retention
-      });
-    }, 300);
-
-    return () => clearTimeout(timer);
+    setCounts({
+      years: stats.years,
+      experts: stats.experts,
+      projects: stats.projects,
+      retention: stats.retention
+    });
   }, [stats]);
 
   return (
@@ -95,8 +91,8 @@ export const About: React.FC<AboutProps> = ({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    fontSize: '0.9rem',
-                    padding: '0.65rem 1.4rem'
+                    fontSize: '0.95rem',
+                    padding: '0.75rem 1.75rem'
                   }}
                 >
                   {strings.about.cta}
@@ -106,10 +102,7 @@ export const About: React.FC<AboutProps> = ({
           </div>
 
           <div className="about-image">
-            <img
-              src={imageUrl}
-              alt="About Axe's Era Enterprise"
-            />
+            <img src={imageUrl} alt="About Axe's Era Enterprises" />
           </div>
         </div>
       </div>

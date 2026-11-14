@@ -5,25 +5,16 @@ export const TrustSignals: React.FC = () => {
   const { strings } = useLanguage();
 
   return (
-    <div
-      className="trust-signals-bar"
-      style={{
-        background: 'rgba(15, 23, 42, 0.95)',
-        padding: '2.5rem 0',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-        textAlign: 'center'
-      }}
-    >
-      <div className="container">
+    <section style={{ padding: '2.5rem 0', background: '#0b1120', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+      <div className="container" style={{ textAlign: 'center' }}>
         <p
           style={{
-            color: 'var(--text-light)',
+            color: '#94a3b8',
             fontSize: '0.85rem',
             textTransform: 'uppercase',
-            letterSpacing: '1.5px',
-            marginBottom: '1.25rem',
-            fontWeight: 600
+            letterSpacing: '0.1em',
+            fontWeight: 600,
+            marginBottom: '1.25rem'
           }}
         >
           {strings.trustSignals.title}
@@ -33,29 +24,28 @@ export const TrustSignals: React.FC = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '3.5rem',
+            gap: '2.5rem',
             flexWrap: 'wrap',
-            opacity: 0.88
+            opacity: 0.72
           }}
         >
-          {/* Brand badges */}
-          <span style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '1px', color: '#fff' }}>
-            <i className="fab fa-aws fa-lg" style={{ marginRight: '8px', color: '#ff9900' }}></i>AWS
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+            <i className="fab fa-aws" aria-hidden="true" /> AWS
           </span>
-          <span style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '0.5px', color: '#fff' }}>
-            <i className="fab fa-google fa-lg" style={{ marginRight: '8px', color: '#4285F4' }}></i>Google
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+            <i className="fab fa-google" aria-hidden="true" /> Google
           </span>
-          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#635bff' }}>
-            <i className="fab fa-stripe fa-lg" style={{ marginRight: '8px' }}></i>stripe
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+            <i className="fab fa-stripe" aria-hidden="true" /> Stripe
           </span>
-          <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#00a4ef' }}>
-            <i className="fab fa-microsoft fa-lg" style={{ marginRight: '8px' }}></i>Microsoft
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+            <i className="fab fa-microsoft" aria-hidden="true" /> Microsoft
           </span>
-          <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#96bf48' }}>
-            <i className="fab fa-shopify fa-lg" style={{ marginRight: '8px' }}></i>shopify
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+            <i className="fab fa-shopify" aria-hidden="true" /> Shopify
           </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

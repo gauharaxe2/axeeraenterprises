@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { LANGUAGE_OPTIONS, getLanguageMeta } from '../i18n/languages';
 import type { Language } from '../i18n/types';
 
-const NAV_KEYS: { page: PageView; href: string; navKey: string }[] = [
+const NAV_LINKS: { page: PageView; href: string; navKey: string }[] = [
   { page: 'home', href: '/', navKey: 'home' },
   { page: 'about', href: '/about', navKey: 'about' },
   { page: 'services', href: '/services', navKey: 'services' },
@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -107,6 +107,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     return navStrings[navKey] || navKey;
   };
 
+  const isLinkActive = (page: PageView): boolean => {
+    if (page === 'services') return currentPage === 'services' || currentPage === 'service-detail';
+    if (page === 'blogs') return currentPage === 'blogs' || currentPage === 'blog-detail';
+    return currentPage === page;
+  };
+
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`} id="navbar">
       <div className="nav-container">
@@ -119,7 +125,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             navigateToPage('home');
           }}
         >
-          <img src={SITE_LOGO_SRC} alt="Axe's Era logo" />
+          <img src={SITE_LOGO_SRC} alt="" aria-hidden="true" />
           <div>
             <h1>{strings.brand.name}</h1>
             <p>{strings.brand.tagline}</p>
@@ -127,13 +133,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         </a>
 
         <div className={`nav-menu ${isMenuOpen ? 'open' : ''}`} id="nav-menu">
-          {NAV_KEYS.map((link) => {
-            const active =
-              link.page === 'services'
-                ? currentPage === 'services' || currentPage === 'service-detail'
-                : link.page === 'blogs'
-                  ? currentPage === 'blogs' || currentPage === 'blog-detail'
-                  : currentPage === link.page;
+          {NAV_LINKS.map((link) => {
+            const active = isLinkActive(link.page);
             const label = getNavLabel(link.navKey);
             return (
               <a
@@ -153,7 +154,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
 
-          {/* In-drawer multi-language selector for mobile menu */}
           <div className="nav-drawer-lang-wrap">
             <div className="nav-drawer-lang-grid" role="group" aria-label="Select Language">
               {LANGUAGE_OPTIONS.map((opt) => {

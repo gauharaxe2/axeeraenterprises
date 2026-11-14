@@ -90,7 +90,7 @@ export const TestimonialsPage: React.FC<TestimonialsPageProps> = ({
       <EditorialHero
         eyebrow="Verified Client Success"
         title="Real Impact. Measurable Growth. Enduring Partnerships."
-        description="Read direct feedback from the founders, corporate leaders, and marketing executives who have trusted Axe's Era Enterprise to architect their critical digital platforms."
+        description="Read direct feedback from the founders, corporate leaders, and marketing executives who have trusted Axe's Era Enterprises to architect their critical digital platforms."
       >
         <div className="editorial-metrics">
           <div className="editorial-metric">
@@ -171,7 +171,7 @@ export const TestimonialsPage: React.FC<TestimonialsPageProps> = ({
         <article className="editorial-panel padded">
           <h2>Our Review Integrity Policy</h2>
           <p className="editorial-muted" style={{ marginTop: '0.7rem', maxWidth: '760px' }}>
-            All client reviews published by Axe's Era Enterprise reflect genuine commercial deliverables. We do not
+            All client reviews published by Axe's Era Enterprises reflect genuine commercial deliverables. We do not
             fabricate testimonials or solicit incentivized reviews. Each quote is verified by project milestone sign-offs
             and live production deployment records.
           </p>
@@ -183,7 +183,7 @@ export const TestimonialsPage: React.FC<TestimonialsPageProps> = ({
 
       <EditorialCta
         title="Ready to Become Our Next Success Story?"
-        description="Join forward-thinking founders and established enterprises who rely on Axe's Era Enterprise to engineer high-performance digital platforms."
+        description="Join forward-thinking founders and established enterprises who rely on Axe's Era Enterprises to engineer high-performance digital platforms."
       >
         <a href="/contact" className="btn btn-primary" onClick={(event) => openInApp(event, onContactClick)}>
           Start Your Project Consultation

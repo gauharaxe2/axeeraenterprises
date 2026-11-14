@@ -2,8 +2,8 @@ import type { LocalizedStrings } from '../types.ts';
 
 export const ja: LocalizedStrings = {
   brand: {
-    name: "Axe's Era Enterprise",
-    tagline: "Gauhar Axe 設立"
+    name: "Axe's Era Enterprises",
+    tagline: "Gauhar Nadeem 設立"
   },
   nav: {
     home: "ホーム",
@@ -21,7 +21,7 @@ export const ja: LocalizedStrings = {
   },
   hero: {
     title: "プレミアムなデジタルソリューションでブランド価値を最大化",
-    subtitle: "Axe's Era Enterprise は、高性能Web開発、モバイルアプリ開発、ブランドデザインに特化した受賞歴のあるデジタルエージェンシーです。単なるWebサイト制作にとどまらず、先進企業のデジタル成長を設計します。",
+    subtitle: "Axe's Era Enterprises は、高性能Web開発、モバイルアプリ開発、ブランドデザインに特化した受賞歴のあるデジタルエージェンシーです。単なるWebサイト制作にとどまらず、先進企業のデジタル成長を設計します。",
     startProject: "プロジェクトを始める",
     exploreCaseStudies: "導入事例を見る"
   },
@@ -32,7 +32,7 @@ export const ja: LocalizedStrings = {
     sectionTitle: "私たちについて",
     sectionSubtitle: "現代のビジネスが力強く成長するための革新的なデジタルソリューションを情熱をもって開発しています。",
     heading: "デジタルトランスフォーメーションの信頼できるパートナー",
-    paragraph1: "Gauhar Axe によって設立された Axe's Era Enterprise は、3年以上の実績を持つデジタルエージェンシーへと成長しました。創造性と高度なエンジニアリングを融合し、数多くの企業のデジタルプレゼンス確立と目標達成を支援しています。",
+    paragraph1: "Gauhar Axe によって設立された Axe's Era Enterprises は、3年以上の実績を持つデジタルエージェンシーへと成長しました。創造性と高度なエンジニアリングを融合し、数多くの企業のデジタルプレゼンス確立と目標達成を支援しています。",
     paragraph2: "私たちはお客様との長期的なパートナーシップを大切にし、独自の課題を深く理解した上で、確かな成果につながる最適なソリューションを提供します。",
     yearsLabel: "年の実績",
     expertsLabel: "デジタル専門家",
@@ -143,7 +143,7 @@ export const ja: LocalizedStrings = {
     sectionTitle: "創業者紹介",
     sectionSubtitle: "デジタルの卓越性を牽引するビジョナリー・リーダーシップ",
     founderRole: "CEO 兼 創業者",
-    founderBio: "デジタル分野での卓越した価値創造を追求。Gauhar Axe は、高コンバージョンなWeb基盤、最先端モバイルアプリ、象徴的なブランドデザインを提供するため Axe's Era Enterprise を設立しました。",
+    founderBio: "デジタル分野での卓越した価値創造を追求。Gauhar Axe は、高コンバージョンなWeb基盤、最先端モバイルアプリ、象徴的なブランドデザインを提供するため Axe's Era Enterprises を設立しました。",
     cta: "創業者とエンジニアリング統括チームを見る（チームページ） →"
   },
   testimonials: {
@@ -164,7 +164,7 @@ export const ja: LocalizedStrings = {
     sectionTitle: "共に特別なデジタル体験を創りましょう",
     sectionSubtitle: "デジタルプレゼンスを変革する準備はできていますか？専門家による戦略相談をご予約ください。",
     getInTouch: "お問い合わせ",
-    description: "Axe's Era Enterprise とともに次のデジタル成功事例を築きましょう。技術的精度と誠実な対応で全力サポートいたします。",
+    description: "Axe's Era Enterprises とともに次のデジタル成功事例を築きましょう。技術的精度と誠実な対応で全力サポートいたします。",
     urgentNotice: "ご注意：メールの返信にお時間を要する場合、WhatsAppボタンから即座にライブ応答を受けられます。",
     addressLabel: "所在地",
     phoneLabel: "電話番号",
@@ -180,7 +180,7 @@ export const ja: LocalizedStrings = {
   policies: {
     badge: "ガバナンスと信頼",
     sectionTitle: "企業ポリシー",
-    sectionSubtitle: "Axe's Era Enterprise は揺るぎない誠実さで事業を運営しています。法的開示、データ保護方針、契約条件をご確認ください。",
+    sectionSubtitle: "Axe's Era Enterprises は揺るぎない誠実さで事業を運営しています。法的開示、データ保護方針、契約条件をご確認ください。",
     legalNoticeTitle: "法的表記",
     legalNoticeDesc: "公式企業登録情報、創業者 Gauhar Axe（Gauhar Nadeem）の所有権、ライセンスおよび知的財産保護。",
     privacyPolicyTitle: "プライバシーポリシー",
@@ -197,7 +197,7 @@ export const ja: LocalizedStrings = {
     cta: "ナレッジベースと全FAQを見る（FAQページ） →",
     items: {
       services: {
-        question: "Axe's Era Enterprise ではどのようなサービスを提供していますか？",
+        question: "Axe's Era Enterprises ではどのようなサービスを提供していますか？",
         answer: "高性能なWeb開発、カスタムモバイルアプリ開発、ブランドデザイン、SEO対策、包括的なデジタルマーケティングを提供しています。"
       },
       process: {
@@ -240,7 +240,7 @@ export const ja: LocalizedStrings = {
   },
   footer: {
     brandDesc: "革新的なデジタル設計、コンバージョン最適化デザイン、高性能アプリケーションで企業の成長を実現します。",
-    founderInfo: "創業者: Gauhar Axe (Gauhar Nadeem)",
+    founderInfo: "創業者: Gauhar Nadeem",
     servicesHeading: "サービス",
     companyHeading: "企業情報",
     policiesHeading: "ポリシー",
@@ -254,7 +254,7 @@ export const ja: LocalizedStrings = {
     newsletterSuccess: "ご登録ありがとうございます！Axe's Era インサイトへようこそ。",
     newsletterEmailRequired: "メールアドレスを入力してください。",
     newsletterError: "現在登録できません。後ほど再度お試しください。",
-    copyright: "© 2024–2026 Axe's Era Enterprise by Gauhar Axe. All rights reserved."
+    copyright: "© 2024–2026 Axe's Era Enterprises by Gauhar Nadeem. All rights reserved."
   },
   common: {
     backToHome: "ホームに戻る",

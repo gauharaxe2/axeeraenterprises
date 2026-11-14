@@ -60,43 +60,18 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
                 <div className="portfolio-overlay">
                   <h3>{project.title}</h3>
                   <p>{project.subtitle}</p>
-                  <div className="case-study-metric">{project.metric}</div>
+                  {project.metric && (
+                    <div className="case-study-metric">{project.metric}</div>
+                  )}
                   <a
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="portfolio-link"
                   >
-                    {strings.caseStudies.viewLiveSite} <ExternalLink size={16} />
+                    {strings.caseStudies.viewLiveSite} <ExternalLink size={15} />
                   </a>
                 </div>
-              </div>
-              <div style={{ padding: '1.25rem 1.5rem' }}>
-                <h4 style={{ color: '#fff', marginBottom: '0.4rem', fontSize: '1.15rem' }}>
-                  {project.title}
-                </h4>
-                <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
-                  {project.description}
-                </p>
-                {project.tags && project.tags.length > 0 && (
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {project.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        style={{
-                          fontSize: '0.75rem',
-                          padding: '3px 10px',
-                          borderRadius: '12px',
-                          background: 'rgba(212, 175, 55, 0.12)',
-                          color: 'var(--primary-color)',
-                          border: '1px solid rgba(212, 175, 55, 0.25)'
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           ))}

@@ -5,15 +5,15 @@ import { canonicalUrl, metaForPage } from './pageMeta.ts';
 
 test('the seven redesigned pages keep titles and canonical paths', () => {
   const expected: Record<string, string> = {
-    '/about': "About | Axe's Era Enterprise",
-    '/services': "Enterprise Services & Capabilities | Axe's Era Enterprise",
-    '/websites': "Websites | Axe's Era Enterprise",
-    '/team': "Our Team | Axe's Era Enterprise",
-    '/testimonials': "Testimonials | Axe's Era Enterprise",
-    '/partnership': "Partnership | Axe's Era Enterprise",
-    '/contact': "Contact | Axe's Era Enterprise",
-    '/location': "Location | Axe's Era Enterprise",
-    '/faq': "FAQ | Axe's Era Enterprise"
+    '/about': "About | Axe's Era Enterprises",
+    '/services': "Enterprise Services & Capabilities | Axe's Era Enterprises",
+    '/websites': "Websites | Axe's Era Enterprises",
+    '/team': "Our Team | Axe's Era Enterprises",
+    '/testimonials': "Testimonials | Axe's Era Enterprises",
+    '/partnership': "Partnership | Axe's Era Enterprises",
+    '/contact': "Contact | Axe's Era Enterprises",
+    '/location': "Location | Axe's Era Enterprises",
+    '/faq': "FAQ | Axe's Era Enterprises"
   };
 
   for (const path of CONTENT_PAGE_PATHS) {

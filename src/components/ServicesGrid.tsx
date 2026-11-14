@@ -62,20 +62,19 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
               <div className="service-icon">{getIcon(service.icon)}</div>
               <h3>{service.title}</h3>
               <p>{service.shortDesc}</p>
-              <div>
-                <button
-                  className="service-link"
-                  onClick={() => {
-                    if (service.slug) {
-                      onSelectService(service);
-                    } else {
-                      onContactClick();
-                    }
-                  }}
-                >
-                  {strings.services.learnMore} <ArrowRight size={16} />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="service-link"
+                onClick={() => {
+                  if (service.slug) {
+                    onSelectService(service);
+                  } else {
+                    onContactClick();
+                  }
+                }}
+              >
+                {strings.services.learnMore} <ArrowRight size={16} />
+              </button>
             </div>
           ))}
         </div>
@@ -83,21 +82,18 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
         {onOpenServicesPage && (
           <div style={{ textAlign: 'center', marginTop: '3rem' }}>
             <button
+              type="button"
               onClick={onOpenServicesPage}
               className="btn btn-outline"
               style={{
-                padding: '12px 28px',
-                fontSize: '1rem',
-                fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
-                border: '1px solid var(--primary-color)',
-                color: 'var(--primary-color)',
-                cursor: 'pointer'
+                gap: '0.5rem',
+                fontSize: '0.95rem',
+                padding: '0.75rem 1.75rem'
               }}
             >
-              {strings.services.exploreAll} <ArrowRight size={18} />
+              {strings.services.exploreAll}
             </button>
           </div>
         )}

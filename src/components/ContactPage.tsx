@@ -160,7 +160,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
       <EditorialHero
         eyebrow="Direct Executive Consultation"
         title="Let's Engineer Your Digital Growth Engine"
-        description="Partner with Axe's Era Enterprise. Schedule a technical discovery session directly with founder Gauhar Axe to map your platform architecture, project scope, and deployment timeline."
+        description="Partner with Axe's Era Enterprises. Schedule a technical discovery session directly with founder Gauhar Axe to map your platform architecture, project scope, and deployment timeline."
       />
 
       <EditorialSection id="contact-desk">
@@ -268,7 +268,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 </div>
                 <h3 style={{ marginTop: '0.8rem' }}>Message Successfully Transmitted</h3>
                 <p className="editorial-muted" style={{ margin: '0.6rem auto 1rem', maxWidth: '420px' }}>
-                  Thank you for contacting Axe's Era Enterprise. Gauhar Axe will analyze your requirements and reach out
+                  Thank you for contacting Axe's Era Enterprises. Gauhar Axe will analyze your requirements and reach out
                   via email or WhatsApp shortly.
                 </p>
                 <button type="button" className="btn btn-outline" onClick={() => setIsSubmitted(false)}>

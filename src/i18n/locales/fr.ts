@@ -2,8 +2,8 @@ import type { LocalizedStrings } from '../types.ts';
 
 export const fr: LocalizedStrings = {
   brand: {
-    name: "Axe's Era Enterprise",
-    tagline: "par Gauhar Axe"
+    name: "Axe's Era Enterprises",
+    tagline: "par Gauhar Nadeem"
   },
   nav: {
     home: "Accueil",
@@ -21,7 +21,7 @@ export const fr: LocalizedStrings = {
   },
   hero: {
     title: "Sublimez Votre Marque avec des Solutions Digitales d'Élite",
-    subtitle: "Axe's Era Enterprise est une agence digitale primée spécialisée dans le développement web haute performance, les applications mobiles et le design de marque. Nous ne créons pas seulement des sites web : nous concevons la croissance digitale des organisations ambitieuses.",
+    subtitle: "Axe's Era Enterprises est une agence digitale primée spécialisée dans le développement web haute performance, les applications mobiles et le design de marque. Nous ne créons pas seulement des sites web : nous concevons la croissance digitale des organisations ambitieuses.",
     startProject: "Démarrer un projet",
     exploreCaseStudies: "Voir les études de cas"
   },
@@ -32,7 +32,7 @@ export const fr: LocalizedStrings = {
     sectionTitle: "À Propos de Notre Agence",
     sectionSubtitle: "Nous sommes passionnés par la création de solutions digitales qui permettent aux entreprises de prospérer.",
     heading: "Votre Partenaire de Transformation Digitale",
-    paragraph1: "Fondée par Gauhar Axe, Axe's Era Enterprise est devenue une agence digitale de premier plan avec plus de 3 ans d'expérience. En alliant créativité et ingénierie de pointe, nous avons aidé des centaines d'entreprises à affirmer leur présence numérique et atteindre leurs objectifs.",
+    paragraph1: "Fondée par Gauhar Axe, Axe's Era Enterprises est devenue une agence digitale de premier plan avec plus de 3 ans d'expérience. En alliant créativité et ingénierie de pointe, nous avons aidé des centaines d'entreprises à affirmer leur présence numérique et atteindre leurs objectifs.",
     paragraph2: "Nous privilégions des partenariats durables avec nos clients afin de comprendre leurs enjeux uniques et livrer des solutions sur mesure à fort impact.",
     yearsLabel: "Années d'expérience",
     expertsLabel: "Experts digitaux",
@@ -143,7 +143,7 @@ export const fr: LocalizedStrings = {
     sectionTitle: "Rencontrez Notre Fondateur",
     sectionSubtitle: "Un leadership visionnaire au service de l'excellence digitale",
     founderRole: "PDG & Fondateur",
-    founderBio: "Un leadership visionnaire tourné vers l'excellence. Gauhar Axe a fondé Axe's Era Enterprise afin de concevoir des plateformes web à forte conversion, des applications mobiles avancées et des identités visuelles emblématiques.",
+    founderBio: "Un leadership visionnaire tourné vers l'excellence. Gauhar Axe a fondé Axe's Era Enterprises afin de concevoir des plateformes web à forte conversion, des applications mobiles avancées et des identités visuelles emblématiques.",
     cta: "Découvrir le fondateur et la direction technique (Page Équipe) →"
   },
   testimonials: {
@@ -164,7 +164,7 @@ export const fr: LocalizedStrings = {
     sectionTitle: "Construisons Ensemble Quelque Chose d'Exceptionnel",
     sectionSubtitle: "Prêt à transformer votre présence digitale ? Réservez une consultation stratégique avec nos experts.",
     getInTouch: "Prendre Contact",
-    description: "Collaborez avec Axe's Era Enterprise pour bâtir votre prochain succès numérique. Nous sommes prêts à écouter, concevoir et exécuter avec précision.",
+    description: "Collaborez avec Axe's Era Enterprises pour bâtir votre prochain succès numérique. Nous sommes prêts à écouter, concevoir et exécuter avec précision.",
     urgentNotice: "NOTE : Si vous n'obtenez pas de réponse rapide par e-mail, cliquez sur le bouton WhatsApp pour une réponse immédiate en direct !",
     addressLabel: "Adresse",
     phoneLabel: "Téléphone",
@@ -180,7 +180,7 @@ export const fr: LocalizedStrings = {
   policies: {
     badge: "Gouvernance & Confiance",
     sectionTitle: "Nos Politiques",
-    sectionSubtitle: "Axe's Era Enterprise agit avec une intégrité sans compromis. Consultez nos mentions légales, cadres de confidentialité et conditions.",
+    sectionSubtitle: "Axe's Era Enterprises agit avec une intégrité sans compromis. Consultez nos mentions légales, cadres de confidentialité et conditions.",
     legalNoticeTitle: "Mentions Légales",
     legalNoticeDesc: "Registre officiel de l'entreprise, propriété du fondateur Gauhar Axe (Gauhar Nadeem), licences et protection de la propriété intellectuelle.",
     privacyPolicyTitle: "Politique de Confidentialité",
@@ -197,7 +197,7 @@ export const fr: LocalizedStrings = {
     cta: "Parcourir toute la base de connaissances (Page FAQ) →",
     items: {
       services: {
-        question: "Quels services propose Axe's Era Enterprise ?",
+        question: "Quels services propose Axe's Era Enterprises ?",
         answer: "Nous proposons le développement web haute performance, des applications mobiles sur mesure, le design de marque, l'optimisation SEO et le marketing digital."
       },
       process: {
@@ -240,7 +240,7 @@ export const fr: LocalizedStrings = {
   },
   footer: {
     brandDesc: "Transformer les entreprises grâce à une architecture digitale innovante, un design axé sur la conversion et des applications performantes.",
-    founderInfo: "Fondée par Gauhar Axe (Gauhar Nadeem)",
+    founderInfo: "Fondée par Gauhar Nadeem",
     servicesHeading: "Services",
     companyHeading: "Entreprise",
     policiesHeading: "Politiques",
@@ -254,7 +254,7 @@ export const fr: LocalizedStrings = {
     newsletterSuccess: "Inscription confirmée ! Bienvenue dans les analyses Axe's Era.",
     newsletterEmailRequired: "Veuillez saisir votre adresse e-mail.",
     newsletterError: "Impossible de finaliser l'inscription. Veuillez réessayer.",
-    copyright: "© 2024–2026 Axe's Era Enterprise par Gauhar Axe. Tous droits réservés."
+    copyright: "© 2024–2026 Axe's Era Enterprises par Gauhar Nadeem. Tous droits réservés."
   },
   common: {
     backToHome: "Retour à l'accueil",

@@ -2,8 +2,8 @@ import type { LocalizedStrings } from '../types.ts';
 
 export const es: LocalizedStrings = {
   brand: {
-    name: "Axe's Era Enterprise",
-    tagline: "por Gauhar Axe"
+    name: "Axe's Era Enterprises",
+    tagline: "por Gauhar Nadeem"
   },
   nav: {
     home: "Inicio",
@@ -21,7 +21,7 @@ export const es: LocalizedStrings = {
   },
   hero: {
     title: "Impulsa Tu Marca con Soluciones Digitales de Élite",
-    subtitle: "Axe's Era Enterprise es una agencia digital galardonada especializada en desarrollo web de alto rendimiento, aplicaciones móviles y diseño de marca. No solo creamos sitios web; diseñamos crecimiento digital para organizaciones visionarias.",
+    subtitle: "Axe's Era Enterprises es una agencia digital galardonada especializada en desarrollo web de alto rendimiento, aplicaciones móviles y diseño de marca. No solo creamos sitios web; diseñamos crecimiento digital para organizaciones visionarias.",
     startProject: "Iniciar Proyecto",
     exploreCaseStudies: "Ver Casos de Éxito"
   },
@@ -32,7 +32,7 @@ export const es: LocalizedStrings = {
     sectionTitle: "Sobre Nuestra Agencia",
     sectionSubtitle: "Nos apasiona crear soluciones digitales que ayuden a las empresas a prosperar en el mundo moderno.",
     heading: "Tu Socio en Transformación Digital",
-    paragraph1: "Fundada por Gauhar Axe, Axe's Era Enterprise se ha consolidado como una agencia digital líder con más de 3 años de experiencia. Hemos ayudado a cientos de empresas a fortalecer su presencia digital y alcanzar sus metas combinando creatividad con ingeniería.",
+    paragraph1: "Fundada por Gauhar Axe, Axe's Era Enterprises se ha consolidado como una agencia digital líder con más de 3 años de experiencia. Hemos ayudado a cientos de empresas a fortalecer su presencia digital y alcanzar sus metas combinando creatividad con ingeniería.",
     paragraph2: "Creemos en construir alianzas a largo plazo con nuestros clientes, comprender sus desafíos únicos y desarrollar soluciones a medida con impacto real.",
     yearsLabel: "Años de Experiencia",
     expertsLabel: "Expertos Digitales",
@@ -143,7 +143,7 @@ export const es: LocalizedStrings = {
     sectionTitle: "Conoce a Nuestro Fundador",
     sectionSubtitle: "Liderazgo visionario impulsando la excelencia digital",
     founderRole: "CEO y Fundador",
-    founderBio: "Liderazgo visionario orientado a la excelencia digital. Gauhar Axe fundó Axe's Era Enterprise con el propósito de crear plataformas web de alta conversión, apps móviles de vanguardia e identidades visuales icónicas.",
+    founderBio: "Liderazgo visionario orientado a la excelencia digital. Gauhar Axe fundó Axe's Era Enterprises con el propósito de crear plataformas web de alta conversión, apps móviles de vanguardia e identidades visuales icónicas.",
     cta: "Conocer al Fundador y Liderazgo Técnico (Página Equipo) →"
   },
   testimonials: {
@@ -164,7 +164,7 @@ export const es: LocalizedStrings = {
     sectionTitle: "Construyamos Algo Extraordinario Juntos",
     sectionSubtitle: "¿Listo para transformar tu presencia digital? Agenda una consulta estratégica con nuestros expertos.",
     getInTouch: "Ponte en Contacto",
-    description: "Asóciate con Axe's Era Enterprise para diseñar tu próximo caso de éxito digital. Estamos listos para escuchar, planificar y ejecutar con precisión técnica.",
+    description: "Asóciate con Axe's Era Enterprises para diseñar tu próximo caso de éxito digital. Estamos listos para escuchar, planificar y ejecutar con precisión técnica.",
     urgentNotice: "NOTA: Si no recibes nuestra respuesta por correo pronto, ¡toca el botón de WhatsApp para atención inmediata en vivo!",
     addressLabel: "Dirección",
     phoneLabel: "Teléfono",
@@ -180,7 +180,7 @@ export const es: LocalizedStrings = {
   policies: {
     badge: "Gobernanza y Confianza",
     sectionTitle: "Nuestras Políticas",
-    sectionSubtitle: "Axe's Era Enterprise opera con integridad absoluta. Revisa nuestras declaraciones legales, marcos de protección de datos y acuerdos con clientes.",
+    sectionSubtitle: "Axe's Era Enterprises opera con integridad absoluta. Revisa nuestras declaraciones legales, marcos de protección de datos y acuerdos con clientes.",
     legalNoticeTitle: "Aviso Legal",
     legalNoticeDesc: "Registro empresarial oficial, propiedad del fundador Gauhar Axe (Gauhar Nadeem), licencias profesionales y resguardos de propiedad intelectual.",
     privacyPolicyTitle: "Política de Privacidad",
@@ -197,7 +197,7 @@ export const es: LocalizedStrings = {
     cta: "Explorar Base de Conocimiento Completa (Página FAQ) →",
     items: {
       services: {
-        question: "¿Qué servicios ofrece Axe's Era Enterprise?",
+        question: "¿Qué servicios ofrece Axe's Era Enterprises?",
         answer: "Ofrecemos desarrollo web de alto rendimiento, aplicaciones móviles a medida, diseño de marca, optimización SEO y estrategias integrales de marketing digital."
       },
       process: {
@@ -240,7 +240,7 @@ export const es: LocalizedStrings = {
   },
   footer: {
     brandDesc: "Transformando empresas mediante arquitectura digital innovadora, diseño enfocado en conversión y aplicaciones de alto rendimiento.",
-    founderInfo: "Fundada por Gauhar Axe (Gauhar Nadeem)",
+    founderInfo: "Fundada por Gauhar Nadeem",
     servicesHeading: "Servicios",
     companyHeading: "Empresa",
     policiesHeading: "Políticas",
@@ -254,7 +254,7 @@ export const es: LocalizedStrings = {
     newsletterSuccess: "¡Suscripción confirmada! Bienvenido a Axe's Era Insights.",
     newsletterEmailRequired: "Por favor ingresa tu correo electrónico.",
     newsletterError: "No se pudo completar la suscripción. Inténtalo de nuevo.",
-    copyright: "© 2024–2026 Axe's Era Enterprise por Gauhar Axe. Todos los derechos reservados."
+    copyright: "© 2024–2026 Axe's Era Enterprises por Gauhar Nadeem. Todos los derechos reservados."
   },
   common: {
     backToHome: "Volver al Inicio",

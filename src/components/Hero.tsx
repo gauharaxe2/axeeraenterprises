@@ -19,6 +19,10 @@ export const Hero: React.FC<HeroProps> = ({
   const displayTitle = title || strings.hero.title;
   const displaySubtitle = subtitle || strings.hero.subtitle;
 
+  const scrollToNext = () => {
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section id="home" className="hero">
       <div className="hero-bg-image" aria-hidden="true" />
@@ -28,28 +32,31 @@ export const Hero: React.FC<HeroProps> = ({
           <h1>{displayTitle}</h1>
           <p>{displaySubtitle}</p>
           <div className="hero-buttons">
-            <button onClick={onStartProject} className="btn btn-primary">
+            <button type="button" onClick={onStartProject} className="btn btn-primary">
               {strings.hero.startProject}
             </button>
-            <button onClick={onExploreCaseStudies} className="btn btn-outline">
+            <button type="button" onClick={onExploreCaseStudies} className="btn btn-outline">
               {strings.hero.exploreCaseStudies}
             </button>
           </div>
         </div>
-        <div className="hero-image">
-          <div className="hero-graphic">
-            <Rocket size={100} />
-          </div>
+
+        <div className="hero-graphic" aria-hidden="true">
+          <Rocket size={92} strokeWidth={1.6} />
         </div>
       </div>
+
       <div
         className="scroll-indicator"
-        onClick={() => {
-          const el = document.getElementById('about');
-          el?.scrollIntoView({ behavior: 'smooth' });
+        onClick={scrollToNext}
+        role="button"
+        tabIndex={0}
+        aria-label="Scroll to next section"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') scrollToNext();
         }}
       >
-        <div className="scroll-arrow"></div>
+        <div className="scroll-arrow" />
       </div>
     </section>
   );

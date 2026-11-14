@@ -21,7 +21,7 @@ const fallbackFounder: TeamMemberData = {
   id: 'gauhar-nadeem',
   name: 'Gauhar Nadeem',
   title: 'CEO & Founder',
-  bio: "Visionary leadership driving digital excellence. Gauhar Axe founded Axe's Era Enterprise with a focus on crafting conversion-engineered web platforms, cutting-edge mobile apps, and iconic visual identities.",
+  bio: "Visionary leadership driving digital excellence. Gauhar Axe founded Axe's Era Enterprises with a focus on crafting conversion-engineered web platforms, cutting-edge mobile apps, and iconic visual identities.",
   imageUrl: 'https://i.postimg.cc/PqjZ6d8q/Picsart-26-08-08-06-40-52-321.jpg',
   socials: {
     linkedin: 'https://www.linkedin.com/in/gauharaxe/',
@@ -82,7 +82,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
 
       <EditorialHero
         eyebrow="Visionary Leadership"
-        title="Meet the Architects Behind Axe's Era Enterprise"
+        title="Meet the Architects Behind Axe's Era Enterprises"
         description="We operate with a high-density senior talent model. You collaborate directly with principal architects and designers who take personal ownership of your digital platform from day one."
       />
 
@@ -181,7 +181,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
         <article className="editorial-panel padded">
           <h2>Partner With Our Extended Engineering Network</h2>
           <p className="editorial-muted" style={{ margin: '0.7rem 0 1.1rem', maxWidth: '720px' }}>
-            Axe's Era Enterprise regularly partners with specialized backend engineers, cloud architects, and motion
+            Axe's Era Enterprises regularly partners with specialized backend engineers, cloud architects, and motion
             designers for mission-critical enterprise engagements. If you build at the highest level, we welcome
             collaborations on global client projects.
           </p>

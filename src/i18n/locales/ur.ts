@@ -2,8 +2,8 @@ import type { LocalizedStrings } from '../types.ts';
 
 export const ur: LocalizedStrings = {
   brand: {
-    name: "ایکسز ایرا انٹرپرائز",
-    tagline: "بذریعہ گوہر ایکس"
+    name: "ایکسز ایرا انٹرپرائزز",
+    tagline: "بذریعہ گوہر ندیم"
   },
   nav: {
     home: "صفحہ اول",
@@ -240,7 +240,7 @@ export const ur: LocalizedStrings = {
   },
   footer: {
     brandDesc: "جدید ڈیجیٹل فن تعمیر، کنورژن ڈیزائن اور اعلیٰ کارکردگی کی حامل ایپلی کیشنز کے ذریعے کاروباروں کی ترقی۔",
-    founderInfo: "بانی: گوہر ایکس (گوہر ندیم)",
+    founderInfo: "بانی: گوہر ندیم",
     servicesHeading: "خدمات",
     companyHeading: "کمپنی",
     policiesHeading: "ہماری پالیسیاں",
@@ -254,7 +254,7 @@ export const ur: LocalizedStrings = {
     newsletterSuccess: "آپ کی سبسکرپشن کامیابی سے ہو گئی ہے! ایکسز ایرا میں خوش آمدید۔",
     newsletterEmailRequired: "براہ کرم اپنا ای میل درج کریں۔",
     newsletterError: "فی الحال سبسکرائب نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔",
-    copyright: "© 2024–2026 ایکسز ایرا انٹرپرائز بذریعہ گوہر ایکس۔ تمام حقوق محفوظ ہیں۔"
+    copyright: "© 2024–2026 ایکسز ایرا انٹرپرائزز بذریعہ گوہر ندیم۔ تمام حقوق محفوظ ہیں۔"
   },
   common: {
     backToHome: "ہوم پر واپس جائیں",

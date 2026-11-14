@@ -172,7 +172,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                   marginBottom: '0.5rem'
                 }}
               >
-                Axe's Era Enterprise Solutions
+                Axe's Era Enterprises Solutions
               </span>
               <h1 style={{ fontSize: '3.4rem', marginBottom: '1.25rem', color: '#fff' }}>
                 {service.title}

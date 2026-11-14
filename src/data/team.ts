@@ -5,7 +5,7 @@ export const initialTeamMembers: TeamMemberData[] = [
     id: 'gauhar-nadeem',
     name: 'Gauhar Nadeem',
     title: 'CEO & Founder',
-    bio: "Visionary leadership driving digital excellence. Gauhar Axe founded Axe's Era Enterprise with a focus on crafting conversion-engineered web platforms, cutting-edge mobile apps, and iconic visual identities.",
+    bio: "Visionary leadership driving digital excellence. Gauhar Axe founded Axe's Era Enterprises with a focus on crafting conversion-engineered web platforms, cutting-edge mobile apps, and iconic visual identities.",
     imageUrl: 'https://i.postimg.cc/j2xhztjF/Picsart-26-05-15-00-58-54-392.jpg',
     socials: {
       linkedin: 'https://www.linkedin.com/in/gauharaxe/',

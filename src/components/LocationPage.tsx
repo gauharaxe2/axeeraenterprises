@@ -56,7 +56,7 @@ export const LocationPage: React.FC<LocationPageProps> = ({
     script.text = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
-      name: "Axe's Era Enterprise",
+      name: "Axe's Era Enterprises",
       url: `${SITE_ORIGIN}/location`,
       email,
       telephone: phone.split('/')[0]?.trim() || phone,
@@ -94,7 +94,7 @@ export const LocationPage: React.FC<LocationPageProps> = ({
 
       <EditorialHero
         eyebrow="Headquarters"
-        title="Find Axe's Era Enterprise in Multan"
+        title="Find Axe's Era Enterprises in Multan"
         description={
           savedPin
             ? 'Google Maps is pinned at the headquarters point saved for this studio.'
@@ -107,7 +107,7 @@ export const LocationPage: React.FC<LocationPageProps> = ({
           <div className="editorial-panel location-map-frame">
             <iframe
               className="location-map"
-              title={`Google Maps pin for Axe's Era Enterprise at ${address}`}
+              title={`Google Maps pin for Axe's Era Enterprises at ${address}`}
               src={embedUrl}
               loading="eager"
               referrerPolicy="no-referrer-when-downgrade"

@@ -77,11 +77,14 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="footer-brand">
               <h2>
                 {strings.brand.name.includes("Axe's Era") ? (
-                  <>Axe's Era <span>Enterprise</span></>
+                  <>Axe's Era <span>Enterprises</span></>
                 ) : (
                   <span>{strings.brand.name}</span>
                 )}
               </h2>
+              <p style={{ color: 'var(--primary-color)', fontSize: '0.88rem', fontWeight: 600, margin: '-0.45rem 0 0.75rem' }}>
+                {strings.brand.tagline}
+              </p>
               <p style={{ color: 'rgba(255, 255, 255, 0.75)', lineHeight: 1.6 }}>
                 {strings.footer.brandDesc}
               </p>
@@ -174,7 +177,6 @@ export const Footer: React.FC<FooterProps> = ({
             </ul>
           </div>
 
-          {/* Block's heading: Our Policies */}
           <div className="footer-section">
             <h3>{strings.footer.policiesHeading}</h3>
             <ul>
@@ -291,84 +293,50 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Newsletter Subscription Form */}
         <div
-          className="footer-newsletter"
           style={{
-            margin: '2.5rem 0 2rem',
-            padding: '2rem 2.25rem',
-            background: 'linear-gradient(135deg, rgba(255, 107, 0, 0.08) 0%, rgba(20, 24, 38, 0.85) 100%)',
+            marginBottom: '2rem',
+            padding: '1.75rem',
+            background: 'linear-gradient(135deg, rgba(255, 107, 0, 0.08) 0%, rgba(212, 175, 55, 0.06) 100%)',
             border: '1px solid rgba(255, 107, 0, 0.25)',
-            borderRadius: '16px',
-            boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.5)'
+            borderRadius: '14px'
           }}
         >
           <div
             style={{
               display: 'flex',
               flexWrap: 'wrap',
-              justifyContent: 'space-between',
               alignItems: 'center',
+              justifyContent: 'space-between',
               gap: '1.5rem'
             }}
           >
-            <div style={{ maxWidth: '480px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Mail size={20} style={{ color: 'var(--primary-color)' }} />
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    letterSpacing: '-0.01em'
-                  }}
-                >
+            <div style={{ flex: '1 1 280px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-color)', marginBottom: '0.35rem' }}>
+                <Mail size={20} />
+                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.15rem' }}>
                   {strings.footer.newsletterHeading}
                 </h3>
               </div>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: '0.92rem',
-                  color: 'rgba(255, 255, 255, 0.72)',
-                  lineHeight: 1.5
-                }}
-              >
+              <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.5 }}>
                 {strings.footer.newsletterDesc}
               </p>
             </div>
 
             <form
               onSubmit={handleSubscribe}
-              style={{
-                flex: '1 1 340px',
-                maxWidth: '480px',
-                width: '100%'
-              }}
+              style={{ flex: '1 1 320px', maxWidth: '480px' }}
               noValidate
             >
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '8px',
-                  flexWrap: 'wrap'
-                }}
-              >
-                <div
-                  style={{
-                    position: 'relative',
-                    flex: '1 1 240px',
-                    minWidth: '220px'
-                  }}
-                >
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: '1 1 200px' }}>
                   <Mail
                     size={16}
                     style={{
                       position: 'absolute',
-                      left: '14px',
+                      left: '12px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      color: 'rgba(255, 255, 255, 0.4)',
-                      pointerEvents: 'none'
+                      color: '#64748b'
                     }}
                   />
                   <input
@@ -383,51 +351,26 @@ export const Footer: React.FC<FooterProps> = ({
                     disabled={status === 'loading'}
                     style={{
                       width: '100%',
-                      padding: '12px 14px 12px 40px',
+                      padding: '11px 14px 11px 36px',
                       borderRadius: '8px',
-                      background: 'rgba(10, 15, 29, 0.85)',
                       border: '1px solid rgba(255, 255, 255, 0.15)',
+                      background: 'rgba(15, 23, 42, 0.85)',
                       color: '#ffffff',
-                      fontSize: '0.95rem',
-                      outline: 'none',
-                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--primary-color)';
-                      e.currentTarget.style.boxShadow = '0 0 0 2px rgba(255, 107, 0, 0.2)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                      e.currentTarget.style.boxShadow = 'none';
+                      fontSize: '0.9rem',
+                      outline: 'none'
                     }}
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={status === 'loading'}
+                  className="btn btn-primary"
                   style={{
+                    padding: '11px 20px',
+                    fontSize: '0.9rem',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '12px 22px',
-                    borderRadius: '8px',
-                    background: 'var(--primary-color)',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    border: 'none',
-                    cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                    transition: 'transform 0.15s ease, opacity 0.2s ease',
-                    opacity: status === 'loading' ? 0.75 : 1,
-                    whiteSpace: 'nowrap'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (status !== 'loading') e.currentTarget.style.opacity = '0.92';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (status !== 'loading') e.currentTarget.style.opacity = '1';
+                    gap: '6px'
                   }}
                 >
                   {status === 'loading' ? (
@@ -442,17 +385,16 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </div>
 
-              {/* Status messages */}
               {status === 'success' && (
                 <div
+                  role="status"
                   style={{
-                    marginTop: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
+                    gap: '6px',
+                    marginTop: '0.6rem',
                     color: '#4ade80',
-                    fontSize: '0.88rem',
-                    fontWeight: 500
+                    fontSize: '0.84rem'
                   }}
                 >
                   <CheckCircle2 size={16} />
@@ -462,14 +404,14 @@ export const Footer: React.FC<FooterProps> = ({
 
               {status === 'error' && (
                 <div
+                  role="alert"
                   style={{
-                    marginTop: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
+                    gap: '6px',
+                    marginTop: '0.6rem',
                     color: '#f87171',
-                    fontSize: '0.88rem',
-                    fontWeight: 500
+                    fontSize: '0.84rem'
                   }}
                 >
                   <AlertCircle size={16} />
@@ -490,50 +432,43 @@ export const Footer: React.FC<FooterProps> = ({
               gap: '1rem'
             }}
           >
-            <p style={{ margin: 0 }}>
-              {strings.footer.copyright}
-            </p>
-            <div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                fontSize: '0.85rem'
-              }}
-            >
+            <p style={{ margin: 0 }}>{strings.footer.copyright}</p>
+            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.84rem' }}>
               <button
+                type="button"
                 onClick={() => onOpenPolicy('legal-notice')}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(255, 255, 255, 0.65)',
                   cursor: 'pointer',
                   padding: 0
                 }}
               >
                 {strings.policies.legalNoticeTitle}
               </button>
-              <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>•</span>
+              <span>•</span>
               <button
+                type="button"
                 onClick={() => onOpenPolicy('privacy-policy')}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(255, 255, 255, 0.65)',
                   cursor: 'pointer',
                   padding: 0
                 }}
               >
                 {strings.policies.privacyPolicyTitle}
               </button>
-              <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>•</span>
+              <span>•</span>
               <button
+                type="button"
                 onClick={() => onOpenPolicy('terms-of-service')}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(255, 255, 255, 0.65)',
                   cursor: 'pointer',
                   padding: 0
                 }}
@@ -547,4 +482,3 @@ export const Footer: React.FC<FooterProps> = ({
     </footer>
   );
 };
-

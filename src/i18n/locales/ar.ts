@@ -2,8 +2,8 @@ import type { LocalizedStrings } from '../types.ts';
 
 export const ar: LocalizedStrings = {
   brand: {
-    name: "مؤسسة أكسز إيرا",
-    tagline: "بواسطة جوهر أكس"
+    name: "مؤسسات أكسز إيرا",
+    tagline: "بواسطة جوهر نديم"
   },
   nav: {
     home: "الرئيسية",
@@ -240,7 +240,7 @@ export const ar: LocalizedStrings = {
   },
   footer: {
     brandDesc: "تحويل الأعمال من خلال الهندسة الرقمية المبتكرة، والتصميم الموجه للتحويل، والتطبيقات عالية الأداء.",
-    founderInfo: "تأسست بواسطة جوهر أكس (جوهر نديم)",
+    founderInfo: "تأسست بواسطة جوهر نديم",
     servicesHeading: "الخدمات",
     companyHeading: "الشركة",
     policiesHeading: "سياساتنا",
@@ -254,7 +254,7 @@ export const ar: LocalizedStrings = {
     newsletterSuccess: "تم اشتراكك بنجاح! مرحباً بك في نشرة أكسز إيرا.",
     newsletterEmailRequired: "يرجى إدخال عنوان بريدك الإلكتروني.",
     newsletterError: "تعذر الاشتراك حالياً. يرجى المحاولة مرة أخرى.",
-    copyright: "© 2024–2026 مؤسسة أكسز إيرا بواسطة جوهر أكس. جميع الحقوق محفوظة."
+    copyright: "© 2024–2026 مؤسسات أكسز إيرا بواسطة جوهر نديم. جميع الحقوق محفوظة."
   },
   common: {
     backToHome: "العودة إلى الرئيسية",

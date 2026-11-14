@@ -22,7 +22,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
           <p>{strings.testimonials.sectionSubtitle}</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div className="services-grid">
           {testimonials.map((item) => (
             <div key={item.id} className="testimonial-card">
               <div>
@@ -37,8 +37,10 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
               <div className="testimonial-author">
                 <div className="avatar-circle">{item.initials}</div>
                 <div>
-                  <h4 style={{ color: 'var(--text-white)', marginBottom: '0.15rem' }}>{item.name}</h4>
-                  <p style={{ color: 'var(--primary-color)', fontSize: '0.85rem', margin: 0 }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-white)' }}>
+                    {item.name}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-light)' }}>
                     {item.role}
                   </p>
                 </div>
@@ -52,7 +54,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
             <button
               type="button"
               onClick={onOpenTestimonialsPage}
-              className="btn btn-primary"
+              className="btn btn-outline"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

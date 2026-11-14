@@ -2,8 +2,8 @@ import type { LocalizedStrings } from '../types.ts';
 
 export const zh: LocalizedStrings = {
   brand: {
-    name: "Axe's Era Enterprise",
-    tagline: "Gauhar Axe 创立"
+    name: "Axe's Era Enterprises",
+    tagline: "Gauhar Nadeem 创立"
   },
   nav: {
     home: "首页",
@@ -21,7 +21,7 @@ export const zh: LocalizedStrings = {
   },
   hero: {
     title: "以卓越数字解决方案全面提升品牌价值",
-    subtitle: "Axe's Era Enterprise 是一家屡获殊荣的数字机构，专注于高性能网站开发、移动应用与品牌设计。我们不仅构建网站，更为前瞻性企业打造可持续的数字增长引擎。",
+    subtitle: "Axe's Era Enterprises 是一家屡获殊荣的数字机构，专注于高性能网站开发、移动应用与品牌设计。我们不仅构建网站，更为前瞻性企业打造可持续的数字增长引擎。",
     startProject: "开启项目",
     exploreCaseStudies: "浏览案例研究"
   },
@@ -32,7 +32,7 @@ export const zh: LocalizedStrings = {
     sectionTitle: "关于我们的机构",
     sectionSubtitle: "我们热衷于打造助力企业在现代数字时代蓬勃发展的创新解决方案。",
     heading: "您的数字化转型战略伙伴",
-    paragraph1: "由 Gauhar Axe 创立的 Axe's Era Enterprise 已成长为拥有超过 3 年行业经验的领先数字机构。我们将创意设计与工程实力相结合，已协助数百家企业建立数字影响力并达成商业目标。",
+    paragraph1: "由 Gauhar Axe 创立的 Axe's Era Enterprises 已成长为拥有超过 3 年行业经验的领先数字机构。我们将创意设计与工程实力相结合，已协助数百家企业建立数字影响力并达成商业目标。",
     paragraph2: "我们致力于与客户建立长期伙伴关系，深入理解其独特挑战，并量身定制能带来真实商业价值的解决方案。",
     yearsLabel: "年行业经验",
     expertsLabel: "数字专家",
@@ -143,7 +143,7 @@ export const zh: LocalizedStrings = {
     sectionTitle: "认识我们的创始人",
     sectionSubtitle: "以远见卓识引领数字卓越",
     founderRole: "首席执行官兼创始人",
-    founderBio: "以卓越数字战略为导向的远见领导力。Gauhar Axe 创立了 Axe's Era Enterprise，专注于打造高转化率的 Web 平台、前沿移动应用与标志性品牌形象。",
+    founderBio: "以卓越数字战略为导向的远见领导力。Gauhar Axe 创立了 Axe's Era Enterprises，专注于打造高转化率的 Web 平台、前沿移动应用与标志性品牌形象。",
     cta: "认识创始人与工程领导团队（团队页面） →"
   },
   testimonials: {
@@ -164,7 +164,7 @@ export const zh: LocalizedStrings = {
     sectionTitle: "携手共创非凡数字未来",
     sectionSubtitle: "准备好全面升级您的数字形象了吗？立即预约专家战略咨询。",
     getInTouch: "联系我们",
-    description: "与 Axe's Era Enterprise 携手开启您的下一个数字成功篇章。我们已准备好倾听需求、制定战略并精准落地。",
+    description: "与 Axe's Era Enterprises 携手开启您的下一个数字成功篇章。我们已准备好倾听需求、制定战略并精准落地。",
     urgentNotice: "提示：若未能及时收到邮件回复，请点击 WhatsApp 按钮获取即时在线响应！",
     addressLabel: "地址",
     phoneLabel: "电话",
@@ -180,7 +180,7 @@ export const zh: LocalizedStrings = {
   policies: {
     badge: "治理与信任",
     sectionTitle: "公司政策与合规",
-    sectionSubtitle: "Axe's Era Enterprise 秉持最高商业诚信运营。欢迎查阅我们的官方免责声明、数据保护框架与客户服务协议。",
+    sectionSubtitle: "Axe's Era Enterprises 秉持最高商业诚信运营。欢迎查阅我们的官方免责声明、数据保护框架与客户服务协议。",
     legalNoticeTitle: "法律声明",
     legalNoticeDesc: "官方企业注册信息、创始人 Gauhar Axe (Gauhar Nadeem) 权属声明、专业资质与知识产权保护。",
     privacyPolicyTitle: "隐私政策",
@@ -197,7 +197,7 @@ export const zh: LocalizedStrings = {
     cta: "浏览完整知识库与全部问答（FAQ 页面） →",
     items: {
       services: {
-        question: "Axe's Era Enterprise 提供哪些核心服务？",
+        question: "Axe's Era Enterprises 提供哪些核心服务？",
         answer: "我们提供高性能网站开发、定制移动应用开发、品牌视觉设计、SEO 优化以及全方位数字营销解决方案。"
       },
       process: {
@@ -240,7 +240,7 @@ export const zh: LocalizedStrings = {
   },
   footer: {
     brandDesc: "通过创新的数字架构、高转化设计与高性能应用软件助力企业实现跨越式增长。",
-    founderInfo: "创始人：Gauhar Axe (Gauhar Nadeem)",
+    founderInfo: "创始人：Gauhar Nadeem",
     servicesHeading: "服务项目",
     companyHeading: "公司导航",
     policiesHeading: "合规政策",
@@ -254,7 +254,7 @@ export const zh: LocalizedStrings = {
     newsletterSuccess: "订阅成功！欢迎加入 Axe's Era 前沿洞察。",
     newsletterEmailRequired: "请输入您的电子邮箱地址。",
     newsletterError: "暂时无法完成订阅，请稍后重试。",
-    copyright: "© 2024–2026 Axe's Era Enterprise (Gauhar Axe)。保留所有权利。"
+    copyright: "© 2024–2026 Axe's Era Enterprises (Gauhar Nadeem)。保留所有权利。"
   },
   common: {
     backToHome: "返回首页",

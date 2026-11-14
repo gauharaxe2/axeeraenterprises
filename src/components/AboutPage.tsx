@@ -99,11 +99,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ generalInfo, onBackToHome,
       />
 
       <EditorialHero
-        eyebrow="About Axe's Era Enterprise"
+        eyebrow="About Axe's Era Enterprises"
         title={aboutTitle || 'Your Digital Transformation Partner'}
         description={
           aboutParagraph1 ||
-          "Founded by Gauhar Axe, Axe's Era Enterprise has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results."
+          "Founded by Gauhar Axe, Axe's Era Enterprises has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results."
         }
       >
         <p className="editorial-copy">
@@ -141,7 +141,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ generalInfo, onBackToHome,
           <div className="editorial-media">
             <EditorialImage
               src={aboutImageUrl || 'https://i.postimg.cc/64KnkhQJ/Picsart-26-08-08-06-41-12-297.jpg'}
-              alt="Axe's Era Enterprise leadership"
+              alt="Axe's Era Enterprises leadership"
               loading="eager"
             />
           </div>

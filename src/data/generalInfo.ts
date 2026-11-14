@@ -2,9 +2,9 @@ import { AgencyGeneralInfo } from '../types';
 
 export const initialGeneralInfo: AgencyGeneralInfo = {
   heroTitle: "Elevate Your Brand with Premium Digital Solutions",
-  heroSubtitle: "Axe's Era Enterprise is an award-winning digital agency specializing in high-performance web development, mobile apps, and brand design. We don't just build websites; we engineer digital growth for forward-thinking organizations.",
+  heroSubtitle: "Axe's Era Enterprises is an award-winning digital agency specializing in high-performance web development, mobile apps, and brand design. We don't just build websites; we engineer digital growth for forward-thinking organizations.",
   aboutTitle: "Your Digital Transformation Partner",
-  aboutParagraph1: "Founded by Gauhar Axe, Axe's Era Enterprise has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results.",
+  aboutParagraph1: "Founded by Gauhar Axe, Axe's Era Enterprises has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results.",
   aboutParagraph2: "We believe in building long-term partnerships with our clients, understanding their unique challenges, and crafting tailored solutions that drive real business impact.",
   aboutImageUrl: "https://i.postimg.cc/64KnkhQJ/Picsart-26-08-08-06-41-12-297.jpg",
   stats: {

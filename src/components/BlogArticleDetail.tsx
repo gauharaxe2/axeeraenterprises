@@ -125,7 +125,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
   };
 
   const handleShareWhatsApp = () => {
-    const text = encodeURIComponent(`Check out this insightful article "${blog.title}" by Axe's Era Enterprise:\n${window.location.href}`);
+    const text = encodeURIComponent(`Check out this insightful article "${blog.title}" by Axe's Era Enterprises:\n${window.location.href}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
@@ -658,7 +658,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                   Published by {blog.author || 'Gauhar Axe'}
                 </h4>
                 <p style={{ margin: 0, fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                  CEO & Founder at Axe's Era Enterprise. Leading digital transformation, high-velocity web engineering, and brand positioning for high-growth global businesses.
+                  CEO & Founder at Axe's Era Enterprises. Leading digital transformation, high-velocity web engineering, and brand positioning for high-growth global businesses.
                 </p>
               </div>
               <button

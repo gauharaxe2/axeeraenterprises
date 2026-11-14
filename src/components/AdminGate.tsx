@@ -72,7 +72,7 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
             marginBottom: '0.5rem'
           }}
         >
-          Axe&apos;s Era Enterprise
+          Axe&apos;s Era Enterprises
         </p>
         <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#f8fafc' }}>Admin sign in</h1>
         <p style={{ marginBottom: '1.5rem', color: '#94a3b8' }}>

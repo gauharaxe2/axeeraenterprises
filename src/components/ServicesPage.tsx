@@ -217,7 +217,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   const faqs = [
     {
-      q: 'How does Axe\'s Era Enterprise handle intellectual property (IP) and code ownership?',
+      q: 'How does Axe\'s Era Enterprises handle intellectual property (IP) and code ownership?',
       a: 'We transfer 100% full intellectual property rights, repository access, and design assets to you immediately upon final project sign-off and milestone completion. You own your code completely with zero vendor lock-in.'
     },
     {
@@ -916,7 +916,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             Ready to Architect Your Digital Solution?
           </h2>
           <p style={{ color: 'var(--text-light)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-            Partner with Axe\'s Era Enterprise. Schedule a technical discovery session directly with founder Gauhar Axe and receive a comprehensive architecture roadmap.
+            Partner with Axe\'s Era Enterprises. Schedule a technical discovery session directly with founder Gauhar Axe and receive a comprehensive architecture roadmap.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <button

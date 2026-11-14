@@ -19,7 +19,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
     if (selectedCategory === 'All') {
       return {
         tagline: 'Agency Insights & Knowledge Hub',
-        description: 'Architectural breakdowns, engineering blueprints, design systems, and conversion growth strategies published by Gauhar Axe and the Axe\'s Era Enterprise team.'
+        description: 'Architectural breakdowns, engineering blueprints, design systems, and conversion growth strategies published by Gauhar Axe and the Axe\'s Era Enterprises team.'
       };
     }
     const found = BLOG_CATEGORY_METAS.find((m) => m.name === selectedCategory);

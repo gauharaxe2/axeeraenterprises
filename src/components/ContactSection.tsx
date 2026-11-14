@@ -95,7 +95,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       setBotField('');
 
       onShowNotification(
-        "Thank you for your message! Axe's Era Enterprise will review your request and get back to you shortly.",
+        "Thank you for your message! Axe's Era Enterprises will review your request and get back to you shortly.",
         'success'
       );
     } catch {
@@ -125,13 +125,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         <div className="contact-content">
           <div className="contact-info">
             <h3>{strings.contact.getInTouch}</h3>
-            <p style={{ color: 'var(--text-light)', lineHeight: 1.7, marginBottom: '1.25rem' }}>
-              {strings.contact.description}
-            </p>
+            <p>{strings.contact.description}</p>
 
-            <div className="urgent-note">
-              {displayUrgentNotice}
-            </div>
+            <div className="urgent-note">{displayUrgentNotice}</div>
 
             <div className="contact-details">
               <div className="contact-item">
@@ -156,7 +152,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
               <div className="contact-item">
                 <div className="contact-icon">
-                  <Mail size={22} />
+                  <Mail size={20} aria-hidden="true" />
                 </div>
                 <div className="contact-text">
                   <h4>{strings.contact.emailLabel}</h4>
