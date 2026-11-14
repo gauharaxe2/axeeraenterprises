@@ -182,7 +182,7 @@ export const de: LocalizedStrings = {
     sectionTitle: "Unsere Richtlinien",
     sectionSubtitle: "Axe's Era Enterprises handelt mit höchster Integrität. Informieren Sie sich über unsere rechtlichen Hinweise, Datenschutzstandards und Vertragsbedingungen.",
     legalNoticeTitle: "Impressum / Rechtliches",
-    legalNoticeDesc: "Offizielle Unternehmensangaben, Eigentümerschaft durch Gründer Gauhar Axe (Gauhar Nadeem) und Schutz des geistigen Eigentums.",
+    legalNoticeDesc: "Offizielle Unternehmensangaben, Eigentümerschaft durch Gründer Gauhar Nadeem (auch bekannt als Gauhar Axe) und Schutz des geistigen Eigentums.",
     privacyPolicyTitle: "Datenschutzerklärung",
     privacyPolicyDesc: "Kein Verkauf personenbezogener Daten, transparente Auftragsverarbeiter (AWS, Cloudflare, Stripe) und volle DSGVO/CCPA-Rechte.",
     termsOfServiceTitle: "Nutzungsbedingungen",

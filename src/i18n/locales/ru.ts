@@ -182,7 +182,7 @@ export const ru: LocalizedStrings = {
     sectionTitle: "Наши Политики",
     sectionSubtitle: "Axe's Era Enterprises действует с безупречной деловой добросовестностью. Ознакомьтесь с правовой информацией, защитой данных и условиями работы.",
     legalNoticeTitle: "Юридическая информация",
-    legalNoticeDesc: "Официальная регистрация предприятия, права основателя Gauhar Axe (Gauhar Nadeem), лицензии и защита интеллектуальной собственности.",
+    legalNoticeDesc: "Официальная регистрация предприятия, права основателя Gauhar Nadeem (также известного как Gauhar Axe), лицензии и защита интеллектуальной собственности.",
     privacyPolicyTitle: "Политика конфиденциальности",
     privacyPolicyDesc: "Отказ от продажи персональных данных, прозрачная работа с обработчиками (AWS, Cloudflare, Stripe) и соблюдение прав GDPR/CCPA.",
     termsOfServiceTitle: "Условия обслуживания",

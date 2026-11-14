@@ -182,7 +182,7 @@ export const en: LocalizedStrings = {
     sectionTitle: "Our Policies",
     sectionSubtitle: "Axe's Era Enterprises operates with uncompromised integrity. Explore our official legal disclosures, data protection frameworks, and client engagement covenants.",
     legalNoticeTitle: "Legal Notice",
-    legalNoticeDesc: "Official enterprise registry, ownership by founder Gauhar Axe (Gauhar Nadeem), professional licensing, intellectual property safeguards, and digital liability disclaimers.",
+    legalNoticeDesc: "Official enterprise registry, ownership by founder Gauhar Nadeem (Also Known as Gauhar Axe), professional licensing, intellectual property safeguards, and digital liability disclaimers.",
     privacyPolicyTitle: "Privacy Policy",
     privacyPolicyDesc: "Our commitment to zero data monetization. Transparent collection of client consultation notes, secure sub-processors (AWS, Cloudflare, Stripe), and full global GDPR/CCPA user rights.",
     termsOfServiceTitle: "Terms of Service",

@@ -182,7 +182,7 @@ export const fr: LocalizedStrings = {
     sectionTitle: "Nos Politiques",
     sectionSubtitle: "Axe's Era Enterprises agit avec une intégrité sans compromis. Consultez nos mentions légales, cadres de confidentialité et conditions.",
     legalNoticeTitle: "Mentions Légales",
-    legalNoticeDesc: "Registre officiel de l'entreprise, propriété du fondateur Gauhar Axe (Gauhar Nadeem), licences et protection de la propriété intellectuelle.",
+    legalNoticeDesc: "Registre officiel de l'entreprise, propriété du fondateur Gauhar Nadeem (alias Gauhar Axe), licences et protection de la propriété intellectuelle.",
     privacyPolicyTitle: "Politique de Confidentialité",
     privacyPolicyDesc: "Engagement zéro revente de données, transparence sur les sous-traitants sécurisés et respect total des droits RGPD/CCPA.",
     termsOfServiceTitle: "Conditions d'Utilisation",

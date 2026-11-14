@@ -182,7 +182,7 @@ export const ja: LocalizedStrings = {
     sectionTitle: "企業ポリシー",
     sectionSubtitle: "Axe's Era Enterprises は揺るぎない誠実さで事業を運営しています。法的開示、データ保護方針、契約条件をご確認ください。",
     legalNoticeTitle: "法的表記",
-    legalNoticeDesc: "公式企業登録情報、創業者 Gauhar Axe（Gauhar Nadeem）の所有権、ライセンスおよび知的財産保護。",
+    legalNoticeDesc: "公式企業登録情報、創業者 Gauhar Nadeem（別名 Gauhar Axe）の所有権、ライセンスおよび知的財産保護。",
     privacyPolicyTitle: "プライバシーポリシー",
     privacyPolicyDesc: "個人データの販売ゼロ宣言、安全な外部処理基盤（AWS・Cloudflare・Stripe）、GDPR/CCPA準拠の権利保護。",
     termsOfServiceTitle: "利用規約",

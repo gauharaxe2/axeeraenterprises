@@ -36,11 +36,11 @@ export const POLICIES_DATA: Record<PolicyType, PolicyDocument> = {
         title: '1. Enterprise Identification & Ownership',
         paragraphs: [
           'This web platform and all associated digital products and client portals are owned and operated by Axe\'s Era Enterprises, a premier digital architecture agency.',
-          'The agency operates under the visionary leadership and technical direction of its Founder & Principal Architect, Gauhar Axe (legal name: Gauhar Nadeem).'
+          'The agency operates under the visionary leadership and technical direction of its Founder & Principal Architect, Gauhar Nadeem (Also Known as Gauhar Axe).'
         ],
         listItems: [
           'Enterprise Name: Axe\'s Era Enterprises',
-          'Founder & CEO: Gauhar Axe (Gauhar Nadeem)',
+          'Founder & CEO: Gauhar Nadeem (Gauhar Axe)',
           'Headquarters / Principal Address: D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan',
           'Primary Official Inquiries: gauharaxe@outlook.com',
           'Direct Phone Numbers: +92-315-7338694 / +92-339-0096853',
@@ -60,7 +60,7 @@ export const POLICIES_DATA: Record<PolicyType, PolicyDocument> = {
         id: 'intellectual-property',
         title: '3. Intellectual Property Rights & Copyright',
         paragraphs: [
-          'All contents published on this site—including but not limited to software code, architecture blueprints, text copy, graphic assets, interface components, logo marks, icons, and audio/visual materials—are the exclusive intellectual property of Axe\'s Era Enterprises and Gauhar Axe, unless otherwise explicitly noted.',
+          'All contents published on this site—including but not limited to software code, architecture blueprints, text copy, graphic assets, interface components, logo marks, icons, and audio/visual materials—are the exclusive intellectual property of Axe\'s Era Enterprises and Gauhar Nadeem (Also Known as Gauhar Axe), unless otherwise explicitly noted.',
           'Any reproduction, distribution, modification, public display, or extraction of code or assets without prior explicit written authorization from Axe\'s Era Enterprises is strictly prohibited under international copyright treaties, trademark conventions, and intellectual property statutes.'
         ]
       },
@@ -112,7 +112,7 @@ export const POLICIES_DATA: Record<PolicyType, PolicyDocument> = {
         title: '2. Data Controller Information',
         paragraphs: [
           'The Data Controller responsible for the processing of your personal data on this platform is:',
-          'Axe\'s Era Enterprises\nAttention: Data Protection & Legal Compliance\nFounder: Gauhar Axe (Gauhar Nadeem)\nEmail: gauharaxe@outlook.com\nAddress: D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan'
+          'Axe\'s Era Enterprises\nAttention: Data Protection & Legal Compliance\nFounder & CEO: Gauhar Nadeem (Gauhar Axe)\nEmail: gauharaxe@outlook.com\nAddress: D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan'
         ]
       },
       {
@@ -201,7 +201,7 @@ export const POLICIES_DATA: Record<PolicyType, PolicyDocument> = {
         id: 'agreement-scope',
         title: '1. Agreement & Acceptance of Terms',
         paragraphs: [
-          'These Terms of Service ("Terms") constitute a legally binding agreement between you (the "Client", "Partner", or "User") and Axe\'s Era Enterprises ("Agency", "We", "Us"), founded by Gauhar Axe (Gauhar Nadeem).',
+          'These Terms of Service ("Terms") constitute a legally binding agreement between you (the "Client", "Partner", or "User") and Axe\'s Era Enterprises ("Agency", "We", "Us"), founded by Gauhar Nadeem (Also Known as Gauhar Axe).',
           'By accessing this website, requesting a project proposal, commissioning digital services, or executing a Statement of Work (SOW), you agree to be bound by these Terms in full.'
         ]
       },

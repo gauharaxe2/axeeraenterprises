@@ -182,7 +182,7 @@ export const zh: LocalizedStrings = {
     sectionTitle: "公司政策与合规",
     sectionSubtitle: "Axe's Era Enterprises 秉持最高商业诚信运营。欢迎查阅我们的官方免责声明、数据保护框架与客户服务协议。",
     legalNoticeTitle: "法律声明",
-    legalNoticeDesc: "官方企业注册信息、创始人 Gauhar Axe (Gauhar Nadeem) 权属声明、专业资质与知识产权保护。",
+    legalNoticeDesc: "官方企业注册信息、创始人 Gauhar Nadeem（又名 Gauhar Axe）权属声明、专业资质与知识产权保护。",
     privacyPolicyTitle: "隐私政策",
     privacyPolicyDesc: "零数据变现承诺，透明的咨询信息采集说明，以及完全符合 GDPR/CCPA 标准的用户隐私权利。",
     termsOfServiceTitle: "服务条款",
