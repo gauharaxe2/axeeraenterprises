@@ -683,6 +683,27 @@
   padding: 0.4rem 0.35rem 0.6rem;
 }
 
+.editorial-video-panel {
+  padding: 1.25rem;
+}
+
+.editorial-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b1120;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.editorial-video-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .editorial-socials {
   display: flex;
   flex-wrap: wrap;

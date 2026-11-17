@@ -153,6 +153,28 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
       </EditorialSection>
 
       <EditorialSection
+        id="ceo-introduction"
+        eyebrow="CEO Introduction"
+        title="Meet Gauhar Nadeem — Leadership & Engineering Vision"
+        description="Watch our Founder & CEO share how Axe's Era Enterprises delivers full-stack platforms, Shopify stores, and WordPress architectures."
+      >
+        <div className="editorial-panel editorial-video-panel">
+          <div className="editorial-video-frame">
+            <iframe
+              width="1491"
+              height="839"
+              src="https://www.youtube.com/embed/7xiVMuv-A2g"
+              title="Full-Stack, Shopify & Wordpress Expert | Gauhar Nadeem | Axe's Era Enterprises"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </EditorialSection>
+
+      <EditorialSection
         id="disciplines"
         eyebrow="Core Capabilities"
         title="Technical Disciplines Mastered"
