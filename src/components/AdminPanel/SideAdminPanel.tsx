@@ -43,6 +43,17 @@ import {
   BLOG_CATEGORIES
 } from '../../types';
 import { normalizeBlogSections, aggregateParagraphs, collectArticleImages } from '../../utils/blogUtils';
+import {
+  ACCOUNT_LINK_PRESETS,
+  type AccountLinkPreset,
+  type EditableAccountLink,
+  collectTeamSocialLinks,
+  createEditableAccountLink,
+  editableLinksToMemberSocials,
+  getAccountPresetMeta,
+  memberToEditableLinks,
+  removeEditableAccountLink
+} from '../../utils/teamSocials';
 import { QueriesPanel } from './QueriesPanel';
 
 interface SideAdminPanelProps {
@@ -152,6 +163,10 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   // Team state for multiple team members
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMemberData | null>(null);
   const [isCreatingTeamMember, setIsCreatingTeamMember] = useState(false);
+  const [editingTeamLinks, setEditingTeamLinks] = useState<EditableAccountLink[]>([]);
+  const [newAccountPreset, setNewAccountPreset] = useState<AccountLinkPreset>('instagramCompany');
+  const [newAccountLabel, setNewAccountLabel] = useState('');
+  const [newAccountUrl, setNewAccountUrl] = useState('');
 
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [isCreatingTestimonial, setIsCreatingTestimonial] = useState(false);
@@ -2020,12 +2035,16 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       title: 'Senior Software Engineer',
                       bio: 'Experienced technologist driving high performance web and app solutions.',
                       imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-                      socials: {
-                        linkedin: 'https://linkedin.com',
-                        twitter: 'https://twitter.com',
-                        github: 'https://github.com'
-                      }
+                      socials: {},
+                      extraLinks: []
                     });
+                    setEditingTeamLinks([
+                      createEditableAccountLink('linkedin', '', ''),
+                      createEditableAccountLink('instagram', '', '')
+                    ]);
+                    setNewAccountPreset('instagramCompany');
+                    setNewAccountLabel('');
+                    setNewAccountUrl('');
                   }}
                   className="btn btn-primary"
                   style={{ padding: '6px 14px', fontSize: '0.8rem' }}
@@ -2093,45 +2112,215 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   />
                 </div>
 
-                <h5 style={{ color: 'var(--primary-color)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                  Social & Portfolio Profiles
-                </h5>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '1.25rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>LinkedIn URL</label>
-                    <input
-                      type="url"
-                      value={editingTeamMember?.socials?.linkedin || ''}
-                      onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, socials: { ...editingTeamMember.socials, linkedin: e.target.value } } : null)}
-                      style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
-                    />
+                {/* Unified Create & Delete Account Links Editor */}
+                <div style={{ marginBottom: '1.25rem', padding: '0.9rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
+                    <div>
+                      <h5 style={{ color: 'var(--primary-color)', fontSize: '0.88rem', margin: 0 }}>
+                        Account &amp; Social Links ({editingTeamLinks.length})
+                      </h5>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: 'var(--text-light)' }}>
+                        Create new links (CEO accounts, Company pages, Facebook, Instagram, etc.) or delete any existing link.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Twitter / X URL</label>
-                    <input
-                      type="url"
-                      value={editingTeamMember?.socials?.twitter || ''}
-                      onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, socials: { ...editingTeamMember.socials, twitter: e.target.value } } : null)}
-                      style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
-                    />
+
+                  {/* Quick Create Buttons */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '0.85rem' }}>
+                    {(
+                      [
+                        ['instagram', 'Instagram (CEO)'],
+                        ['instagramCompany', 'Instagram (Company)'],
+                        ['linkedin', 'LinkedIn (CEO)'],
+                        ['linkedinCompany', 'LinkedIn (Company)'],
+                        ['facebook', 'Facebook'],
+                        ['youtube', 'YouTube'],
+                        ['website', 'Custom Link']
+                      ] as Array<[AccountLinkPreset, string]>
+                    ).map(([presetKey, shortLabel]) => (
+                      <button
+                        key={presetKey}
+                        type="button"
+                        onClick={() => {
+                          setEditingTeamLinks((prev) => [
+                            ...prev,
+                            createEditableAccountLink(presetKey)
+                          ]);
+                        }}
+                        className="btn btn-outline"
+                        style={{ padding: '4px 9px', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <Plus size={12} /> {shortLabel}
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Upwork URL</label>
-                    <input
-                      type="url"
-                      value={editingTeamMember?.socials?.upwork || ''}
-                      onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, socials: { ...editingTeamMember.socials, upwork: e.target.value } } : null)}
-                      style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>GitHub / Portfolio URL</label>
-                    <input
-                      type="url"
-                      value={editingTeamMember?.socials?.github || ''}
-                      onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, socials: { ...editingTeamMember.socials, github: e.target.value } } : null)}
-                      style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
-                    />
+
+                  {/* Active Account Links List (each row editable & deletable) */}
+                  {editingTeamLinks.length === 0 ? (
+                    <p style={{ margin: '0 0 0.85rem', fontSize: '0.78rem', color: '#94a3b8' }}>
+                      No account links attached yet. Use the quick buttons above or the form below to create a link.
+                    </p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '0.9rem' }}>
+                      {editingTeamLinks.map((linkItem, index) => {
+                        const presetMeta = getAccountPresetMeta(linkItem.preset);
+                        return (
+                          <div
+                            key={linkItem.id}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                              background: '#1e293b',
+                              padding: '8px 10px',
+                              borderRadius: '8px',
+                              border: '1px solid #334155'
+                            }}
+                          >
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '6px', alignItems: 'center' }}>
+                              <select
+                                aria-label={`Account link ${index + 1} type`}
+                                value={linkItem.preset}
+                                onChange={(e) => {
+                                  const nextPreset = e.target.value as AccountLinkPreset;
+                                  const nextMeta = getAccountPresetMeta(nextPreset);
+                                  setEditingTeamLinks((prev) =>
+                                    prev.map((item) =>
+                                      item.id === linkItem.id
+                                        ? {
+                                            ...item,
+                                            preset: nextMeta.preset,
+                                            platform: nextMeta.platform,
+                                            label:
+                                              !item.label || item.label === presetMeta.label
+                                                ? nextMeta.label
+                                                : item.label
+                                          }
+                                        : item
+                                    )
+                                  );
+                                }}
+                                style={{ padding: '6px 8px', borderRadius: '6px', background: '#0f172a', border: '1px solid #475569', color: '#fff', fontSize: '0.76rem' }}
+                              >
+                                {ACCOUNT_LINK_PRESETS.map((opt) => (
+                                  <option key={opt.preset} value={opt.preset}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <input
+                                type="text"
+                                aria-label={`Account link ${index + 1} label`}
+                                placeholder="Display label"
+                                value={linkItem.label}
+                                onChange={(e) => {
+                                  const nextVal = e.target.value;
+                                  setEditingTeamLinks((prev) =>
+                                    prev.map((item) => (item.id === linkItem.id ? { ...item, label: nextVal } : item))
+                                  );
+                                }}
+                                style={{ padding: '6px 8px', borderRadius: '6px', background: '#0f172a', border: '1px solid #475569', color: '#fff', fontSize: '0.76rem' }}
+                              />
+
+                              <button
+                                type="button"
+                                aria-label={`Delete ${linkItem.label || presetMeta.label} link`}
+                                title={`Delete ${linkItem.label || presetMeta.label} link`}
+                                onClick={() => setEditingTeamLinks((prev) => removeEditableAccountLink(prev, linkItem.id))}
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                                  color: '#f87171',
+                                  padding: '5px 8px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 600
+                                }}
+                              >
+                                <Trash2 size={13} /> Delete
+                              </button>
+                            </div>
+
+                            <input
+                              type="url"
+                              aria-label={`Account link ${index + 1} URL`}
+                              placeholder={presetMeta.placeholder}
+                              value={linkItem.url}
+                              onChange={(e) => {
+                                const nextUrl = e.target.value;
+                                setEditingTeamLinks((prev) =>
+                                  prev.map((item) => (item.id === linkItem.id ? { ...item, url: nextUrl } : item))
+                                );
+                              }}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#0f172a', border: '1px solid #475569', color: '#fff', fontSize: '0.78rem' }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Explicit Create New Account Link Bar */}
+                  <div style={{ paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '0.75rem', color: 'var(--primary-color)', fontWeight: 600 }}>
+                      Create New Account Link
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '6px' }}>
+                      <select
+                        aria-label="New account link type"
+                        value={newAccountPreset}
+                        onChange={(e) => setNewAccountPreset(e.target.value as AccountLinkPreset)}
+                        style={{ padding: '6px 8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.78rem' }}
+                      >
+                        {ACCOUNT_LINK_PRESETS.map((opt) => (
+                          <option key={opt.preset} value={opt.preset}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        aria-label="New account link label"
+                        placeholder={`Label (default: ${getAccountPresetMeta(newAccountPreset).label})`}
+                        value={newAccountLabel}
+                        onChange={(e) => setNewAccountLabel(e.target.value)}
+                        style={{ padding: '6px 8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.78rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <input
+                        type="url"
+                        aria-label="New account link URL"
+                        placeholder={getAccountPresetMeta(newAccountPreset).placeholder}
+                        value={newAccountUrl}
+                        onChange={(e) => setNewAccountUrl(e.target.value)}
+                        style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.78rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newAccountUrl.trim()) {
+                            onShowToast('Please enter a URL for the account link', 'error');
+                            return;
+                          }
+                          setEditingTeamLinks((prev) => [
+                            ...prev,
+                            createEditableAccountLink(newAccountPreset, newAccountLabel, newAccountUrl)
+                          ]);
+                          setNewAccountLabel('');
+                          setNewAccountUrl('');
+                        }}
+                        className="btn btn-primary"
+                        style={{ padding: '6px 12px', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
+                      >
+                        <Plus size={14} /> Create Link
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -2141,6 +2330,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     onClick={() => {
                       setEditingTeamMember(null);
                       setIsCreatingTeamMember(false);
+                      setEditingTeamLinks([]);
                     }}
                     className="btn btn-outline"
                     style={{ padding: '6px 14px', fontSize: '0.85rem' }}
@@ -2154,15 +2344,24 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         onShowToast('Please provide member name and title', 'error');
                         return;
                       }
+                      const { socials, extraLinks } = editableLinksToMemberSocials(editingTeamLinks);
+                      const sanitizedMember: TeamMemberData = {
+                        ...editingTeamMember,
+                        name: editingTeamMember.name.trim(),
+                        title: editingTeamMember.title.trim(),
+                        socials,
+                        extraLinks
+                      };
                       if (isCreatingTeamMember) {
-                        onAddTeamMember(editingTeamMember);
-                        onShowToast(`Added ${editingTeamMember.name} to the team!`, 'success');
+                        onAddTeamMember(sanitizedMember);
+                        onShowToast(`Added ${sanitizedMember.name} to the team!`, 'success');
                       } else {
-                        onUpdateTeamMember(editingTeamMember);
-                        onShowToast(`Updated ${editingTeamMember.name}!`, 'success');
+                        onUpdateTeamMember(sanitizedMember);
+                        onShowToast(`Updated ${sanitizedMember.name}!`, 'success');
                       }
                       setEditingTeamMember(null);
                       setIsCreatingTeamMember(false);
+                      setEditingTeamLinks([]);
                     }}
                     className="btn btn-primary"
                     style={{ padding: '6px 16px', fontSize: '0.85rem' }}
@@ -2175,7 +2374,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Team Members List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {data.team.map((member) => (
+              {data.team.map((member) => {
+                const configuredLinks = collectTeamSocialLinks(member);
+                return (
                 <div
                   key={member.id}
                   style={{
@@ -2201,11 +2402,23 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-light)', maxWidth: '380px' }}>
                       {member.bio}
                     </p>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#94a3b8' }}>
+                      {configuredLinks.length} profile {configuredLinks.length === 1 ? 'link' : 'links'} active
+                      {configuredLinks.length > 0 ? `: ${configuredLinks.map((l) => l.label).slice(0, 4).join(', ')}${configuredLinks.length > 4 ? ` +${configuredLinks.length - 4} more` : ''}` : ''}
+                    </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
                       onClick={() => {
-                        setEditingTeamMember(member);
+                        setEditingTeamMember({
+                          ...member,
+                          socials: member.socials || {},
+                          extraLinks: member.extraLinks || []
+                        });
+                        setEditingTeamLinks(memberToEditableLinks(member));
+                        setNewAccountPreset('instagramCompany');
+                        setNewAccountLabel('');
+                        setNewAccountUrl('');
                         setIsCreatingTeamMember(false);
                       }}
                       style={{
@@ -2238,7 +2451,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

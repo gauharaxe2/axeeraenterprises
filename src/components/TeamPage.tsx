@@ -1,6 +1,8 @@
 import React from 'react';
-import { ArrowRight, Award, CheckCircle2, Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
+import { ArrowRight, Award, CheckCircle2 } from 'lucide-react';
 import { TeamMemberData } from '../types';
+import { collectTeamSocialLinks } from '../utils/teamSocials';
+import { SocialPlatformIcon } from './SocialPlatformIcon';
 import {
   EditorialCta,
   EditorialHero,
@@ -25,11 +27,13 @@ const fallbackFounder: TeamMemberData = {
   imageUrl: 'https://i.postimg.cc/PqjZ6d8q/Picsart-26-08-08-06-40-52-321.jpg',
   socials: {
     linkedin: 'https://www.linkedin.com/in/gauharaxe/',
+    linkedinCompany: '',
     twitter: 'https://twitter.com/gauharaxe',
     upwork: 'https://www.upwork.com/freelancers/~0131edfc6b7fb25125',
     youtube: 'https://www.youtube.com/@gauharaxe',
     facebook: 'https://www.facebook.com/gauharaxe',
-    instagram: 'https://www.instagram.com/gauharaxe'
+    instagram: 'https://www.instagram.com/gauharaxe',
+    instagramCompany: ''
   }
 };
 
@@ -52,17 +56,7 @@ const disciplines = [
   }
 ];
 
-function socialLinks(member: TeamMemberData) {
-  const items = [
-    { href: member.socials.linkedin, label: 'LinkedIn Profile', icon: <Linkedin size={15} aria-hidden="true" /> },
-    { href: member.socials.upwork, label: 'Upwork Agency Profile', icon: <Award size={15} aria-hidden="true" /> },
-    { href: member.socials.twitter, label: 'X (Twitter)', icon: <Twitter size={15} aria-hidden="true" /> },
-    { href: member.socials.youtube, label: 'YouTube', icon: <Youtube size={15} aria-hidden="true" /> },
-    { href: member.socials.facebook, label: 'Facebook', icon: <Facebook size={15} aria-hidden="true" /> },
-    { href: member.socials.instagram, label: 'Instagram', icon: <Instagram size={15} aria-hidden="true" /> }
-  ];
-  return items.filter((item) => item.href);
-}
+
 
 export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContactClick }) => {
   const members = team.length > 0 ? team : [fallbackFounder];
@@ -112,9 +106,9 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
                 Verified Executive Channels
               </p>
               <div className="editorial-socials">
-                {socialLinks(founder).map((item) => (
-                  <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">
-                    {item.icon}
+                {collectTeamSocialLinks(founder).map((item) => (
+                  <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer">
+                    <SocialPlatformIcon platform={item.platform} size={15} />
                     {item.label}
                   </a>
                 ))}
@@ -135,8 +129,9 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
                   <p className="editorial-kicker-inline">{member.title}</p>
                   <p className="editorial-muted">{member.bio}</p>
                   <div className="editorial-socials">
-                    {socialLinks(member).map((item) => (
-                      <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">
+                    {collectTeamSocialLinks(member).map((item) => (
+                      <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer">
+                        <SocialPlatformIcon platform={item.platform} size={15} />
                         {item.label}
                       </a>
                     ))}

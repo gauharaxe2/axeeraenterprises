@@ -87,6 +87,23 @@ export interface PartnerLogo {
   websiteUrl?: string;
 }
 
+export type SocialPlatform =
+  | 'facebook'
+  | 'instagram'
+  | 'youtube'
+  | 'linkedin'
+  | 'twitter'
+  | 'upwork'
+  | 'github'
+  | 'website';
+
+export interface TeamExtraLink {
+  id: string;
+  platform: SocialPlatform;
+  label: string;
+  url: string;
+}
+
 export interface TeamMemberData {
   id: string;
   name: string;
@@ -95,13 +112,16 @@ export interface TeamMemberData {
   imageUrl: string;
   socials: {
     linkedin?: string;
+    linkedinCompany?: string;
     twitter?: string;
     upwork?: string;
     youtube?: string;
     facebook?: string;
     instagram?: string;
+    instagramCompany?: string;
     github?: string;
   };
+  extraLinks?: TeamExtraLink[];
 }
 
 export interface AgencyGeneralInfo {

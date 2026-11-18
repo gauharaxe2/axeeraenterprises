@@ -9,11 +9,13 @@ export const initialTeamMembers: TeamMemberData[] = [
     imageUrl: 'https://i.postimg.cc/j2xhztjF/Picsart-26-05-15-00-58-54-392.jpg',
     socials: {
       linkedin: 'https://www.linkedin.com/in/gauharaxe/',
+      linkedinCompany: '',
       twitter: 'https://twitter.com/gauharaxe',
       upwork: 'https://www.upwork.com/freelancers/~0131edfc6b7fb25125',
       youtube: 'https://www.youtube.com/@gauharaxe',
       facebook: 'https://www.facebook.com/gauharaxe',
-      instagram: 'https://www.instagram.com/gauharaxe'
+      instagram: 'https://www.instagram.com/gauharaxe',
+      instagramCompany: ''
     }
   }
 ];
