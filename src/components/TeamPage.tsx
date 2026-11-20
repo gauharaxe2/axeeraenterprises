@@ -120,7 +120,11 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
         {others.length > 0 ? (
           <div className="editorial-grid" style={{ marginTop: '1.5rem', ['--card-min' as string]: '260px' }}>
             {others.map((member) => (
-              <article key={member.id || member.name} className="editorial-card">
+              <article
+                key={member.id || member.name}
+                id={member.id ? `member-${member.id}` : undefined}
+                className="editorial-card"
+              >
                 <div className="editorial-media">
                   <EditorialImage src={member.imageUrl} alt={member.name} />
                 </div>

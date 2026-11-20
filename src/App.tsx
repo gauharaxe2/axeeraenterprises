@@ -523,7 +523,14 @@ const AppContent: React.FC = () => {
           />
           <TeamSection
             team={data.team}
-            onOpenTeamPage={() => handleSetCurrentPage('team')}
+            onOpenTeamPage={(memberId) => {
+              handleSetCurrentPage('team');
+              if (memberId && memberId !== data.team[0]?.id) {
+                setTimeout(() => {
+                  document.getElementById(`member-${memberId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 80);
+              }
+            }}
           />
           <TestimonialsSection
             testimonials={data.testimonials}
