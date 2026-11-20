@@ -140,13 +140,13 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({
   const unreadCount = rows.filter((row) => !row.read).length;
 
   return (
-    <div>
+    <div className="dark-surface">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <div>
           <h3 style={{ margin: '0 0 4px', color: 'var(--primary-color)', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Mail size={18} /> Website enquiries
           </h3>
-          <p style={{ margin: 0, color: 'var(--text-light)', fontSize: '0.85rem' }}>
+          <p style={{ margin: 0, color: '#a8a29e', fontSize: '0.85rem' }}>
             {loading
               ? 'Loading the contact form inbox…'
               : error
@@ -165,7 +165,7 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({
         </button>
       </div>
 
-      <p style={{ color: 'var(--text-light)', fontSize: '0.8rem' }}>
+      <p style={{ color: '#a8a29e', fontSize: '0.8rem' }}>
         Visitor messages from the public contact form appear here automatically (newest first).
       </p>
 
@@ -184,23 +184,23 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({
       )}
 
       {!loading && formFound && rows.length > 0 && (
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', fontSize: '0.85rem', marginBottom: '1rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e5e5e5', fontSize: '0.85rem', marginBottom: '1rem' }}>
           <input type="checkbox" checked={unreadOnly} onChange={(event) => setUnreadOnly(event.target.checked)} />
           Show unread only
         </label>
       )}
 
       {!loading && !formFound && (
-        <div style={{ background: '#151d32', border: '1px solid #334155', borderRadius: '10px', padding: '1.25rem' }}>
-          <p style={{ margin: 0 }}>
+        <div style={{ background: '#141414', border: '1px solid #2e2e2e', borderRadius: '10px', padding: '1.25rem' }}>
+          <p style={{ margin: 0, color: '#d4d4d4' }}>
             No Firebase submissions collection data yet. Submit a test enquiry from the contact form, then refresh.
           </p>
         </div>
       )}
 
       {!loading && formFound && visible.length === 0 && !error && (
-        <div style={{ background: '#151d32', border: '1px solid #334155', borderRadius: '10px', padding: '1.25rem' }}>
-          <p style={{ margin: 0 }}>{unreadOnly ? 'No unread enquiries.' : 'No contact form submissions yet. When a visitor sends a message, it will show up here.'}</p>
+        <div style={{ background: '#141414', border: '1px solid #2e2e2e', borderRadius: '10px', padding: '1.25rem' }}>
+          <p style={{ margin: 0, color: '#d4d4d4' }}>{unreadOnly ? 'No unread enquiries.' : 'No contact form submissions yet. When a visitor sends a message, it will show up here.'}</p>
         </div>
       )}
 
@@ -211,38 +211,38 @@ export const QueriesPanel: React.FC<QueriesPanelProps> = ({
             <article
               key={row.id}
               style={{
-                background: '#151d32',
-                border: '1px solid #334155',
-                borderLeft: row.read ? '1px solid #334155' : '4px solid var(--primary-color)',
+                background: '#141414',
+                border: '1px solid #2e2e2e',
+                borderLeft: row.read ? '1px solid #2e2e2e' : '4px solid var(--primary-color)',
                 borderRadius: '10px',
                 padding: '1rem'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'baseline' }}>
-                <strong style={{ color: '#fff' }}>
+                <strong style={{ color: '#ffffff' }}>
                   {display(row.name)}
                   {!row.read && (
-                    <span style={{ marginLeft: '8px', color: '#0f172a', background: 'var(--primary-color)', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>
+                    <span style={{ marginLeft: '8px', color: '#0a0a0a', background: 'var(--primary-color)', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>
                       New
                     </span>
                   )}
                 </strong>
-                <time dateTime={row.createdAt} style={{ color: '#94a3b8', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <time dateTime={row.createdAt} style={{ color: '#a8a29e', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                   {formatWhen(row.createdAt)}
                 </time>
               </div>
-              <p style={{ margin: '0.35rem 0', fontSize: '0.85rem' }}>
+              <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: '#d4d4d4' }}>
                 {mailHref(row.email) ? (
                   <a href={mailHref(row.email) ?? undefined} style={{ color: 'var(--primary-color)' }}>{row.email}</a>
                 ) : display(row.email)}
                 {' · '}{display(row.company)}{' · '}{display(row.service)}
               </p>
               {row.budget.trim() ? (
-                <p style={{ margin: '0.15rem 0 0', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                <p style={{ margin: '0.15rem 0 0', fontSize: '0.85rem', color: '#d4d4d4' }}>
                   Budget: {row.budget}
                 </p>
               ) : null}
-              <p style={{ margin: '0.5rem 0 0.9rem', whiteSpace: 'pre-wrap', color: '#e2e8f0' }}>{display(row.message)}</p>
+              <p style={{ margin: '0.5rem 0 0.9rem', whiteSpace: 'pre-wrap', color: '#f5f5f5' }}>{display(row.message)}</p>
               {confirmId === row.id ? (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{ color: '#f87171', fontSize: '0.85rem', alignSelf: 'center' }}>Delete this enquiry permanently?</span>

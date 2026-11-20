@@ -167,10 +167,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({
         <div className="editorial-split contact-layout">
           <div className="editorial-stack">
             <div className="urgent-note">
-              <p style={{ margin: '0 0 0.35rem', color: '#fef08a', fontWeight: 700 }}>
-                <WhatsAppIcon size={16} color="#fef08a" /> Immediate WhatsApp Response
+              <p style={{ margin: '0 0 0.35rem', color: '#4a3500', fontWeight: 700 }}>
+                <WhatsAppIcon size={16} color="#15803d" /> Immediate WhatsApp Response
               </p>
-              <p style={{ margin: 0, color: '#fef08a' }}>{urgentNotice}</p>
+              <p style={{ margin: 0, color: '#4a3500' }}>{urgentNotice}</p>
             </div>
 
             <div className="editorial-panel padded">
@@ -226,7 +226,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </div>
               <div className="contact-item">
                 <div className="contact-icon">
-                  <WhatsAppIcon size={22} color="#ffffff" />
+                  <WhatsAppIcon size={22} color="#d4af37" />
                 </div>
                 <div className="contact-text">
                   <h3>WhatsApp Direct Line</h3>
@@ -242,7 +242,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
             <div className="editorial-panel padded">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                <Clock size={16} aria-hidden="true" color="var(--primary-color)" /> Engagement Hours
+                <Clock size={16} aria-hidden="true" color="var(--gold-ink)" /> Engagement Hours
               </h3>
               <p className="editorial-muted" style={{ marginTop: '0.55rem' }}>
                 Headquarters operating hours: 09:00 - 19:00 (PKT). For active client emergencies and SLA subscribers,
@@ -253,7 +253,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
           <div className="contact-form" id="contact-form-panel">
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <MessageSquare size={20} aria-hidden="true" color="var(--primary-color)" /> Request a Technical Discovery
+              <MessageSquare size={20} aria-hidden="true" color="var(--gold-ink)" /> Request a Technical Discovery
               Session
             </h2>
             <p className="editorial-muted" style={{ margin: '0.45rem 0 1.2rem' }}>

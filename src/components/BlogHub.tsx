@@ -83,13 +83,15 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
   }, [blogs, searchQuery, selectedCategory, activeTag]);
 
   return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-primary, #0b1120)', color: '#f8fafc' }}>
-      {/* Blog Hub Hero - Matches image_cae85f6a.png closely */}
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#ffffff', color: '#0a0a0a' }}>
+      {/* Blog Hub Hero */}
       <section
+        className="dark-surface"
         style={{
           padding: '90px 20px 60px',
-          background: 'radial-gradient(ellipse at top, rgba(30, 41, 59, 0.7) 0%, rgba(11, 17, 32, 1) 75%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'radial-gradient(ellipse at top, rgba(212, 175, 55, 0.14) 0%, #0a0a0a 70%)',
+          borderBottom: '1px solid rgba(212, 175, 55, 0.25)',
+          color: '#ffffff',
           textAlign: 'center',
           position: 'relative'
         }}
@@ -100,8 +102,8 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
             <button
               onClick={onBackToHome}
               style={{
-                background: 'rgba(15, 23, 42, 0.85)',
-                border: '1px solid rgba(212, 175, 55, 0.4)',
+                background: 'rgba(20, 20, 20, 0.9)',
+                border: '1px solid rgba(212, 175, 55, 0.45)',
                 color: 'var(--primary-color, #d4af37)',
                 padding: '9px 22px',
                 borderRadius: '9999px',
@@ -116,12 +118,12 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'var(--primary-color, #d4af37)';
-                e.currentTarget.style.background = 'rgba(212, 175, 55, 0.12)';
+                e.currentTarget.style.background = 'rgba(212, 175, 55, 0.14)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
-                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)';
+                e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.45)';
+                e.currentTarget.style.background = 'rgba(20, 20, 20, 0.9)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -129,7 +131,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
             </button>
           </div>
 
-          {/* Main Title - Matches "Web Development Insights" typography */}
+          {/* Main Title */}
           <h1
             style={{
               fontSize: 'clamp(2.4rem, 5vw, 3.8rem)',
@@ -148,7 +150,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
           <p
             style={{
               fontSize: 'clamp(1.05rem, 2vw, 1.25rem)',
-              color: '#94a3b8',
+              color: '#d6d3d1',
               maxWidth: '820px',
               margin: '0 auto 2.5rem',
               lineHeight: 1.65,
@@ -189,21 +191,21 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                 width: '100%',
                 padding: '16px 20px 16px 54px',
                 borderRadius: '9999px',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                background: 'rgba(19, 27, 46, 0.9)',
+                border: '1px solid rgba(212, 175, 55, 0.35)',
+                background: 'rgba(22, 22, 22, 0.94)',
                 color: '#ffffff',
                 fontSize: '1rem',
                 outline: 'none',
-                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
                 transition: 'all 0.2s ease'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = 'var(--primary-color, #d4af37)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.2)';
+                e.target.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.22)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                e.target.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.4)';
+                e.target.style.borderColor = 'rgba(212, 175, 55, 0.35)';
+                e.target.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.45)';
               }}
             />
             {searchQuery && (
@@ -216,7 +218,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                   transform: 'translateY(-50%)',
                   background: 'transparent',
                   border: 'none',
-                  color: '#94a3b8',
+                  color: '#d6d3d1',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: 600
@@ -232,8 +234,8 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
       {/* 9 Categories Selector & Navigation */}
       <section
         style={{
-          background: 'rgba(15, 23, 42, 0.75)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          background: 'rgba(247, 245, 240, 0.95)',
+          borderBottom: '1px solid var(--border-color)',
           padding: '24px 20px',
           position: 'sticky',
           top: '70px',
@@ -243,8 +245,8 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
       >
         <div className="container" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-            <Layers size={16} color="var(--primary-color, #d4af37)" />
-            <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#94a3b8', fontWeight: 600 }}>
+            <Layers size={16} color="var(--gold-ink)" />
+            <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#44403c', fontWeight: 700 }}>
               Browse By Category (9 Official Pillars):
             </span>
           </div>
@@ -274,11 +276,11 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                     padding: '8px 18px',
                     borderRadius: '9999px',
                     border: '1px solid',
-                    borderColor: isSelected ? 'var(--primary-color, #d4af37)' : 'rgba(255, 255, 255, 0.12)',
+                    borderColor: isSelected ? '#0a0a0a' : 'var(--border-color)',
                     background: isSelected
-                      ? 'linear-gradient(135deg, #d4af37 0%, #b8860b 100%)'
-                      : 'rgba(30, 41, 59, 0.6)',
-                    color: isSelected ? '#0b1120' : '#e2e8f0',
+                      ? '#0a0a0a'
+                      : '#ffffff',
+                    color: isSelected ? '#d4af37' : '#292524',
                     fontWeight: isSelected ? 700 : 500,
                     fontSize: '0.88rem',
                     cursor: 'pointer',
@@ -287,18 +289,18 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                     alignItems: 'center',
                     gap: '8px',
                     transition: 'all 0.2s ease',
-                    boxShadow: isSelected ? '0 4px 15px rgba(212, 175, 55, 0.3)' : 'none'
+                    boxShadow: isSelected ? '0 4px 14px rgba(10, 10, 10, 0.16)' : 'none'
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.5)';
-                      e.currentTarget.style.background = 'rgba(30, 41, 59, 0.9)';
+                      e.currentTarget.style.borderColor = '#b8860b';
+                      e.currentTarget.style.background = '#fdf8e6';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-                      e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+                      e.currentTarget.style.borderColor = 'var(--border-color)';
+                      e.currentTarget.style.background = '#ffffff';
                     }
                   }}
                 >
@@ -308,8 +310,8 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                       fontSize: '0.75rem',
                       padding: '2px 7px',
                       borderRadius: '10px',
-                      background: isSelected ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                      color: isSelected ? '#0b1120' : '#94a3b8',
+                      background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'var(--bg-light)',
+                      color: isSelected ? '#f5d061' : '#57534e',
                       fontWeight: 700
                     }}
                   >
@@ -322,8 +324,8 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
 
           {/* Quick Filter Tags (if available) */}
           {allTags.length > 0 && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: '0.78rem', color: '#57534e', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
                 <Tag size={13} /> Trending Topics:
               </span>
               {allTags.map((tag) => (
@@ -334,10 +336,11 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                     padding: '3px 10px',
                     borderRadius: '12px',
                     border: '1px solid',
-                    borderColor: activeTag === tag ? 'var(--primary-color, #d4af37)' : 'rgba(255, 255, 255, 0.08)',
-                    background: activeTag === tag ? 'rgba(212, 175, 55, 0.2)' : 'transparent',
-                    color: activeTag === tag ? 'var(--primary-color, #d4af37)' : '#94a3b8',
+                    borderColor: activeTag === tag ? '#0a0a0a' : 'var(--border-color)',
+                    background: activeTag === tag ? '#0a0a0a' : '#ffffff',
+                    color: activeTag === tag ? '#d4af37' : '#44403c',
                     fontSize: '0.75rem',
+                    fontWeight: activeTag === tag ? 700 : 500,
                     cursor: 'pointer'
                   }}
                 >
@@ -350,8 +353,9 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#f87171',
+                    color: '#dc2626',
                     fontSize: '0.75rem',
+                    fontWeight: 600,
                     cursor: 'pointer',
                     textDecoration: 'underline'
                   }}
@@ -365,7 +369,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
       </section>
 
       {/* Main Blog Post Grid */}
-      <section style={{ padding: '48px 20px 100px' }}>
+      <section style={{ padding: '48px 20px 100px', background: '#ffffff' }}>
         <div className="container" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           {/* Header Info & Result Count */}
           <div
@@ -377,29 +381,30 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
               flexWrap: 'wrap',
               gap: '12px',
               paddingBottom: '1rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+              borderBottom: '1px solid var(--border-color)'
             }}
           >
             <div>
-              <span style={{ fontSize: '0.95rem', color: '#94a3b8' }}>
-                Showing <strong style={{ color: '#ffffff' }}>{filteredBlogs.length}</strong> {filteredBlogs.length === 1 ? 'publication' : 'publications'}
-                {selectedCategory !== 'All' && <span> in <strong style={{ color: 'var(--primary-color, #d4af37)' }}>{selectedCategory}</strong></span>}
-                {activeTag && <span> tagged with <strong style={{ color: 'var(--primary-color, #d4af37)' }}>#{activeTag}</strong></span>}
+              <span style={{ fontSize: '0.95rem', color: '#44403c' }}>
+                Showing <strong style={{ color: '#0a0a0a' }}>{filteredBlogs.length}</strong> {filteredBlogs.length === 1 ? 'publication' : 'publications'}
+                {selectedCategory !== 'All' && <span> in <strong style={{ color: 'var(--gold-ink)' }}>{selectedCategory}</strong></span>}
+                {activeTag && <span> tagged with <strong style={{ color: 'var(--gold-ink)' }}>#{activeTag}</strong></span>}
               </span>
             </div>
 
-            {/* AdSense / Publication Badge */}
+            {/* Publication Badge */}
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: 'rgba(212, 175, 55, 0.08)',
-                border: '1px solid rgba(212, 175, 55, 0.25)',
+                background: '#fdf8e6',
+                border: '1px solid rgba(184, 134, 11, 0.35)',
                 padding: '4px 14px',
                 borderRadius: '9999px',
                 fontSize: '0.8rem',
-                color: 'var(--primary-color, #d4af37)'
+                fontWeight: 600,
+                color: 'var(--gold-ink)'
               }}
             >
               <Sparkles size={14} />
@@ -413,15 +418,15 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
               style={{
                 textAlign: 'center',
                 padding: '80px 20px',
-                background: 'rgba(15, 23, 42, 0.5)',
+                background: 'var(--bg-light)',
                 borderRadius: '16px',
-                border: '1px dashed rgba(255, 255, 255, 0.15)',
+                border: '1px dashed #c8bfa8',
                 margin: '2rem 0'
               }}
             >
-              <BookOpen size={48} style={{ color: '#64748b', margin: '0 auto 1rem' }} />
-              <h3 style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '0.5rem' }}>No articles found</h3>
-              <p style={{ color: '#94a3b8', maxWidth: '460px', margin: '0 auto 1.5rem' }}>
+              <BookOpen size={48} style={{ color: 'var(--gold-ink)', margin: '0 auto 1rem' }} />
+              <h3 style={{ fontSize: '1.4rem', color: '#0a0a0a', marginBottom: '0.5rem' }}>No articles found</h3>
+              <p style={{ color: '#44403c', maxWidth: '460px', margin: '0 auto 1.5rem' }}>
                 We couldn't find any articles matching your search criteria. Try selecting another category or resetting the search filter.
               </p>
               <button
@@ -454,25 +459,25 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                 <article
                   key={blog.id}
                   style={{
-                    background: 'rgba(19, 27, 46, 0.75)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    background: '#ffffff',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '16px',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'all 0.3s ease',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.35)',
+                    boxShadow: 'var(--shadow-md)',
                     position: 'relative'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                    e.currentTarget.style.borderColor = '#b8860b';
                     e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.15)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.35)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
                   }}
                 >
                   {/* Card Image Container */}
@@ -483,7 +488,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                       width: '100%',
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      background: '#0f172a'
+                      background: '#0a0a0a'
                     }}
                     onClick={() => onSelectArticle(blog)}
                   >
@@ -506,16 +511,16 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                         position: 'absolute',
                         top: '14px',
                         left: '14px',
-                        background: 'rgba(11, 17, 32, 0.85)',
+                        background: 'rgba(10, 10, 10, 0.88)',
                         backdropFilter: 'blur(8px)',
-                        border: '1px solid rgba(212, 175, 55, 0.35)',
-                        color: 'var(--primary-color, #d4af37)',
+                        border: '1px solid rgba(212, 175, 55, 0.45)',
+                        color: '#f5d061',
                         padding: '4px 12px',
                         borderRadius: '9999px',
                         fontSize: '0.78rem',
                         fontWeight: 700,
                         letterSpacing: '0.3px',
-                        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.4)'
+                        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.35)'
                       }}
                     >
                       {blog.category || '🌐 Web Development'}
@@ -528,9 +533,9 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                           position: 'absolute',
                           top: '14px',
                           right: '14px',
-                          background: 'rgba(15, 23, 42, 0.9)',
+                          background: 'rgba(10, 10, 10, 0.9)',
                           backdropFilter: 'blur(8px)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          border: '1px solid rgba(212, 175, 55, 0.4)',
                           color: '#ffffff',
                           padding: '4px 10px',
                           borderRadius: '9999px',
@@ -539,7 +544,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                           display: 'flex',
                           alignItems: 'center',
                           gap: '5px',
-                          boxShadow: '0 4px 10px rgba(0,0,0,0.5)'
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.4)'
                         }}
                         title={`${imageCount} images included in this article`}
                       >
@@ -567,25 +572,25 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                           alignItems: 'center',
                           gap: '12px',
                           fontSize: '0.8rem',
-                          color: '#94a3b8',
+                          color: '#57534e',
                           marginBottom: '0.75rem',
                           flexWrap: 'wrap'
                         }}
                       >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <Clock size={13} color="var(--primary-color, #d4af37)" />
+                          <Clock size={13} color="var(--gold-ink)" />
                           {blog.readTime || '5 min read'}
                         </span>
                         <span>•</span>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <Calendar size={13} color="#94a3b8" />
+                          <Calendar size={13} color="#57534e" />
                           {blog.date || '2026 Insights'}
                         </span>
                         {blog.author && (
                           <>
                             <span>•</span>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <User size={13} color="#94a3b8" />
+                              <User size={13} color="#57534e" />
                               {blog.author}
                             </span>
                           </>
@@ -598,14 +603,14 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                         style={{
                           fontSize: '1.25rem',
                           fontWeight: 700,
-                          color: '#ffffff',
+                          color: '#0a0a0a',
                           marginBottom: '0.75rem',
                           lineHeight: 1.35,
                           cursor: 'pointer',
                           transition: 'color 0.2s ease'
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary-color, #d4af37)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--gold-ink)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#0a0a0a')}
                       >
                         {blog.title}
                       </h3>
@@ -614,7 +619,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                       <p
                         style={{
                           fontSize: '0.92rem',
-                          color: '#94a3b8',
+                          color: '#44403c',
                           lineHeight: 1.6,
                           marginBottom: '1.25rem',
                           display: '-webkit-box',
@@ -634,11 +639,11 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                               key={idx}
                               style={{
                                 fontSize: '0.72rem',
-                                color: '#cbd5e1',
-                                background: 'rgba(255, 255, 255, 0.05)',
+                                color: '#292524',
+                                background: 'var(--bg-light)',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
-                                border: '1px solid rgba(255, 255, 255, 0.06)'
+                                border: '1px solid var(--border-color)'
                               }}
                             >
                               #{t}
@@ -652,7 +657,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                     <div
                       style={{
                         paddingTop: '1rem',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                        borderTop: '1px solid var(--border-color)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between'
@@ -663,7 +668,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                         style={{
                           background: 'transparent',
                           border: 'none',
-                          color: 'var(--primary-color, #d4af37)',
+                          color: 'var(--gold-ink)',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
@@ -687,7 +692,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
                         <span
                           style={{
                             fontSize: '0.75rem',
-                            color: '#64748b'
+                            color: '#57534e'
                           }}
                         >
                           Includes gallery

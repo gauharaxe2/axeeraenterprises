@@ -28,7 +28,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
               <div>
                 <div className="stars-rating">
                   {[...Array(item.rating || 5)].map((_, i) => (
-                    <Star key={i} size={18} fill="var(--primary-color)" stroke="var(--primary-color)" />
+                    <Star key={i} size={18} fill="var(--primary-dark)" stroke="var(--primary-dark)" />
                   ))}
                 </div>
                 <p className="testimonial-quote">"{item.quote}"</p>
@@ -37,7 +37,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
               <div className="testimonial-author">
                 <div className="avatar-circle">{item.initials}</div>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-white)' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-dark)' }}>
                     {item.name}
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-light)' }}>

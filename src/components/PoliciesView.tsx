@@ -74,18 +74,20 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
   return (
     <div
       style={{
-        background: '#070b14',
+        background: 'var(--bg-light)',
         minHeight: '100vh',
-        color: '#f8fafc',
+        color: '#0a0a0a',
         paddingTop: '90px',
         paddingBottom: '80px'
       }}
     >
       {/* Header Banner */}
       <section
+        className="dark-surface"
         style={{
-          background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(7, 11, 20, 0.95) 100%)',
-          borderBottom: '1px solid rgba(212, 175, 55, 0.15)',
+          background: 'linear-gradient(180deg, #0a0a0a 0%, #161616 100%)',
+          borderBottom: '1px solid rgba(212, 175, 55, 0.25)',
+          color: '#ffffff',
           padding: '2.5rem 1rem 3rem',
           position: 'relative'
         }}
@@ -144,7 +146,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
             <p
               style={{
                 fontSize: '1.05rem',
-                color: 'rgba(255, 255, 255, 0.75)',
+                color: '#d6d3d1',
                 maxWidth: '750px',
                 lineHeight: 1.6,
                 margin: 0
@@ -162,9 +164,9 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
               gap: '12px',
               marginTop: '2rem',
               padding: '6px',
-              background: 'rgba(15, 23, 42, 0.8)',
+              background: '#141414',
               borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(212, 175, 55, 0.25)',
               width: 'fit-content'
             }}
           >
@@ -172,7 +174,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
               onClick={() => handleTabChange('legal-notice')}
               style={{
                 background: activePolicy === 'legal-notice' ? 'var(--primary-color)' : 'transparent',
-                color: activePolicy === 'legal-notice' ? '#070b14' : 'rgba(255, 255, 255, 0.8)',
+                color: activePolicy === 'legal-notice' ? '#0a0a0a' : 'rgba(255, 255, 255, 0.85)',
                 border: 'none',
                 padding: '10px 20px',
                 borderRadius: '8px',
@@ -192,7 +194,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
               onClick={() => handleTabChange('privacy-policy')}
               style={{
                 background: activePolicy === 'privacy-policy' ? 'var(--primary-color)' : 'transparent',
-                color: activePolicy === 'privacy-policy' ? '#070b14' : 'rgba(255, 255, 255, 0.8)',
+                color: activePolicy === 'privacy-policy' ? '#0a0a0a' : 'rgba(255, 255, 255, 0.85)',
                 border: 'none',
                 padding: '10px 20px',
                 borderRadius: '8px',
@@ -212,7 +214,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
               onClick={() => handleTabChange('terms-of-service')}
               style={{
                 background: activePolicy === 'terms-of-service' ? 'var(--primary-color)' : 'transparent',
-                color: activePolicy === 'terms-of-service' ? '#070b14' : 'rgba(255, 255, 255, 0.8)',
+                color: activePolicy === 'terms-of-service' ? '#0a0a0a' : 'rgba(255, 255, 255, 0.85)',
                 border: 'none',
                 padding: '10px 20px',
                 borderRadius: '8px',
@@ -243,11 +245,12 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
           {/* Document Header Card */}
           <div
             style={{
-              background: '#0f172a',
-              border: '1px solid rgba(212, 175, 55, 0.25)',
+              background: '#ffffff',
+              border: '1px solid var(--border-color)',
+              borderTop: '4px solid var(--primary-color)',
               borderRadius: '16px',
-              padding: '2rem',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)'
+              padding: '2.25rem',
+              boxShadow: 'var(--shadow-md)'
             }}
           >
             <div
@@ -257,7 +260,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
                 gap: '1.5rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                borderBottom: '1px solid var(--border-color)',
                 paddingBottom: '1.5rem',
                 marginBottom: '1.5rem'
               }}
@@ -268,7 +271,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    color: 'var(--primary-color)',
+                    color: 'var(--gold-ink)',
                     fontSize: '0.8rem',
                     fontWeight: 700,
                     textTransform: 'uppercase',
@@ -282,7 +285,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   style={{
                     fontSize: '1.85rem',
                     fontWeight: 700,
-                    color: '#ffffff',
+                    color: '#0a0a0a',
                     margin: '0 0 0.5rem'
                   }}
                 >
@@ -293,7 +296,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    color: '#94a3b8',
+                    color: '#57534e',
                     fontSize: '0.85rem'
                   }}
                 >
@@ -310,9 +313,9 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                 <button
                   onClick={handleCopyLink}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#e2e8f0',
+                    background: 'var(--bg-light)',
+                    border: '1px solid var(--border-color)',
+                    color: '#0a0a0a',
                     padding: '8px 14px',
                     borderRadius: '8px',
                     fontSize: '0.82rem',
@@ -325,16 +328,16 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   }}
                   title="Copy direct link to this policy"
                 >
-                  {copiedLink ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                  {copiedLink ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
                   {copiedLink ? 'Link Copied!' : 'Copy Link'}
                 </button>
 
                 <button
                   onClick={handlePrint}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#e2e8f0',
+                    background: 'var(--bg-light)',
+                    border: '1px solid var(--border-color)',
+                    color: '#0a0a0a',
                     padding: '8px 14px',
                     borderRadius: '8px',
                     fontSize: '0.82rem',
@@ -354,25 +357,25 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
             {/* Document Summary Box */}
             <div
               style={{
-                background: 'rgba(212, 175, 55, 0.08)',
+                background: '#fdf8e6',
                 borderLeft: '4px solid var(--primary-color)',
                 padding: '1rem 1.25rem',
                 borderRadius: '0 8px 8px 0',
-                color: '#e2e8f0',
+                color: '#4a3500',
                 fontSize: '0.95rem',
                 lineHeight: 1.6,
                 marginBottom: '2rem'
               }}
             >
-              <strong style={{ color: 'var(--primary-color)' }}>Summary of Purpose: </strong>
+              <strong style={{ color: '#0a0a0a' }}>Summary of Purpose: </strong>
               {doc.summary}
             </div>
 
             {/* Quick Table of Contents Jump Links */}
             <div
               style={{
-                background: '#090d19',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                background: 'var(--bg-light)',
+                border: '1px solid var(--border-color)',
                 borderRadius: '10px',
                 padding: '1rem 1.25rem',
                 marginBottom: '2.5rem'
@@ -384,7 +387,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   textTransform: 'uppercase',
                   fontWeight: 700,
                   letterSpacing: '0.08em',
-                  color: 'var(--primary-color)',
+                  color: 'var(--gold-ink)',
                   marginBottom: '0.75rem'
                 }}
               >
@@ -410,7 +413,8 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                       }
                     }}
                     style={{
-                      color: activeSectionId === sec.id ? 'var(--primary-color)' : '#94a3b8',
+                      color: activeSectionId === sec.id ? 'var(--gold-ink)' : '#44403c',
+                      fontWeight: activeSectionId === sec.id ? 700 : 500,
                       fontSize: '0.85rem',
                       textDecoration: 'none',
                       transition: 'color 0.2s ease'
@@ -430,7 +434,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   id={section.id}
                   style={{
                     scrollMarginTop: '110px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderBottom: '1px solid var(--border-color)',
                     paddingBottom: '2rem'
                   }}
                 >
@@ -438,7 +442,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     style={{
                       fontSize: '1.25rem',
                       fontWeight: 700,
-                      color: '#ffffff',
+                      color: '#0a0a0a',
                       marginBottom: '1rem',
                       display: 'flex',
                       alignItems: 'center',
@@ -461,7 +465,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     <p
                       key={idx}
                       style={{
-                        color: 'rgba(255, 255, 255, 0.82)',
+                        color: '#292524',
                         fontSize: '0.96rem',
                         lineHeight: 1.7,
                         margin: '0 0 1rem',
@@ -486,7 +490,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                         <li
                           key={itemIdx}
                           style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: '#292524',
                             fontSize: '0.93rem',
                             lineHeight: 1.6
                           }}
@@ -502,24 +506,26 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
 
             {/* Direct Verification & Contact Box */}
             <div
+              className="dark-surface"
               style={{
                 marginTop: '3rem',
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(9, 13, 25, 0.95) 100%)',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1917 100%)',
+                border: '1px solid var(--primary-color)',
                 borderRadius: '12px',
                 padding: '1.75rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem'
+                gap: '1rem',
+                color: '#ffffff'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Building size={22} color="var(--primary-color)" />
-                <h4 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>
+                <h4 style={{ margin: 0, color: '#ffffff', fontSize: '1.1rem', fontWeight: 700 }}>
                   Axe's Era Enterprises Official Legal Desk
                 </h4>
               </div>
-              <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6 }}>
+              <p style={{ margin: 0, color: '#d6d3d1', fontSize: '0.9rem', lineHeight: 1.6 }}>
                 For custom Non-Disclosure Agreements (NDAs), master service agreements (MSA), compliance audits, or data rights requests, connect directly with our legal and management desk.
               </p>
               <div
@@ -528,14 +534,14 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   flexWrap: 'wrap',
                   gap: '12px 24px',
                   fontSize: '0.88rem',
-                  color: '#cbd5e1'
+                  color: '#e7e5e4'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Mail size={15} color="var(--primary-color)" />
                   <a
                     href="mailto:gauharaxe@outlook.com"
-                    style={{ color: '#cbd5e1', textDecoration: 'none' }}
+                    style={{ color: '#e7e5e4', textDecoration: 'none' }}
                   >
                     gauharaxe@outlook.com
                   </a>

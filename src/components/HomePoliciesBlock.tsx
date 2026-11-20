@@ -14,9 +14,9 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
     <section
       id="policies"
       style={{
-        background: '#0b1120',
-        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+        background: 'var(--bg-light)',
+        borderTop: '1px solid var(--border-color)',
+        borderBottom: '1px solid var(--border-color)'
       }}
     >
       <div className="container">
@@ -24,9 +24,9 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
           <span
             style={{
               display: 'inline-block',
-              color: 'var(--primary-color)',
-              background: 'rgba(212, 175, 55, 0.12)',
-              border: '1px solid rgba(212, 175, 55, 0.3)',
+              color: 'var(--gold-ink)',
+              background: '#fdf8e6',
+              border: '1px solid rgba(184, 134, 11, 0.35)',
               borderRadius: '9999px',
               padding: '4px 14px',
               fontSize: '0.8rem',

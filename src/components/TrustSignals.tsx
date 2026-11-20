@@ -5,11 +5,11 @@ export const TrustSignals: React.FC = () => {
   const { strings } = useLanguage();
 
   return (
-    <section style={{ padding: '2.5rem 0', background: '#0b1120', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+    <section style={{ padding: '2.5rem 0', background: '#ffffff', borderBottom: '1px solid var(--border-color)' }}>
       <div className="container" style={{ textAlign: 'center' }}>
         <p
           style={{
-            color: '#94a3b8',
+            color: 'var(--text-muted)',
             fontSize: '0.85rem',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -26,22 +26,22 @@ export const TrustSignals: React.FC = () => {
             alignItems: 'center',
             gap: '2.5rem',
             flexWrap: 'wrap',
-            opacity: 0.72
+            opacity: 0.85
           }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#171717' }}>
             <i className="fab fa-aws" aria-hidden="true" /> AWS
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#171717' }}>
             <i className="fab fa-google" aria-hidden="true" /> Google
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#171717' }}>
             <i className="fab fa-stripe" aria-hidden="true" /> Stripe
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#171717' }}>
             <i className="fab fa-microsoft" aria-hidden="true" /> Microsoft
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#cbd5e1' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 700, color: '#171717' }}>
             <i className="fab fa-shopify" aria-hidden="true" /> Shopify
           </span>
         </div>

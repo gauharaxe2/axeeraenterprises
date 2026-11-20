@@ -54,6 +54,13 @@ import {
   memberToEditableLinks,
   removeEditableAccountLink
 } from '../../utils/teamSocials';
+import {
+  DEFAULT_MEMBER_SKILLS,
+  addMemberSkill,
+  removeMemberSkill,
+  resolveMemberSkills,
+  sanitizeMemberSkills
+} from '../../utils/teamProfile';
 import { QueriesPanel } from './QueriesPanel';
 
 interface SideAdminPanelProps {
@@ -163,6 +170,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   // Team state for multiple team members
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMemberData | null>(null);
   const [isCreatingTeamMember, setIsCreatingTeamMember] = useState(false);
+  const [editingTeamSkills, setEditingTeamSkills] = useState<string[]>([]);
+  const [newSkillInput, setNewSkillInput] = useState('');
   const [editingTeamLinks, setEditingTeamLinks] = useState<EditableAccountLink[]>([]);
   const [newAccountPreset, setNewAccountPreset] = useState<AccountLinkPreset>('instagramCompany');
   const [newAccountLabel, setNewAccountLabel] = useState('');
@@ -278,6 +287,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
   return (
     <div
+      className="dark-surface"
       style={{
         position: 'fixed',
         top: 0,
@@ -285,22 +295,22 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         bottom: 0,
         width: isExpanded ? '92vw' : '580px',
         maxWidth: '100vw',
-        background: '#0d1527',
-        color: '#f8fafc',
-        boxShadow: '-10px 0 35px rgba(0, 0, 0, 0.7)',
+        background: '#0a0a0a',
+        color: '#fafafa',
+        boxShadow: '-10px 0 35px rgba(0, 0, 0, 0.75)',
         zIndex: 10001,
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.3s ease',
-        borderLeft: '1px solid rgba(212, 175, 55, 0.3)'
+        borderLeft: '1px solid rgba(212, 175, 55, 0.35)'
       }}
     >
       {/* Top Header */}
       <div
         style={{
           padding: '1.25rem 1.5rem',
-          background: '#0a0f1d',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          background: '#050505',
+          borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
@@ -316,7 +326,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff'
+              color: '#0a0a0a'
             }}
           >
             <Settings size={20} />
@@ -333,7 +343,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   gap: '5px',
                   fontSize: '0.72rem',
                   fontWeight: 600,
-                  color: syncStatus === 'connected' ? '#34d399' : syncStatus === 'syncing' ? '#fbbf24' : '#94a3b8',
+                  color: syncStatus === 'connected' ? '#34d399' : syncStatus === 'syncing' ? '#fbbf24' : '#a3a3a3',
                   background: 'rgba(255, 255, 255, 0.06)',
                   padding: '2px 8px',
                   borderRadius: '9999px',
@@ -345,13 +355,13 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     width: '6px',
                     height: '6px',
                     borderRadius: '50%',
-                    background: syncStatus === 'connected' ? '#10b981' : syncStatus === 'syncing' ? '#f59e0b' : '#94a3b8',
+                    background: syncStatus === 'connected' ? '#10b981' : syncStatus === 'syncing' ? '#f59e0b' : '#a3a3a3',
                     boxShadow: syncStatus === 'connected' ? '0 0 6px #10b981' : undefined
                   }}
                 />
                 {syncStatus === 'connected' ? 'Firebase Live Synced' : syncStatus === 'syncing' ? 'Syncing Firestore...' : 'Offline Local Storage'}
               </span>
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              <span style={{ fontSize: '0.72rem', color: '#a3a3a3' }}>
                 All edits synchronize instantly to public site & cloud
               </span>
             </div>
@@ -430,7 +440,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#cbd5e1',
+              color: '#e5e5e5',
               padding: '6px 10px',
               borderRadius: '6px',
               cursor: 'pointer',
@@ -450,7 +460,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         style={{
           display: 'flex',
           overflowX: 'auto',
-          background: '#090d19',
+          background: '#050505',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           padding: '0.5rem 0.75rem',
           gap: '6px'
@@ -499,7 +509,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               borderRadius: '6px',
               border: 'none',
               background: activeTab === tab.id ? 'var(--primary-color)' : 'transparent',
-              color: activeTab === tab.id ? '#0f172a' : 'var(--text-light)',
+              color: activeTab === tab.id ? '#0a0a0a' : 'var(--text-light)',
               fontWeight: 600,
               fontSize: '0.8rem',
               cursor: 'pointer',
@@ -521,7 +531,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           flex: 1,
           overflowY: 'auto',
           padding: '1.5rem',
-          background: '#0d1527'
+          background: '#0a0a0a'
         }}
       >
         <div style={{ display: activeTab === 'queries' ? 'block' : 'none' }}>
@@ -556,7 +566,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="text"
                 value={generalForm.heroTitle}
                 onChange={(e) => setGeneralForm({ ...generalForm, heroTitle: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                 required
               />
             </div>
@@ -569,7 +579,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 rows={3}
                 value={generalForm.heroSubtitle}
                 onChange={(e) => setGeneralForm({ ...generalForm, heroSubtitle: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                 required
               />
             </div>
@@ -586,7 +596,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   type="number"
                   value={generalForm.stats.years}
                   onChange={(e) => setGeneralForm({ ...generalForm, stats: { ...generalForm.stats, years: parseInt(e.target.value) || 0 } })}
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                 />
               </div>
               <div>
@@ -595,7 +605,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   type="number"
                   value={generalForm.stats.experts}
                   onChange={(e) => setGeneralForm({ ...generalForm, stats: { ...generalForm.stats, experts: parseInt(e.target.value) || 0 } })}
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                 />
               </div>
               <div>
@@ -604,7 +614,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   type="number"
                   value={generalForm.stats.projects}
                   onChange={(e) => setGeneralForm({ ...generalForm, stats: { ...generalForm.stats, projects: parseInt(e.target.value) || 0 } })}
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                 />
               </div>
               <div>
@@ -613,7 +623,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   type="number"
                   value={generalForm.stats.retention}
                   onChange={(e) => setGeneralForm({ ...generalForm, stats: { ...generalForm.stats, retention: parseInt(e.target.value) || 0 } })}
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                  style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                 />
               </div>
             </div>
@@ -631,7 +641,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="text"
                 value={generalForm.aboutTitle}
                 onChange={(e) => setGeneralForm({ ...generalForm, aboutTitle: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -642,7 +652,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 rows={3}
                 value={generalForm.aboutParagraph1}
                 onChange={(e) => setGeneralForm({ ...generalForm, aboutParagraph1: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -653,7 +663,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 rows={2}
                 value={generalForm.aboutParagraph2}
                 onChange={(e) => setGeneralForm({ ...generalForm, aboutParagraph2: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -664,7 +674,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="text"
                 value={generalForm.aboutImageUrl}
                 onChange={(e) => setGeneralForm({ ...generalForm, aboutImageUrl: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
 
@@ -681,7 +691,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="text"
                 value={generalForm.contactAddress}
                 onChange={(e) => setGeneralForm({ ...generalForm, contactAddress: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -692,7 +702,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="text"
                 value={generalForm.contactPhone}
                 onChange={(e) => setGeneralForm({ ...generalForm, contactPhone: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -703,7 +713,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="email"
                 value={generalForm.contactEmail}
                 onChange={(e) => setGeneralForm({ ...generalForm, contactEmail: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -714,7 +724,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 type="text"
                 value={generalForm.whatsappNumber}
                 onChange={(e) => setGeneralForm({ ...generalForm, whatsappNumber: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
             <div style={{ marginBottom: '1.5rem' }}>
@@ -725,7 +735,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 rows={2}
                 value={generalForm.urgentNotice}
                 onChange={(e) => setGeneralForm({ ...generalForm, urgentNotice: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
               />
             </div>
 
@@ -771,7 +781,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Service Form */}
             {(isCreatingService || editingService) && (
-              <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
                   {isCreatingService ? 'Add New Service' : `Edit: ${editingService?.title}`}
                 </h4>
@@ -783,7 +793,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingService?.title || ''}
                     onChange={(e) => setEditingService(editingService ? { ...editingService, title: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -795,7 +805,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     <select
                       value={editingService?.slug || 'web-development'}
                       onChange={(e) => setEditingService(editingService ? { ...editingService, slug: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     >
                       <option value="web-development">web-development</option>
                       <option value="brand-design">brand-design</option>
@@ -810,7 +820,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     <select
                       value={editingService?.icon || 'Laptop'}
                       onChange={(e) => setEditingService(editingService ? { ...editingService, icon: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     >
                       <option value="Laptop">Laptop (Code/Web)</option>
                       <option value="Palette">Palette (Brand/Design)</option>
@@ -831,7 +841,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     rows={2}
                     value={editingService?.shortDesc || ''}
                     onChange={(e) => setEditingService(editingService ? { ...editingService, shortDesc: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -846,7 +856,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       const feats = e.target.value.split(',').map((f) => f.trim()).filter(Boolean);
                       setEditingService(editingService ? { ...editingService, features: feats } : null);
                     }}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -894,7 +904,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={svc.id}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -986,7 +996,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Project Form */}
             {(isCreatingProject || editingProject) && (
-              <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
                   {isCreatingProject ? 'Add New Case Study' : `Edit: ${editingProject?.title}`}
                 </h4>
@@ -999,7 +1009,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingProject?.title || ''}
                       onChange={(e) => setEditingProject(editingProject ? { ...editingProject, title: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                   <div>
@@ -1009,7 +1019,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     <select
                       value={editingProject?.category || 'ecommerce'}
                       onChange={(e) => setEditingProject(editingProject ? { ...editingProject, category: e.target.value as any } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     >
                       <option value="ecommerce">E-Commerce</option>
                       <option value="saas">SaaS & Analytics</option>
@@ -1027,7 +1037,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingProject?.subtitle || ''}
                       onChange={(e) => setEditingProject(editingProject ? { ...editingProject, subtitle: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                   <div>
@@ -1038,7 +1048,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingProject?.metric || ''}
                       onChange={(e) => setEditingProject(editingProject ? { ...editingProject, metric: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                 </div>
@@ -1051,7 +1061,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="url"
                     value={editingProject?.link || ''}
                     onChange={(e) => setEditingProject(editingProject ? { ...editingProject, link: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -1063,7 +1073,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingProject?.imageUrl || ''}
                     onChange={(e) => setEditingProject(editingProject ? { ...editingProject, imageUrl: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -1078,7 +1088,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       const tags = e.target.value.split(',').map((t) => t.trim()).filter(Boolean);
                       setEditingProject(editingProject ? { ...editingProject, tags } : null);
                     }}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -1126,7 +1136,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={proj.id}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -1158,7 +1168,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       rel="noopener noreferrer"
                       style={{
                         background: 'rgba(255, 255, 255, 0.08)',
-                        color: '#cbd5e1',
+                        color: '#e5e5e5',
                         padding: '6px',
                         borderRadius: '6px',
                         display: 'flex',
@@ -1272,7 +1282,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 : ensureBlogSections(editingBlog);
 
               return (
-                <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+                <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.75rem' }}>
                     <div>
                       <h4 style={{ color: '#fff', margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>
@@ -1304,17 +1314,17 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           .replace(/\s+/g, '-');
                         setEditingBlog({ ...editingBlog, title, slug: isCreatingBlog ? slug : editingBlog.slug });
                       }}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.95rem' }}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.95rem' }}
                     />
                   </div>
 
                   {/* 2. PRIMARY COVER IMAGE URL OPTION WITH LIVE PREVIEW */}
-                  <div style={{ marginBottom: '1rem', background: '#0b1120', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <div style={{ marginBottom: '1rem', background: '#0a0a0a', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <label style={{ fontSize: '0.82rem', color: 'var(--primary-color)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <ImageIcon size={15} /> Primary Cover Image URL *
                       </label>
-                      <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#a3a3a3' }}>
                         Main featured banner image for article header
                       </span>
                     </div>
@@ -1324,10 +1334,10 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         value={editingBlog.imageUrl || ''}
                         placeholder="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
                         onChange={(e) => setEditingBlog({ ...editingBlog, imageUrl: e.target.value })}
-                        style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                        style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
                       />
                       {editingBlog.imageUrl ? (
-                        <div style={{ position: 'relative', width: '56px', height: '42px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--primary-color)', flexShrink: 0, background: '#1e293b' }}>
+                        <div style={{ position: 'relative', width: '56px', height: '42px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--primary-color)', flexShrink: 0, background: '#1c1c1c' }}>
                           <img
                             src={editingBlog.imageUrl}
                             alt="Cover Preview"
@@ -1338,7 +1348,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           />
                         </div>
                       ) : (
-                        <div style={{ width: '56px', height: '42px', borderRadius: '4px', background: '#1e293b', border: '1px dashed #475569', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '0.68rem', flexShrink: 0 }}>
+                        <div style={{ width: '56px', height: '42px', borderRadius: '4px', background: '#1c1c1c', border: '1px dashed #404040', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a3a3a3', fontSize: '0.68rem', flexShrink: 0 }}>
                           No image
                         </div>
                       )}
@@ -1360,7 +1370,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       value={editingBlog.summary || ''}
                       placeholder="Brief 2-3 sentence overview explaining what this article covers and why it matters..."
                       onChange={(e) => setEditingBlog({ ...editingBlog, summary: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.88rem', lineHeight: 1.5 }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.88rem', lineHeight: 1.5 }}
                     />
                   </div>
 
@@ -1373,7 +1383,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       <select
                         value={editingBlog.category || '🌐 Web Development'}
                         onChange={(e) => setEditingBlog({ ...editingBlog, category: e.target.value })}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
                       >
                         {BLOG_CATEGORIES.map((cat) => (
                           <option key={cat} value={cat}>
@@ -1390,7 +1400,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         type="text"
                         value={editingBlog.slug || ''}
                         onChange={(e) => setEditingBlog({ ...editingBlog, slug: e.target.value })}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
                       />
                     </div>
                   </div>
@@ -1403,7 +1413,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         type="text"
                         value={editingBlog.author || 'Gauhar Axe'}
                         onChange={(e) => setEditingBlog({ ...editingBlog, author: e.target.value })}
-                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.82rem' }}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.82rem' }}
                       />
                     </div>
                     <div>
@@ -1412,7 +1422,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         type="text"
                         value={editingBlog.readTime || '5 min read'}
                         onChange={(e) => setEditingBlog({ ...editingBlog, readTime: e.target.value })}
-                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.82rem' }}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.82rem' }}
                       />
                     </div>
                     <div>
@@ -1421,7 +1431,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         type="text"
                         value={editingBlog.date || 'March 2026'}
                         onChange={(e) => setEditingBlog({ ...editingBlog, date: e.target.value })}
-                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.82rem' }}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.82rem' }}
                       />
                     </div>
                   </div>
@@ -1439,18 +1449,18 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         const tags = e.target.value.split(',').map((t) => t.trim()).filter(Boolean);
                         setEditingBlog({ ...editingBlog, tags });
                       }}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
                     />
                   </div>
 
                   {/* 4. MULTIPLE HEADINGS, THEIR PARAGRAPHS, THEIR IMAGES OPTIONS */}
-                  <div style={{ background: '#090e1c', padding: '1.25rem', borderRadius: '10px', border: '1px solid rgba(212, 175, 55, 0.35)', marginBottom: '1.25rem' }}>
+                  <div style={{ background: '#050505', padding: '1.25rem', borderRadius: '10px', border: '1px solid rgba(212, 175, 55, 0.35)', marginBottom: '1.25rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                       <div>
                         <h5 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '0.98rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <FileText size={17} /> Article Sections: Headings, Paragraphs & Images ({currentSections.length})
                         </h5>
-                        <p style={{ margin: '3px 0 0', color: '#94a3b8', fontSize: '0.75rem' }}>
+                        <p style={{ margin: '3px 0 0', color: '#a3a3a3', fontSize: '0.75rem' }}>
                           Build structured content with multiple headings, dedicated section images, and rich body paragraphs.
                         </p>
                       </div>
@@ -1479,7 +1489,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         <div
                           key={sec.id || sIdx}
                           style={{
-                            background: '#131b2e',
+                            background: '#141414',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             borderRadius: '8px',
                             padding: '1rem'
@@ -1488,7 +1498,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           {/* Section Header Controls */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ background: 'var(--primary-color)', color: '#0f172a', fontWeight: 800, fontSize: '0.75rem', padding: '2px 7px', borderRadius: '4px' }}>
+                              <span style={{ background: 'var(--primary-color)', color: '#0a0a0a', fontWeight: 800, fontSize: '0.75rem', padding: '2px 7px', borderRadius: '4px' }}>
                                 #{sIdx + 1}
                               </span>
                               <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -1511,7 +1521,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                 style={{
                                   background: 'rgba(255, 255, 255, 0.08)',
                                   border: 'none',
-                                  color: sIdx === 0 ? '#475569' : '#cbd5e1',
+                                  color: sIdx === 0 ? '#525252' : '#e5e5e5',
                                   padding: '4px',
                                   borderRadius: '4px',
                                   cursor: sIdx === 0 ? 'not-allowed' : 'pointer'
@@ -1535,7 +1545,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                 style={{
                                   background: 'rgba(255, 255, 255, 0.08)',
                                   border: 'none',
-                                  color: sIdx === currentSections.length - 1 ? '#475569' : '#cbd5e1',
+                                  color: sIdx === currentSections.length - 1 ? '#525252' : '#e5e5e5',
                                   padding: '4px',
                                   borderRadius: '4px',
                                   cursor: sIdx === currentSections.length - 1 ? 'not-allowed' : 'pointer'
@@ -1584,12 +1594,12 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                 updated[sIdx] = { ...updated[sIdx], heading: e.target.value };
                                 setEditingBlog({ ...editingBlog, sections: updated });
                               }}
-                              style={{ width: '100%', padding: '7px 10px', borderRadius: '5px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                              style={{ width: '100%', padding: '7px 10px', borderRadius: '5px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
                             />
                           </div>
 
                           {/* Section Image Option & Caption */}
-                          <div style={{ background: '#0b1120', padding: '10px', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div style={{ background: '#0a0a0a', padding: '10px', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                               <label style={{ fontSize: '0.76rem', color: '#93c5fd', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
                                 <ImageIcon size={13} /> Section Image URL (Optional visual asset for this heading)
@@ -1602,7 +1612,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                     updated[sIdx] = { ...updated[sIdx], imageUrl: '', imageCaption: '' };
                                     setEditingBlog({ ...editingBlog, sections: updated });
                                   }}
-                                  style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
+                                  style={{ background: 'transparent', border: 'none', color: '#a3a3a3', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
                                 >
                                   Clear Image
                                 </button>
@@ -1618,7 +1628,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                   updated[sIdx] = { ...updated[sIdx], imageUrl: e.target.value };
                                   setEditingBlog({ ...editingBlog, sections: updated });
                                 }}
-                                style={{ padding: '6px 9px', borderRadius: '5px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.8rem' }}
+                                style={{ padding: '6px 9px', borderRadius: '5px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
                               />
                               <input
                                 type="text"
@@ -1629,10 +1639,10 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                   updated[sIdx] = { ...updated[sIdx], imageCaption: e.target.value };
                                   setEditingBlog({ ...editingBlog, sections: updated });
                                 }}
-                                style={{ padding: '6px 9px', borderRadius: '5px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.8rem' }}
+                                style={{ padding: '6px 9px', borderRadius: '5px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
                               />
                               {sec.imageUrl && (
-                                <div style={{ width: '60px', height: '36px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(59,130,246,0.5)', background: '#1e293b' }}>
+                                <div style={{ width: '60px', height: '36px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(59,130,246,0.5)', background: '#1c1c1c' }}>
                                   <img src={sec.imageUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
                               )}
@@ -1659,7 +1669,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                 updated[sIdx] = { ...updated[sIdx], paragraphs: paras };
                                 setEditingBlog({ ...editingBlog, sections: updated });
                               }}
-                              style={{ width: '100%', padding: '8px 10px', borderRadius: '5px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem', lineHeight: 1.5 }}
+                              style={{ width: '100%', padding: '8px 10px', borderRadius: '5px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem', lineHeight: 1.5 }}
                             />
                           </div>
                         </div>
@@ -1699,7 +1709,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   </div>
 
                   {/* 5. ADDITIONAL GALLERY PHOTOS MANAGER */}
-                  <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '1.25rem' }}>
+                  <div style={{ background: '#0a0a0a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '1.25rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <label style={{ fontSize: '0.85rem', color: 'var(--primary-color)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <ImageIcon size={15} /> Extra Article Showcase Photos ({editingBlog.images?.length || 0})
@@ -1721,7 +1731,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                               borderRadius: '6px',
                               overflow: 'hidden',
                               border: '1px solid rgba(255,255,255,0.15)',
-                              background: '#1e293b'
+                              background: '#1c1c1c'
                             }}
                           >
                             <img src={imgUrl} alt={`gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1765,7 +1775,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         placeholder="Paste additional image URL (e.g. Unsplash, postimg, CDN)..."
                         value={newGalleryImageUrl}
                         onChange={(e) => setNewGalleryImageUrl(e.target.value)}
-                        style={{ flex: 1, padding: '7px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                        style={{ flex: 1, padding: '7px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
                       />
                       <button
                         type="button"
@@ -1888,9 +1898,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         padding: '4px 10px',
                         borderRadius: '12px',
                         border: '1px solid',
-                        borderColor: isSelected ? 'var(--primary-color)' : '#334155',
-                        background: isSelected ? 'rgba(212, 175, 55, 0.2)' : '#1e293b',
-                        color: isSelected ? 'var(--primary-color)' : '#94a3b8',
+                        borderColor: isSelected ? 'var(--primary-color)' : '#2e2e2e',
+                        background: isSelected ? 'rgba(212, 175, 55, 0.2)' : '#1c1c1c',
+                        color: isSelected ? 'var(--primary-color)' : '#a3a3a3',
                         fontSize: '0.75rem',
                         cursor: 'pointer',
                         whiteSpace: 'nowrap'
@@ -1914,8 +1924,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   width: '100%',
                   padding: '9px 12px',
                   borderRadius: '6px',
-                  background: '#151d32',
-                  border: '1px solid #334155',
+                  background: '#141414',
+                  border: '1px solid #2e2e2e',
                   color: '#fff',
                   fontSize: '0.85rem'
                 }}
@@ -1937,7 +1947,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     <div
                       key={blog.id}
                       style={{
-                        background: '#151d32',
+                        background: '#141414',
                         padding: '0.85rem 1rem',
                         borderRadius: '8px',
                         border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -2034,10 +2044,13 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       name: '',
                       title: 'Senior Software Engineer',
                       bio: 'Experienced technologist driving high performance web and app solutions.',
+                      skills: [...DEFAULT_MEMBER_SKILLS],
                       imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
                       socials: {},
                       extraLinks: []
                     });
+                    setEditingTeamSkills([...DEFAULT_MEMBER_SKILLS]);
+                    setNewSkillInput('');
                     setEditingTeamLinks([
                       createEditableAccountLink('linkedin', '', ''),
                       createEditableAccountLink('instagram', '', '')
@@ -2056,7 +2069,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Team Member Form */}
             {(isCreatingTeamMember || editingTeamMember) && (
-              <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
                   {isCreatingTeamMember ? 'Add New Team Member' : `Edit: ${editingTeamMember?.name}`}
                 </h4>
@@ -2070,7 +2083,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingTeamMember?.name || ''}
                       onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, name: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                       required
                     />
                   </div>
@@ -2082,7 +2095,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingTeamMember?.title || ''}
                       onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, title: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                       required
                     />
                   </div>
@@ -2096,7 +2109,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingTeamMember?.imageUrl || ''}
                     onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, imageUrl: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -2108,12 +2121,96 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     rows={3}
                     value={editingTeamMember?.bio || ''}
                     onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, bio: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
+                {/* Skills & Technical Specializations Editor */}
+                <div style={{ marginBottom: '1rem', padding: '0.9rem', borderRadius: '8px', background: 'rgba(20, 20, 20, 0.85)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <h5 style={{ color: 'var(--primary-color)', fontSize: '0.88rem', margin: '0 0 4px' }}>
+                    Skills &amp; Technical Specializations ({editingTeamSkills.length})
+                  </h5>
+                  <p style={{ margin: '0 0 0.65rem', fontSize: '0.72rem', color: 'var(--text-light)' }}>
+                    Add core technical skills or specializations shown on the team member profile view.
+                  </p>
+
+                  {editingTeamSkills.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '0.75rem' }}>
+                      {editingTeamSkills.map((skill) => (
+                        <span
+                          key={skill}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            background: '#1c1c1c',
+                            border: '1px solid rgba(212, 175, 55, 0.35)',
+                            color: '#e2e8f0',
+                            fontSize: '0.74rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          <span>{skill}</span>
+                          <button
+                            type="button"
+                            aria-label={`Remove skill ${skill}`}
+                            onClick={() => setEditingTeamSkills((prev) => removeMemberSkill(prev, skill))}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#f87171',
+                              cursor: 'pointer',
+                              padding: 0,
+                              display: 'inline-flex',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <X size={13} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <input
+                      type="text"
+                      aria-label="Add skill or specialization"
+                      placeholder="e.g. Next.js 15, Shopify Liquid, Cloud Architecture (comma-separated)"
+                      value={newSkillInput}
+                      onChange={(e) => setNewSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (!newSkillInput.trim()) return;
+                          setEditingTeamSkills((prev) => addMemberSkill(prev, newSkillInput));
+                          setNewSkillInput('');
+                        }
+                      }}
+                      style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.78rem' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newSkillInput.trim()) {
+                          onShowToast('Please enter a skill or specialization', 'error');
+                          return;
+                        }
+                        setEditingTeamSkills((prev) => addMemberSkill(prev, newSkillInput));
+                        setNewSkillInput('');
+                      }}
+                      className="btn btn-primary"
+                      style={{ padding: '6px 12px', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
+                    >
+                      <Plus size={14} /> Add Skill
+                    </button>
+                  </div>
+                </div>
+
                 {/* Unified Create & Delete Account Links Editor */}
-                <div style={{ marginBottom: '1.25rem', padding: '0.9rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ marginBottom: '1.25rem', padding: '0.9rem', borderRadius: '8px', background: 'rgba(20, 20, 20, 0.85)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
                     <div>
                       <h5 style={{ color: 'var(--primary-color)', fontSize: '0.88rem', margin: 0 }}>
@@ -2157,7 +2254,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
                   {/* Active Account Links List (each row editable & deletable) */}
                   {editingTeamLinks.length === 0 ? (
-                    <p style={{ margin: '0 0 0.85rem', fontSize: '0.78rem', color: '#94a3b8' }}>
+                    <p style={{ margin: '0 0 0.85rem', fontSize: '0.78rem', color: '#a3a3a3' }}>
                       No account links attached yet. Use the quick buttons above or the form below to create a link.
                     </p>
                   ) : (
@@ -2171,10 +2268,10 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                               display: 'flex',
                               flexDirection: 'column',
                               gap: '6px',
-                              background: '#1e293b',
+                              background: '#1c1c1c',
                               padding: '8px 10px',
                               borderRadius: '8px',
-                              border: '1px solid #334155'
+                              border: '1px solid #2e2e2e'
                             }}
                           >
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '6px', alignItems: 'center' }}>
@@ -2200,7 +2297,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                     )
                                   );
                                 }}
-                                style={{ padding: '6px 8px', borderRadius: '6px', background: '#0f172a', border: '1px solid #475569', color: '#fff', fontSize: '0.76rem' }}
+                                style={{ padding: '6px 8px', borderRadius: '6px', background: '#0a0a0a', border: '1px solid #404040', color: '#fff', fontSize: '0.76rem' }}
                               >
                                 {ACCOUNT_LINK_PRESETS.map((opt) => (
                                   <option key={opt.preset} value={opt.preset}>
@@ -2220,7 +2317,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                     prev.map((item) => (item.id === linkItem.id ? { ...item, label: nextVal } : item))
                                   );
                                 }}
-                                style={{ padding: '6px 8px', borderRadius: '6px', background: '#0f172a', border: '1px solid #475569', color: '#fff', fontSize: '0.76rem' }}
+                                style={{ padding: '6px 8px', borderRadius: '6px', background: '#0a0a0a', border: '1px solid #404040', color: '#fff', fontSize: '0.76rem' }}
                               />
 
                               <button
@@ -2257,7 +2354,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                   prev.map((item) => (item.id === linkItem.id ? { ...item, url: nextUrl } : item))
                                 );
                               }}
-                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#0f172a', border: '1px solid #475569', color: '#fff', fontSize: '0.78rem' }}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#0a0a0a', border: '1px solid #404040', color: '#fff', fontSize: '0.78rem' }}
                             />
                           </div>
                         );
@@ -2275,7 +2372,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         aria-label="New account link type"
                         value={newAccountPreset}
                         onChange={(e) => setNewAccountPreset(e.target.value as AccountLinkPreset)}
-                        style={{ padding: '6px 8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.78rem' }}
+                        style={{ padding: '6px 8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.78rem' }}
                       >
                         {ACCOUNT_LINK_PRESETS.map((opt) => (
                           <option key={opt.preset} value={opt.preset}>
@@ -2289,7 +2386,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         placeholder={`Label (default: ${getAccountPresetMeta(newAccountPreset).label})`}
                         value={newAccountLabel}
                         onChange={(e) => setNewAccountLabel(e.target.value)}
-                        style={{ padding: '6px 8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.78rem' }}
+                        style={{ padding: '6px 8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.78rem' }}
                       />
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
@@ -2299,7 +2396,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         placeholder={getAccountPresetMeta(newAccountPreset).placeholder}
                         value={newAccountUrl}
                         onChange={(e) => setNewAccountUrl(e.target.value)}
-                        style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.78rem' }}
+                        style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.78rem' }}
                       />
                       <button
                         type="button"
@@ -2330,6 +2427,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     onClick={() => {
                       setEditingTeamMember(null);
                       setIsCreatingTeamMember(false);
+                      setEditingTeamSkills([]);
+                      setNewSkillInput('');
                       setEditingTeamLinks([]);
                     }}
                     className="btn btn-outline"
@@ -2345,10 +2444,15 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         return;
                       }
                       const { socials, extraLinks } = editableLinksToMemberSocials(editingTeamLinks);
+                      const pendingSkills = newSkillInput.trim()
+                        ? addMemberSkill(editingTeamSkills, newSkillInput)
+                        : editingTeamSkills;
+                      const sanitizedSkills = sanitizeMemberSkills(pendingSkills);
                       const sanitizedMember: TeamMemberData = {
                         ...editingTeamMember,
                         name: editingTeamMember.name.trim(),
                         title: editingTeamMember.title.trim(),
+                        skills: sanitizedSkills,
                         socials,
                         extraLinks
                       };
@@ -2361,6 +2465,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       }
                       setEditingTeamMember(null);
                       setIsCreatingTeamMember(false);
+                      setEditingTeamSkills([]);
+                      setNewSkillInput('');
                       setEditingTeamLinks([]);
                     }}
                     className="btn btn-primary"
@@ -2380,7 +2486,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={member.id}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -2402,19 +2508,23 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-light)', maxWidth: '380px' }}>
                       {member.bio}
                     </p>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#94a3b8' }}>
-                      {configuredLinks.length} profile {configuredLinks.length === 1 ? 'link' : 'links'} active
+                    <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#a3a3a3' }}>
+                      {resolveMemberSkills(member).length} specializations &bull; {configuredLinks.length} profile {configuredLinks.length === 1 ? 'link' : 'links'} active
                       {configuredLinks.length > 0 ? `: ${configuredLinks.map((l) => l.label).slice(0, 4).join(', ')}${configuredLinks.length > 4 ? ` +${configuredLinks.length - 4} more` : ''}` : ''}
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
                       onClick={() => {
+                        const resolvedSkills = resolveMemberSkills(member);
                         setEditingTeamMember({
                           ...member,
+                          skills: resolvedSkills,
                           socials: member.socials || {},
                           extraLinks: member.extraLinks || []
                         });
+                        setEditingTeamSkills(resolvedSkills);
+                        setNewSkillInput('');
                         setEditingTeamLinks(memberToEditableLinks(member));
                         setNewAccountPreset('instagramCompany');
                         setNewAccountLabel('');
@@ -2492,7 +2602,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Testimonial Form */}
             {(isCreatingTestimonial || editingTestimonial) && (
-              <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
                   {isCreatingTestimonial ? 'Add Review' : `Edit: ${editingTestimonial?.name}`}
                 </h4>
@@ -2505,7 +2615,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingTestimonial?.name || ''}
                       onChange={(e) => setEditingTestimonial(editingTestimonial ? { ...editingTestimonial, name: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                   <div>
@@ -2516,7 +2626,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingTestimonial?.initials || ''}
                       onChange={(e) => setEditingTestimonial(editingTestimonial ? { ...editingTestimonial, initials: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                 </div>
@@ -2530,7 +2640,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       type="text"
                       value={editingTestimonial?.role || ''}
                       onChange={(e) => setEditingTestimonial(editingTestimonial ? { ...editingTestimonial, role: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                   <div>
@@ -2543,7 +2653,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       max={5}
                       value={editingTestimonial?.rating || 5}
                       onChange={(e) => setEditingTestimonial(editingTestimonial ? { ...editingTestimonial, rating: parseInt(e.target.value) || 5 } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     />
                   </div>
                 </div>
@@ -2556,7 +2666,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     rows={3}
                     value={editingTestimonial?.quote || ''}
                     onChange={(e) => setEditingTestimonial(editingTestimonial ? { ...editingTestimonial, quote: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -2604,7 +2714,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={t.id}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -2696,7 +2806,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
             </div>
 
             {/* Announcement text */}
-            <div style={{ background: '#151d32', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #334155' }}>
+            <div style={{ background: '#141414', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #2e2e2e' }}>
               <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
                 Alliance Status Announcement Message
               </label>
@@ -2704,7 +2814,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 rows={2}
                 value={generalForm.partnershipNotice}
                 onChange={(e) => setGeneralForm({ ...generalForm, partnershipNotice: e.target.value })}
-                style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.85rem' }}
+                style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
               />
               <button
                 type="button"
@@ -2721,7 +2831,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Partnership Form */}
             {(isCreatingPartnership || editingPartnership) && (
-              <div style={{ background: '#151d32', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
                   {isCreatingPartnership ? 'Add Partnership Card' : 'Edit Partnership Card'}
                 </h4>
@@ -2731,7 +2841,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingPartnership?.title || ''}
                     onChange={(e) => setEditingPartnership(editingPartnership ? { ...editingPartnership, title: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
                 <div style={{ marginBottom: '0.75rem' }}>
@@ -2740,7 +2850,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     rows={2}
                     value={editingPartnership?.description || ''}
                     onChange={(e) => setEditingPartnership(editingPartnership ? { ...editingPartnership, description: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -2785,7 +2895,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={p.id}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -2875,7 +2985,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* Logo Form */}
             {(isCreatingPartnerLogo || editingPartnerLogo) && (
-              <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
                   {isCreatingPartnerLogo ? 'Add Partner Logo' : `Edit: ${editingPartnerLogo?.name}`}
                 </h4>
@@ -2888,7 +2998,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingPartnerLogo?.name || ''}
                     onChange={(e) => setEditingPartnerLogo(editingPartnerLogo ? { ...editingPartnerLogo, name: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     required
                   />
                 </div>
@@ -2901,11 +3011,11 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingPartnerLogo?.logoUrl || ''}
                     onChange={(e) => setEditingPartnerLogo(editingPartnerLogo ? { ...editingPartnerLogo, logoUrl: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                     required
                   />
                   {editingPartnerLogo?.logoUrl && (
-                    <div style={{ marginTop: '8px', background: '#0f172a', padding: '10px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ marginTop: '8px', background: '#0a0a0a', padding: '10px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Preview:</span>
                       <img src={editingPartnerLogo.logoUrl} alt="Preview" style={{ maxHeight: '35px', maxWidth: '100px' }} />
                     </div>
@@ -2920,7 +3030,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="url"
                     value={editingPartnerLogo?.websiteUrl || ''}
                     onChange={(e) => setEditingPartnerLogo(editingPartnerLogo ? { ...editingPartnerLogo, websiteUrl: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
 
@@ -2968,7 +3078,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={logo.id}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -3076,7 +3186,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
             {/* FAQ Form */}
             {(isCreatingFaq || editingFaq) && (
-              <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
                 <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
                   {isCreatingFaq ? 'Add Question' : 'Edit Question'}
                 </h4>
@@ -3088,7 +3198,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     type="text"
                     value={editingFaq?.question || ''}
                     onChange={(e) => setEditingFaq(editingFaq ? { ...editingFaq, question: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
                 <div style={{ marginBottom: '1.25rem' }}>
@@ -3099,7 +3209,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     rows={3}
                     value={editingFaq?.answer || ''}
                     onChange={(e) => setEditingFaq(editingFaq ? { ...editingFaq, answer: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -3146,7 +3256,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <div
                   key={faq.id || index}
                   style={{
-                    background: '#151d32',
+                    background: '#141414',
                     padding: '1rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.08)'
@@ -3234,7 +3344,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               )}
             </div>
 
-            <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid #334155' }}>
+            <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid #2e2e2e' }}>
               <h4 style={{ color: '#fff', fontSize: '0.95rem', marginBottom: '0.5rem' }}>
                 1. Export Current Data (JSON)
               </h4>
@@ -3254,7 +3364,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               </button>
             </div>
 
-            <div style={{ background: '#151d32', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid #334155' }}>
+            <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid #2e2e2e' }}>
               <h4 style={{ color: '#fff', fontSize: '0.95rem', marginBottom: '0.5rem' }}>
                 2. Import Data (JSON)
               </h4>
@@ -3266,7 +3376,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 placeholder="Paste JSON here..."
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#fff', fontSize: '0.8rem', marginBottom: '0.75rem' }}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem', marginBottom: '0.75rem' }}
               />
               <button
                 onClick={() => {
@@ -3320,7 +3430,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
       <div
         style={{
           padding: '0.75rem 1.5rem',
-          background: '#090d19',
+          background: '#050505',
           borderTop: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           justifyContent: 'space-between',
@@ -3340,7 +3450,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               boxShadow: syncStatus === 'connected' ? '0 0 6px #10b981' : undefined
             }}
           />
-          <span style={{ color: syncStatus === 'connected' ? '#94a3b8' : '#f59e0b' }}>
+          <span style={{ color: syncStatus === 'connected' ? '#a3a3a3' : '#f59e0b' }}>
             {activeTab === 'queries'
               ? 'Visitor contact messages sync live from Firebase.'
               : syncStatus === 'connected'
@@ -3354,7 +3464,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           onClick={onClose}
           style={{
             background: 'var(--primary-color)',
-            color: '#0f172a',
+            color: '#0a0a0a',
             border: 'none',
             padding: '4px 12px',
             borderRadius: '4px',
@@ -3372,7 +3482,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(5, 8, 16, 0.85)',
+            background: 'rgba(10, 10, 10, 0.88)',
             backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
@@ -3384,7 +3494,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         >
           <div
             style={{
-              background: '#151d32',
+              background: '#141414',
               border: '1px solid rgba(239, 68, 68, 0.4)',
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8)',
               borderRadius: '12px',
@@ -3414,7 +3524,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
             <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: '#fff', fontWeight: 700 }}>
               {deleteConfirmTarget.type === 'reset-defaults' ? 'Reset All Data?' : 'Confirm Deletion'}
             </h3>
-            <p style={{ margin: '0 0 1.25rem', color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 1.25rem', color: '#a3a3a3', fontSize: '0.88rem', lineHeight: 1.5 }}>
               {deleteConfirmTarget.type === 'reset-defaults'
                 ? 'Are you sure you want to revert all changes and restore original agency data? All custom edits will be reset.'
                 : `Are you sure you want to delete "${deleteConfirmTarget.title}"? This item will be removed immediately.`}

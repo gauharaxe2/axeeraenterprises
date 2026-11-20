@@ -70,7 +70,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
           {partnerships.map((item) => (
             <div key={item.id} className="partner-card">
               <div className="partner-icon">{getIcon(item.icon)}</div>
-              <h3 style={{ color: 'var(--text-white)', marginBottom: '0.75rem' }}>{item.title}</h3>
+              <h3 style={{ color: 'var(--text-dark)', marginBottom: '0.75rem' }}>{item.title}</h3>
               <p style={{ color: 'var(--text-light)', margin: 0 }}>{item.description}</p>
             </div>
           ))}
@@ -80,12 +80,12 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
         {partnerLogos.length > 0 && (
           <div
             style={{
-              background: 'rgba(15, 23, 42, 0.85)',
+              background: '#ffffff',
               borderRadius: '16px',
-              border: '1px solid rgba(212, 175, 55, 0.25)',
+              border: '1px solid rgba(184, 134, 11, 0.38)',
               padding: '2.5rem 1.5rem',
               marginBottom: '2.5rem',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+              boxShadow: 'var(--shadow-lg)',
               position: 'relative'
             }}
             onMouseEnter={() => setIsPaused(true)}
@@ -94,7 +94,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <span
                 style={{
-                  color: 'var(--primary-color)',
+                  color: 'var(--gold-ink)',
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
                   fontSize: '0.8rem',
@@ -105,7 +105,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
               >
                 {strings.partnerships.ecosystemBadge}
               </span>
-              <h3 style={{ color: '#fff', fontSize: '1.6rem', margin: 0 }}>
+              <h3 style={{ color: 'var(--text-dark)', fontSize: '1.6rem', margin: 0 }}>
                 {strings.partnerships.partnersHeading}
               </h3>
             </div>
@@ -127,8 +127,8 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       flex: `0 0 calc(${100 / itemsPerView}% - 1.15rem)`,
                       minWidth: '180px',
                       boxSizing: 'border-box',
-                      background: 'rgba(30, 41, 59, 0.7)',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      background: 'var(--bg-light)',
+                      border: '1px solid var(--border-color)',
                       borderRadius: '12px',
                       padding: '1.5rem 1rem',
                       display: 'flex',
@@ -137,7 +137,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       justifyContent: 'center',
                       height: '140px',
                       transition: 'all 0.3s ease',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                      boxShadow: 'var(--shadow-sm)',
                       textAlign: 'center'
                     }}
                     onMouseEnter={(e) => {
@@ -146,7 +146,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.borderColor = 'var(--border-color)';
                     }}
                   >
                     <div
@@ -166,8 +166,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                           style={{
                             maxHeight: '48px',
                             maxWidth: '140px',
-                            objectFit: 'contain',
-                            filter: 'brightness(1.1)'
+                            objectFit: 'contain'
                           }}
                           onError={(e) => {
                             // Fallback to text initials if broken URL
@@ -180,12 +179,13 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                             width: '45px',
                             height: '45px',
                             borderRadius: '50%',
-                            background: 'var(--gradient-primary)',
+                            background: 'var(--obsidian)',
+                            border: '1px solid var(--primary-color)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: 700,
-                            color: '#0f172a'
+                            color: 'var(--primary-color)'
                           }}
                         >
                           {logo.name.charAt(0)}
@@ -194,7 +194,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                     </div>
                     <span
                       style={{
-                        color: 'var(--text-white)',
+                        color: 'var(--text-dark)',
                         fontWeight: 600,
                         fontSize: '0.9rem',
                         lineHeight: 1.2
@@ -209,12 +209,13 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                         rel="noopener noreferrer"
                         style={{
                           fontSize: '0.75rem',
-                          color: 'var(--primary-color)',
+                          color: 'var(--gold-ink)',
                           textDecoration: 'none',
                           marginTop: '4px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '3px'
+                          gap: '3px',
+                          fontWeight: 600
                         }}
                       >
                         Visit Partner <ExternalLink size={12} />
@@ -237,7 +238,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       width: '40px',
                       height: '40px',
                       borderRadius: '50%',
-                      background: 'rgba(15, 23, 42, 0.95)',
+                      background: '#0a0a0a',
                       border: '1px solid var(--primary-color)',
                       color: 'var(--primary-color)',
                       display: 'flex',
@@ -245,7 +246,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       justifyContent: 'center',
                       cursor: 'pointer',
                       zIndex: 2,
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                      boxShadow: '0 4px 12px rgba(10, 10, 10, 0.25)'
                     }}
                     aria-label="Previous Partners"
                   >
@@ -261,7 +262,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       width: '40px',
                       height: '40px',
                       borderRadius: '50%',
-                      background: 'rgba(15, 23, 42, 0.95)',
+                      background: '#0a0a0a',
                       border: '1px solid var(--primary-color)',
                       color: 'var(--primary-color)',
                       display: 'flex',
@@ -269,7 +270,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       justifyContent: 'center',
                       cursor: 'pointer',
                       zIndex: 2,
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                      boxShadow: '0 4px 12px rgba(10, 10, 10, 0.25)'
                     }}
                     aria-label="Next Partners"
                   >
@@ -298,7 +299,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       height: '8px',
                       borderRadius: '4px',
                       border: 'none',
-                      background: currentIndex === idx ? 'var(--primary-color)' : 'rgba(255, 255, 255, 0.2)',
+                      background: currentIndex === idx ? 'var(--primary-dark)' : 'rgba(10, 10, 10, 0.18)',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
                       padding: 0
@@ -312,7 +313,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
         )}
 
         <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-          <p style={{ fontSize: '1.15rem', color: 'var(--primary-color)', fontWeight: 500 }}>
+          <p style={{ fontSize: '1.15rem', color: 'var(--gold-ink)', fontWeight: 600 }}>
             {displayNotice}
           </p>
         </div>

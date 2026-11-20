@@ -129,13 +129,15 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
   };
 
   return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-light)' }}>
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#ffffff', color: '#0a0a0a' }}>
       {/* Service Hero */}
       <section
+        className="dark-surface"
         style={{
           padding: '110px 0 70px',
-          background: 'linear-gradient(135deg, #0f172a 0%, #000000 100%)',
+          background: 'linear-gradient(135deg, #0a0a0a 0%, #161616 100%)',
           color: '#ffffff',
+          borderBottom: '1px solid rgba(212, 175, 55, 0.25)',
           position: 'relative'
         }}
       >
@@ -143,8 +145,8 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
           <button
             onClick={onBackToHome}
             style={{
-              background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(212, 175, 55, 0.08)',
+              border: '1px solid rgba(212, 175, 55, 0.4)',
               color: 'var(--primary-color)',
               padding: '8px 18px',
               borderRadius: '20px',
@@ -174,10 +176,10 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
               >
                 Axe's Era Enterprises Solutions
               </span>
-              <h1 style={{ fontSize: '3.4rem', marginBottom: '1.25rem', color: '#fff' }}>
+              <h1 style={{ fontSize: '3.4rem', marginBottom: '1.25rem', color: '#ffffff' }}>
                 {service.title}
               </h1>
-              <p style={{ fontSize: '1.2rem', color: 'var(--text-light)', lineHeight: 1.7, marginBottom: '2rem' }}>
+              <p style={{ fontSize: '1.2rem', color: '#d6d3d1', lineHeight: 1.7, marginBottom: '2rem' }}>
                 {service.fullDesc || service.shortDesc}
               </p>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -197,13 +199,13 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                   height: '220px',
                   borderRadius: '50%',
                   background: 'rgba(212, 175, 55, 0.1)',
-                  border: '2px solid rgba(212, 175, 55, 0.4)',
+                  border: '2px solid rgba(212, 175, 55, 0.45)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto',
                   color: 'var(--primary-color)',
-                  boxShadow: '0 0 40px rgba(212, 175, 55, 0.2)'
+                  boxShadow: '0 0 40px rgba(212, 175, 55, 0.18)'
                 }}
               >
                 {getHeroIcon()}
@@ -214,7 +216,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
       </section>
 
       {/* Offerings Grid */}
-      <section style={{ padding: '80px 0' }}>
+      <section style={{ padding: '80px 0', background: 'var(--bg-light)' }}>
         <div className="container">
           <div className="section-header">
             <h2>Specialized Capabilities</h2>
@@ -226,16 +228,17 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
               <div
                 key={idx}
                 style={{
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: '#ffffff',
+                  border: '1px solid var(--border-color)',
+                  borderTop: '3px solid var(--primary-color)',
                   borderRadius: '12px',
                   padding: '2rem',
-                  boxShadow: 'var(--shadow-md)'
+                  boxShadow: 'var(--shadow-sm)'
                 }}
               >
                 <div
                   style={{
-                    color: 'var(--primary-color)',
+                    color: 'var(--gold-ink)',
                     marginBottom: '1rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -243,9 +246,9 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                   }}
                 >
                   <Check size={22} />
-                  <h3 style={{ margin: 0, color: '#fff', fontSize: '1.25rem' }}>{item.title}</h3>
+                  <h3 style={{ margin: 0, color: '#0a0a0a', fontSize: '1.25rem' }}>{item.title}</h3>
                 </div>
-                <p style={{ color: 'var(--text-light)', margin: 0, lineHeight: 1.6 }}>{item.desc}</p>
+                <p style={{ color: '#44403c', margin: 0, lineHeight: 1.6 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -253,7 +256,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
       </section>
 
       {/* Technologies & Standards */}
-      <section style={{ padding: '60px 0 100px', background: 'var(--bg-white)' }}>
+      <section style={{ padding: '60px 0 100px', background: '#ffffff' }}>
         <div className="container">
           <div className="section-header">
             <h2>Our Standards & Technologies</h2>
@@ -263,48 +266,48 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             <div
               style={{
-                background: 'rgba(15, 23, 42, 0.8)',
+                background: 'var(--bg-light)',
                 padding: '2rem',
                 borderRadius: '12px',
                 border: '1px solid var(--border-color)'
               }}
             >
-              <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Zap size={22} /> Performance-First
+              <h3 style={{ color: '#0a0a0a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Zap size={22} color="var(--gold-ink)" /> Performance-First
               </h3>
-              <p style={{ color: 'var(--text-light)', lineHeight: 1.6 }}>
+              <p style={{ color: '#44403c', lineHeight: 1.6 }}>
                 Every solution is audited against strict speed benchmarks, achieving sub-second load times and 90+ Core Web Vitals scores.
               </p>
             </div>
 
             <div
               style={{
-                background: 'rgba(15, 23, 42, 0.8)',
+                background: 'var(--bg-light)',
                 padding: '2rem',
                 borderRadius: '12px',
                 border: '1px solid var(--border-color)'
               }}
             >
-              <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={22} /> Enterprise Security
+              <h3 style={{ color: '#0a0a0a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldCheck size={22} color="var(--gold-ink)" /> Enterprise Security
               </h3>
-              <p style={{ color: 'var(--text-light)', lineHeight: 1.6 }}>
+              <p style={{ color: '#44403c', lineHeight: 1.6 }}>
                 SSL enforcement, sanitized database queries, encrypted communications, and adherence to modern privacy regulations.
               </p>
             </div>
 
             <div
               style={{
-                background: 'rgba(15, 23, 42, 0.8)',
+                background: 'var(--bg-light)',
                 padding: '2rem',
                 borderRadius: '12px',
                 border: '1px solid var(--border-color)'
               }}
             >
-              <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Laptop size={22} /> Modern Tech Stacks
+              <h3 style={{ color: '#0a0a0a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Laptop size={22} color="var(--gold-ink)" /> Modern Tech Stacks
               </h3>
-              <p style={{ color: 'var(--text-light)', lineHeight: 1.6 }}>
+              <p style={{ color: '#44403c', lineHeight: 1.6 }}>
                 TypeScript, React, Node.js, Next.js, Kotlin, Swift, PostgreSQL, Tailwind, and AWS cloud infrastructure.
               </p>
             </div>
@@ -312,19 +315,21 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
 
           {/* CTA Banner */}
           <div
+            className="dark-surface"
             style={{
               marginTop: '4rem',
               padding: '3rem',
               borderRadius: '16px',
-              background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%)',
+              background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1917 100%)',
               border: '1px solid var(--primary-color)',
-              textAlign: 'center'
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-xl)'
             }}
           >
-            <h3 style={{ fontSize: '2rem', color: '#fff', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '2rem', color: '#ffffff', marginBottom: '1rem' }}>
               Ready to elevate your {service.title}?
             </h3>
-            <p style={{ color: 'var(--text-light)', maxWidth: '650px', margin: '0 auto 2rem', fontSize: '1.05rem' }}>
+            <p style={{ color: '#d6d3d1', maxWidth: '650px', margin: '0 auto 2rem', fontSize: '1.05rem' }}>
               Discuss your project scope directly with Founder Gauhar Axe and receive a comprehensive roadmap tailored to your timeline.
             </p>
             <button onClick={onContactClick} className="btn btn-primary" style={{ padding: '14px 36px', fontSize: '1.05rem' }}>

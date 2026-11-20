@@ -296,8 +296,8 @@ export const Footer: React.FC<FooterProps> = ({
           style={{
             marginBottom: '2rem',
             padding: '1.75rem',
-            background: 'linear-gradient(135deg, rgba(255, 107, 0, 0.08) 0%, rgba(212, 175, 55, 0.06) 100%)',
-            border: '1px solid rgba(255, 107, 0, 0.25)',
+            background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(22, 22, 22, 0.96) 100%)',
+            border: '1px solid rgba(212, 175, 55, 0.42)',
             borderRadius: '14px'
           }}
         >
@@ -317,7 +317,7 @@ export const Footer: React.FC<FooterProps> = ({
                   {strings.footer.newsletterHeading}
                 </h3>
               </div>
-              <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.5 }}>
+              <p style={{ margin: 0, color: '#d4d4d4', fontSize: '0.88rem', lineHeight: 1.5 }}>
                 {strings.footer.newsletterDesc}
               </p>
             </div>
@@ -336,7 +336,7 @@ export const Footer: React.FC<FooterProps> = ({
                       left: '12px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      color: '#64748b'
+                      color: '#a3a3a3'
                     }}
                   />
                   <input
@@ -353,8 +353,8 @@ export const Footer: React.FC<FooterProps> = ({
                       width: '100%',
                       padding: '11px 14px 11px 36px',
                       borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      background: 'rgba(15, 23, 42, 0.85)',
+                      border: '1px solid rgba(212, 175, 55, 0.32)',
+                      background: '#0a0a0a',
                       color: '#ffffff',
                       fontSize: '0.9rem',
                       outline: 'none'

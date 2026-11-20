@@ -48,7 +48,7 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f172a 0%, #000000 100%)',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #171717 100%)',
         padding: '24px'
       }}
     >
@@ -56,8 +56,8 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
         style={{
           width: '100%',
           maxWidth: '440px',
-          background: '#151d32',
-          border: '1px solid rgba(212, 175, 55, 0.35)',
+          background: '#ffffff',
+          border: '1px solid #d4af37',
           borderRadius: '16px',
           padding: '2rem',
           boxShadow: '0 24px 48px rgba(0, 0, 0, 0.45)'
@@ -65,28 +65,29 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
       >
         <p
           style={{
-            color: 'var(--primary-color)',
+            color: 'var(--gold-ink)',
             fontWeight: 700,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: '0.5rem'
+            marginBottom: '0.5rem',
+            fontSize: '0.85rem'
           }}
         >
           Axe&apos;s Era Enterprises
         </p>
-        <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#f8fafc' }}>Admin sign in</h1>
-        <p style={{ marginBottom: '1.5rem', color: '#94a3b8' }}>
+        <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#0a0a0a' }}>Admin sign in</h1>
+        <p style={{ marginBottom: '1.5rem', color: '#44403c' }}>
           Sign in with an authorized Google account to open the content editor and enquiry inbox.
         </p>
 
         {phase === 'checking' ? (
-          <p role="status" style={{ color: '#94a3b8' }}>
+          <p role="status" style={{ color: '#57534e' }}>
             Checking your session…
           </p>
         ) : (
           <>
             {error && (
-              <p role="alert" style={{ color: '#f87171', marginBottom: '1rem' }}>
+              <p role="alert" style={{ color: '#dc2626', marginBottom: '1rem', fontWeight: 600 }}>
                 {error}
               </p>
             )}
@@ -111,7 +112,7 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
         )}
 
         <p style={{ marginTop: '1.25rem', marginBottom: 0 }}>
-          <a href="/" style={{ color: 'var(--primary-color)' }}>
+          <a href="/" style={{ color: 'var(--gold-ink)', fontWeight: 600 }}>
             Back to the website
           </a>
         </p>

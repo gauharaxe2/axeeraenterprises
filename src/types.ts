@@ -109,6 +109,7 @@ export interface TeamMemberData {
   name: string;
   title: string;
   bio: string;
+  skills?: string[];
   imageUrl: string;
   socials: {
     linkedin?: string;

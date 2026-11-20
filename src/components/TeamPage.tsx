@@ -2,6 +2,12 @@ import React from 'react';
 import { ArrowRight, Award, CheckCircle2 } from 'lucide-react';
 import { TeamMemberData } from '../types';
 import { collectTeamSocialLinks } from '../utils/teamSocials';
+import {
+  DEFAULT_FOUNDER_SKILLS,
+  isFounderMember,
+  resolveMemberBiography,
+  resolveMemberSkills
+} from '../utils/teamProfile';
 import { SocialPlatformIcon } from './SocialPlatformIcon';
 import {
   EditorialCta,
@@ -24,6 +30,7 @@ const fallbackFounder: TeamMemberData = {
   name: 'Gauhar Nadeem',
   title: 'CEO & Founder',
   bio: "Visionary leadership driving digital excellence. Gauhar Axe founded Axe's Era Enterprises with a focus on crafting conversion-engineered web platforms, cutting-edge mobile apps, and iconic visual identities.",
+  skills: [...DEFAULT_FOUNDER_SKILLS],
   imageUrl: 'https://i.postimg.cc/PqjZ6d8q/Picsart-26-08-08-06-40-52-321.jpg',
   socials: {
     linkedin: 'https://www.linkedin.com/in/gauharaxe/',
@@ -89,18 +96,40 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
             </span>
           </div>
           <div className="editorial-feature-copy">
-            <p className="editorial-kicker-inline">Founder & Principal Architect</p>
+            <p className="editorial-kicker-inline">Founder &amp; Principal Architect</p>
             <h2>
               {founder.name} <span className="editorial-muted">(Gauhar Axe)</span>
             </h2>
             <p className="editorial-muted">Multan, Pakistan / Global Client Base</p>
-            <p style={{ color: 'var(--primary-color)', fontWeight: 700 }}>{founder.title}</p>
-            <p className="editorial-copy">{founder.bio}</p>
-            <p className="editorial-copy">
-              Gauhar brings extensive experience engineering bespoke enterprise platforms, high-converting commercial web
-              stores, and custom software architectures. His philosophy centers on technical precision, eliminating
-              unnecessary software bloat, and empowering clients with complete code sovereignty upon project handover.
-            </p>
+            <p style={{ color: 'var(--gold-ink)', fontWeight: 700 }}>{founder.title}</p>
+
+            <div className="team-profile-block">
+              <h3 className="team-profile-subheading">Short Biography</h3>
+              <p className="editorial-copy">{resolveMemberBiography(founder)}</p>
+              {isFounderMember(founder) && (
+                <p className="editorial-copy" style={{ marginTop: '0.6rem' }}>
+                  Gauhar brings extensive experience engineering bespoke enterprise platforms, high-converting commercial
+                  web stores, and custom software architectures. His philosophy centers on technical precision, eliminating
+                  unnecessary software bloat, and empowering clients with complete code sovereignty upon project handover.
+                </p>
+              )}
+            </div>
+
+            <div className="team-profile-block">
+              <h3 className="team-profile-subheading">Skills &amp; Technical Specializations</h3>
+              <ul
+                className="team-skills-grid"
+                aria-label={`${founder.name} skills and technical specializations`}
+              >
+                {resolveMemberSkills(founder).map((skill) => (
+                  <li key={skill} className="team-skill-item">
+                    <CheckCircle2 size={15} aria-hidden="true" />
+                    <span>{skill}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div>
               <p className="editorial-eyebrow" style={{ marginBottom: '0.7rem' }}>
                 Verified Executive Channels
@@ -118,31 +147,56 @@ export const TeamPage: React.FC<TeamPageProps> = ({ team, onBackToHome, onContac
         </article>
 
         {others.length > 0 ? (
-          <div className="editorial-grid" style={{ marginTop: '1.5rem', ['--card-min' as string]: '260px' }}>
-            {others.map((member) => (
-              <article
-                key={member.id || member.name}
-                id={member.id ? `member-${member.id}` : undefined}
-                className="editorial-card"
-              >
-                <div className="editorial-media">
-                  <EditorialImage src={member.imageUrl} alt={member.name} />
-                </div>
-                <div className="editorial-card-body">
-                  <h3>{member.name}</h3>
-                  <p className="editorial-kicker-inline">{member.title}</p>
-                  <p className="editorial-muted">{member.bio}</p>
-                  <div className="editorial-socials">
-                    {collectTeamSocialLinks(member).map((item) => (
-                      <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer">
-                        <SocialPlatformIcon platform={item.platform} size={15} />
-                        {item.label}
-                      </a>
-                    ))}
+          <div className="editorial-grid" style={{ marginTop: '1.5rem', ['--card-min' as string]: '300px' }}>
+            {others.map((member) => {
+              const memberSkills = resolveMemberSkills(member);
+              return (
+                <article
+                  key={member.id || member.name}
+                  id={member.id ? `member-${member.id}` : undefined}
+                  className="editorial-card"
+                >
+                  <div className="editorial-media">
+                    <EditorialImage src={member.imageUrl} alt={member.name} />
                   </div>
-                </div>
-              </article>
-            ))}
+                  <div className="editorial-card-body">
+                    <div>
+                      <h3>{member.name}</h3>
+                      <p className="editorial-kicker-inline">{member.title}</p>
+                    </div>
+
+                    <div className="team-member-bio-block">
+                      <span className="team-member-section-label">Short Biography</span>
+                      <p className="editorial-muted">{resolveMemberBiography(member)}</p>
+                    </div>
+
+                    <div className="team-member-skills-block">
+                      <span className="team-member-section-label">Skills &amp; Technical Specializations</span>
+                      <ul
+                        className="team-member-skills-list"
+                        aria-label={`${member.name} skills and technical specializations`}
+                      >
+                        {memberSkills.map((skill) => (
+                          <li key={skill} className="team-skill-chip">
+                            <CheckCircle2 size={13} aria-hidden="true" />
+                            <span>{skill}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="editorial-socials" style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
+                      {collectTeamSocialLinks(member).map((item) => (
+                        <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer">
+                          <SocialPlatformIcon platform={item.platform} size={15} />
+                          {item.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         ) : (
           <p className="editorial-todo" style={{ marginTop: '1.25rem' }}>

@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { TeamMemberData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { collectTeamSocialLinks } from '../utils/teamSocials';
+import { resolveMemberBiography } from '../utils/teamProfile';
 import { SocialPlatformIcon } from './SocialPlatformIcon';
 
 interface TeamSectionProps {
@@ -66,7 +67,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team, onOpenTeamPage }
                   </h3>
                   <p>{member.title}</p>
                   <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', fontWeight: 400 }}>
-                    {member.bio}
+                    {resolveMemberBiography(member)}
                   </p>
 
                   {onOpenTeamPage && (

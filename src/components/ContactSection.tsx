@@ -255,9 +255,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <div
                   role="alert"
                   style={{
-                    background: 'rgba(239, 68, 68, 0.12)',
-                    border: '1px solid rgba(239, 68, 68, 0.45)',
-                    color: '#fecaca',
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    color: '#991b1b',
                     borderRadius: '8px',
                     padding: '12px 14px',
                     marginBottom: '1rem',
@@ -265,24 +265,24 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     lineHeight: 1.55
                   }}
                 >
-                  <p style={{ margin: '0 0 0.5rem', color: '#fecaca' }}>
+                  <p style={{ margin: '0 0 0.5rem', color: '#991b1b', fontWeight: 600 }}>
                     We couldn't send your message, so it was not delivered. Your text is still here.
                   </p>
-                  <p style={{ margin: 0, color: '#fecaca' }}>
+                  <p style={{ margin: 0, color: '#7f1d1d' }}>
                     Please try again, or reach us on{' '}
                     <a
                       href={WHATSAPP_URL}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        color: '#25D366',
+                        color: '#15803d',
                         fontWeight: 700,
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '4px'
                       }}
                     >
-                      <WhatsAppIcon size={15} color="#25D366" /> WhatsApp
+                      <WhatsAppIcon size={15} color="#16a34a" /> WhatsApp
                     </a>
                     {phoneNumbers.length > 0 ? ' or call ' : '.'}
                     {phoneNumbers.map((number, index) => (
@@ -290,7 +290,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         {index > 0 ? ' / ' : ''}
                         <a
                           href={phoneHref(number)}
-                          style={{ color: 'var(--primary-color)', fontWeight: 700 }}
+                          style={{ color: 'var(--gold-ink)', fontWeight: 700 }}
                         >
                           {number}
                         </a>

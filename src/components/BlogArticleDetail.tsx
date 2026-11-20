@@ -132,7 +132,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
   const isWhatIsWebDev = blog.slug === 'what-is-web-development';
 
   return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-primary, #0b1120)', color: '#f8fafc' }}>
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-light)', color: '#0a0a0a' }}>
       {/* Fixed Top Reading Progress Bar */}
       <div
         className="reading-progress-track"
@@ -152,10 +152,12 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
 
       {/* Article Header Hero */}
       <section
+        className="dark-surface"
         style={{
           padding: '80px 20px 50px',
-          background: 'radial-gradient(ellipse at top, rgba(30, 41, 59, 0.7) 0%, rgba(11, 17, 32, 1) 80%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'radial-gradient(ellipse at top, rgba(212, 175, 55, 0.14) 0%, #0a0a0a 75%)',
+          borderBottom: '1px solid rgba(212, 175, 55, 0.25)',
+          color: '#ffffff',
           textAlign: 'center'
         }}
       >
@@ -165,8 +167,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
             <button
               onClick={onBackToBlogs}
               style={{
-                background: 'rgba(15, 23, 42, 0.85)',
-                border: '1px solid rgba(212, 175, 55, 0.4)',
+                background: 'rgba(20, 20, 20, 0.9)',
+                border: '1px solid rgba(212, 175, 55, 0.45)',
                 color: 'var(--primary-color, #d4af37)',
                 padding: '8px 20px',
                 borderRadius: '9999px',
@@ -180,11 +182,11 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'var(--primary-color, #d4af37)';
-                e.currentTarget.style.background = 'rgba(212, 175, 55, 0.12)';
+                e.currentTarget.style.background = 'rgba(212, 175, 55, 0.14)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
-                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)';
+                e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.45)';
+                e.currentTarget.style.background = 'rgba(20, 20, 20, 0.9)';
               }}
             >
               <ArrowLeft size={16} /> Back to All Articles
@@ -234,12 +236,12 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               alignItems: 'center',
               gap: '16px',
               fontSize: '0.88rem',
-              color: '#94a3b8',
+              color: '#d6d3d1',
               flexWrap: 'wrap',
               marginBottom: '1.5rem'
             }}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#e2e8f0' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#ffffff' }}>
               <User size={15} color="var(--primary-color, #d4af37)" />
               {blog.author || 'Gauhar Axe'}
             </span>
@@ -256,7 +258,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                 alignItems: 'center',
                 gap: '6px',
                 fontVariantNumeric: 'tabular-nums',
-                color: '#cbd5e1'
+                color: '#e7e5e4'
               }}
             >
               <Clock size={15} color="var(--primary-color, #d4af37)" aria-hidden="true" />
@@ -277,7 +279,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
           <p
             style={{
               fontSize: 'clamp(1.05rem, 1.8vw, 1.25rem)',
-              color: '#cbd5e1',
+              color: '#e7e5e4',
               maxWidth: '820px',
               margin: '0 auto 1.5rem',
               lineHeight: 1.6,
@@ -292,8 +294,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
             <button
               onClick={handleCopyLink}
               style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                background: 'rgba(28, 28, 28, 0.9)',
+                border: '1px solid rgba(212, 175, 55, 0.35)',
                 color: copiedLink ? '#4ade80' : '#ffffff',
                 padding: '6px 14px',
                 borderRadius: '8px',
@@ -312,7 +314,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               onClick={handleShareWhatsApp}
               style={{
                 background: 'rgba(37, 211, 102, 0.15)',
-                border: '1px solid rgba(37, 211, 102, 0.4)',
+                border: '1px solid rgba(37, 211, 102, 0.45)',
                 color: '#25d366',
                 padding: '6px 14px',
                 borderRadius: '8px',
@@ -334,15 +336,15 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
         <div className="container" style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div
             style={{
-              background: 'rgba(19, 27, 46, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: '#ffffff',
+              border: '1px solid var(--border-color)',
               borderRadius: '20px',
               padding: 'clamp(1.5rem, 4vw, 3.5rem)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)'
+              boxShadow: 'var(--shadow-lg)'
             }}
           >
             {/* Primary Cover Image with Zoom Lightbox Trigger */}
-            <div style={{ position: 'relative', borderRadius: '14px', overflow: 'hidden', marginBottom: '2.5rem', background: '#0f172a' }}>
+            <div style={{ position: 'relative', borderRadius: '14px', overflow: 'hidden', marginBottom: '2.5rem', background: '#0a0a0a' }}>
               <img
                 src={allImages[activeImageIndex] || blog.imageUrl}
                 alt={blog.title}
@@ -361,8 +363,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                   position: 'absolute',
                   bottom: '16px',
                   right: '16px',
-                  background: 'rgba(15, 23, 42, 0.85)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'rgba(10, 10, 10, 0.88)',
+                  border: '1px solid rgba(212, 175, 55, 0.4)',
                   color: '#ffffff',
                   padding: '6px 12px',
                   borderRadius: '6px',
@@ -373,7 +375,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                   cursor: 'pointer'
                 }}
               >
-                <Maximize2 size={13} /> View Full Photo ({activeImageIndex + 1}/{allImages.length})
+                <Maximize2 size={13} color="var(--primary-color)" /> View Full Photo ({activeImageIndex + 1}/{allImages.length})
               </button>
             </div>
 
@@ -381,21 +383,21 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
             {allImages.length > 1 && (
               <div
                 style={{
-                  background: 'rgba(15, 23, 42, 0.7)',
-                  border: '1px solid rgba(212, 175, 55, 0.25)',
+                  background: 'var(--bg-light)',
+                  border: '1px solid rgba(184, 134, 11, 0.3)',
                   borderRadius: '14px',
                   padding: '1.25rem',
                   marginBottom: '2.5rem'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Images size={18} color="var(--primary-color, #d4af37)" />
-                    <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#ffffff' }}>
+                    <Images size={18} color="var(--gold-ink)" />
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#0a0a0a' }}>
                       Article Image Gallery ({allImages.length} Visual Assets)
                     </h4>
                   </div>
-                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#57534e' }}>
                     Click thumbnail to swap main preview
                   </span>
                 </div>
@@ -418,17 +420,17 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                           borderRadius: '8px',
                           overflow: 'hidden',
                           cursor: 'pointer',
-                          border: isCurrent ? '2px solid var(--primary-color, #d4af37)' : '1px solid rgba(255, 255, 255, 0.1)',
+                          border: isCurrent ? '2px solid #b8860b' : '1px solid var(--border-color)',
                           position: 'relative',
                           transition: 'all 0.2s ease',
-                          opacity: isCurrent ? 1 : 0.75
+                          opacity: isCurrent ? 1 : 0.78
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.opacity = '1';
                           e.currentTarget.style.transform = 'scale(1.02)';
                         }}
                         onMouseLeave={(e) => {
-                          if (!isCurrent) e.currentTarget.style.opacity = '0.75';
+                          if (!isCurrent) e.currentTarget.style.opacity = '0.78';
                           e.currentTarget.style.transform = 'scale(1.0)';
                         }}
                       >
@@ -442,9 +444,10 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                             position: 'absolute',
                             bottom: '4px',
                             right: '4px',
-                            background: 'rgba(0,0,0,0.7)',
-                            color: '#fff',
+                            background: 'rgba(10, 10, 10, 0.82)',
+                            color: '#f5d061',
                             fontSize: '0.65rem',
+                            fontWeight: 700,
                             padding: '1px 5px',
                             borderRadius: '4px'
                           }}
@@ -465,8 +468,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                   <article
                     key={section.id || sIdx}
                     style={{
-                      background: 'rgba(15, 23, 42, 0.5)',
-                      border: '1px solid rgba(255, 255, 255, 0.07)',
+                      background: 'var(--bg-light)',
+                      border: '1px solid var(--border-color)',
                       borderRadius: '16px',
                       padding: 'clamp(1.25rem, 3vw, 2.25rem)',
                       position: 'relative'
@@ -478,14 +481,14 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                         style={{
                           width: '4px',
                           height: '24px',
-                          background: 'linear-gradient(to bottom, var(--primary-color, #d4af37), #f59e0b)',
+                          background: 'linear-gradient(to bottom, var(--primary-color, #d4af37), var(--primary-dark, #b8860b))',
                           borderRadius: '2px',
                           display: 'inline-block'
                         }}
                       />
                       <h2
                         style={{
-                          color: '#ffffff',
+                          color: '#0a0a0a',
                           fontSize: 'clamp(1.25rem, 2.2vw, 1.65rem)',
                           fontWeight: 700,
                           margin: 0,
@@ -503,8 +506,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                           margin: '0 0 1.5rem',
                           borderRadius: '12px',
                           overflow: 'hidden',
-                          background: '#0b1120',
-                          border: '1px solid rgba(212, 175, 55, 0.25)'
+                          background: '#ffffff',
+                          border: '1px solid var(--border-color)'
                         }}
                       >
                         <div
@@ -530,9 +533,9 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                               position: 'absolute',
                               bottom: '10px',
                               right: '10px',
-                              background: 'rgba(15, 23, 42, 0.85)',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
-                              color: '#fff',
+                              background: 'rgba(10, 10, 10, 0.88)',
+                              border: '1px solid rgba(212, 175, 55, 0.4)',
+                              color: '#ffffff',
                               padding: '5px 10px',
                               borderRadius: '6px',
                               fontSize: '0.74rem',
@@ -541,7 +544,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                               gap: '5px'
                             }}
                           >
-                            <Maximize2 size={12} /> Click to Enlarge
+                            <Maximize2 size={12} color="var(--primary-color)" /> Click to Enlarge
                           </div>
                         </div>
                         {section.imageCaption && (
@@ -549,16 +552,16 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                             style={{
                               padding: '8px 14px',
                               fontSize: '0.82rem',
-                              color: '#94a3b8',
-                              background: 'rgba(15, 23, 42, 0.95)',
-                              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                              color: '#44403c',
+                              background: '#ffffff',
+                              borderTop: '1px solid var(--border-color)',
                               fontStyle: 'italic',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px'
                             }}
                           >
-                            <span style={{ color: 'var(--primary-color, #d4af37)' }}>📷</span>
+                            <span style={{ color: 'var(--gold-ink)' }}>📷</span>
                             {section.imageCaption}
                           </figcaption>
                         )}
@@ -566,9 +569,9 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                     )}
 
                     {/* Section Paragraphs */}
-                    <div style={{ color: '#cbd5e1', fontSize: '1.08rem', lineHeight: 1.85 }}>
+                    <div style={{ color: '#292524', fontSize: '1.08rem', lineHeight: 1.85 }}>
                       {section.paragraphs.map((para, pIdx) => (
-                        <p key={pIdx} style={{ marginBottom: pIdx === section.paragraphs.length - 1 ? 0 : '1.25rem' }}>
+                        <p key={pIdx} style={{ color: '#292524', marginBottom: pIdx === section.paragraphs.length - 1 ? 0 : '1.25rem' }}>
                           {para}
                         </p>
                       ))}
@@ -578,9 +581,9 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               </div>
             ) : (
               /* Fallback for legacy paragraphs */
-              <div style={{ color: '#cbd5e1', fontSize: '1.12rem', lineHeight: 1.85, marginBottom: '2.5rem' }}>
+              <div style={{ color: '#292524', fontSize: '1.12rem', lineHeight: 1.85, marginBottom: '2.5rem' }}>
                 {blog.paragraphs.map((para, idx) => (
-                  <p key={idx} style={{ marginBottom: '1.5rem' }}>
+                  <p key={idx} style={{ color: '#292524', marginBottom: '1.5rem' }}>
                     {para}
                   </p>
                 ))}
@@ -589,44 +592,44 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
 
             {/* Special Technical Breakdown (for "What is Web Development?") */}
             {isWhatIsWebDev && (
-              <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                <h2 style={{ color: '#fff', fontSize: '1.85rem', borderBottom: '2px solid var(--primary-color, #d4af37)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
+              <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)' }}>
+                <h2 style={{ color: '#0a0a0a', fontSize: '1.85rem', borderBottom: '2px solid var(--primary-color, #d4af37)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
                   Core Web Development Pillars In 2026
                 </h2>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '2.5rem' }}>
-                  <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <h3 style={{ color: 'var(--primary-color, #d4af37)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
-                      <Code2 size={20} /> Frontend Engineering
+                  <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                      <Code2 size={20} color="var(--gold-ink)" /> Frontend Engineering
                     </h3>
-                    <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Building high-performance user interfaces with React, Next.js, and TypeScript. Ensures fluid touch responsiveness and sub-second rendering.
                     </p>
                   </div>
 
-                  <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <h3 style={{ color: 'var(--primary-color, #d4af37)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
-                      <Server size={20} /> Backend & Cloud APIs
+                  <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                      <Server size={20} color="var(--gold-ink)" /> Backend & Cloud APIs
                     </h3>
-                    <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Microservices, automated queue processors, serverless functions, and third-party API orchestration with enterprise-grade uptime.
                     </p>
                   </div>
 
-                  <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <h3 style={{ color: 'var(--primary-color, #d4af37)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
-                      <Database size={20} /> Database Architecture
+                  <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                      <Database size={20} color="var(--gold-ink)" /> Database Architecture
                     </h3>
-                    <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Relational PostgreSQL schemas, distributed caches with Redis, and NoSQL stores engineered for rapid query execution under high traffic.
                     </p>
                   </div>
 
-                  <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <h3 style={{ color: 'var(--primary-color, #d4af37)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
-                      <Shield size={20} /> Cybersecurity & Compliance
+                  <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                      <Shield size={20} color="var(--gold-ink)" /> Cybersecurity & Compliance
                     </h3>
-                    <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Automated rate limiting, SSL encryption, CSRF/XSS defense shields, and secure OAuth/JWT token workflows protecting client data.
                     </p>
                   </div>
@@ -636,28 +639,30 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
 
             {/* Author Attribution Card */}
             <div
+              className="dark-surface"
               style={{
-                background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(15, 23, 42, 0.8) 100%)',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1917 100%)',
+                border: '1px solid rgba(212, 175, 55, 0.45)',
                 borderRadius: '14px',
                 padding: '2rem',
                 margin: '3rem 0',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '20px',
-                flexWrap: 'wrap'
+                flexWrap: 'wrap',
+                color: '#ffffff'
               }}
             >
               <img
                 src={SITE_LOGO_SRC}
                 alt="Axe's Era"
-                style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', background: '#000' }}
+                style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', background: '#000', border: '1px solid var(--primary-color)' }}
               />
               <div style={{ flex: 1 }}>
                 <h4 style={{ margin: '0 0 4px', fontSize: '1.1rem', color: '#ffffff' }}>
                   Published by {blog.author || 'Gauhar Axe'}
                 </h4>
-                <p style={{ margin: 0, fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                <p style={{ margin: 0, fontSize: '0.88rem', color: '#d6d3d1', lineHeight: 1.5 }}>
                   CEO & Founder at Axe's Era Enterprises. Leading digital transformation, high-velocity web engineering, and brand positioning for high-growth global businesses.
                 </p>
               </div>
@@ -677,7 +682,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 paddingTop: '2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                borderTop: '1px solid var(--border-color)',
                 flexWrap: 'wrap',
                 gap: '1rem'
               }}
@@ -708,7 +713,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(5, 8, 16, 0.95)',
+            background: 'rgba(10, 10, 10, 0.96)',
             zIndex: 9999,
             display: 'flex',
             flexDirection: 'column',
@@ -725,8 +730,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               position: 'absolute',
               top: '24px',
               right: '24px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(212, 175, 55, 0.35)',
               color: '#ffffff',
               padding: '10px',
               borderRadius: '50%',
@@ -770,8 +775,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                     left: '-20px',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    background: 'rgba(15, 23, 42, 0.9)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(10, 10, 10, 0.92)',
+                    border: '1px solid rgba(212, 175, 55, 0.45)',
                     color: '#ffffff',
                     padding: '10px',
                     borderRadius: '50%',
@@ -787,8 +792,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                     right: '-20px',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    background: 'rgba(15, 23, 42, 0.9)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(10, 10, 10, 0.92)',
+                    border: '1px solid rgba(212, 175, 55, 0.45)',
                     color: '#ffffff',
                     padding: '10px',
                     borderRadius: '50%',
