@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Search } from 'lucide-react';
+import { sanitizeDisplayImageUrl } from '../../utils/imageUpload';
 
 export function openInApp(event: React.MouseEvent<HTMLAnchorElement>, action: () => void) {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -211,8 +212,14 @@ export function EditorialImage({
   alt: string;
   loading?: 'lazy' | 'eager';
 }) {
+  const safeSrc = sanitizeDisplayImageUrl(src);
   const [failed, setFailed] = useState(false);
-  if (!src || failed) {
+
+  useEffect(() => {
+    setFailed(false);
+  }, [safeSrc]);
+
+  if (!safeSrc || failed) {
     return (
       <div className="editorial-media-fallback" role="img" aria-label={alt}>
         {alt}
@@ -221,7 +228,7 @@ export function EditorialImage({
   }
   return (
     <img
-      src={src}
+      src={safeSrc}
       alt={alt}
       loading={loading}
       referrerPolicy="no-referrer"

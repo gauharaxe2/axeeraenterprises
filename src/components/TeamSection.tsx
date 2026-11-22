@@ -4,7 +4,31 @@ import { TeamMemberData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { collectTeamSocialLinks } from '../utils/teamSocials';
 import { resolveMemberBiography } from '../utils/teamProfile';
+import { deriveInitials, sanitizeDisplayImageUrl } from '../utils/imageUpload';
 import { SocialPlatformIcon } from './SocialPlatformIcon';
+
+const TeamMemberPhoto: React.FC<{ imageUrl?: string; name: string; title: string }> = ({
+  imageUrl,
+  name,
+  title
+}) => {
+  const safeSrc = sanitizeDisplayImageUrl(imageUrl);
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasError(false);
+  }, [safeSrc]);
+
+  if (!safeSrc || hasError) {
+    return (
+      <div className="member-image-fallback" aria-label={`${name} - ${title}`}>
+        {deriveInitials(name)}
+      </div>
+    );
+  }
+
+  return <img src={safeSrc} alt={`${name} - ${title}`} onError={() => setHasError(true)} />;
+};
 
 interface TeamSectionProps {
   team: TeamMemberData[];
@@ -35,7 +59,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ team, onOpenTeamPage }
                 className={onOpenTeamPage ? 'team-member team-member-clickable' : 'team-member'}
               >
                 <div className="member-image">
-                  <img src={member.imageUrl} alt={`${member.name} - ${member.title}`} />
+                  <TeamMemberPhoto imageUrl={member.imageUrl} name={member.name} title={member.title} />
                 </div>
 
                 <div className="member-info">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,6 +21,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import { ServiceItem } from '../types';
+import { sanitizeDisplayImageUrl } from '../utils/imageUpload';
 
 interface ServicesPageProps {
   services: ServiceItem[];
@@ -28,6 +29,37 @@ interface ServicesPageProps {
   onSelectService: (service: ServiceItem) => void;
   onContactClick: (serviceName?: string) => void;
 }
+
+const ServiceCatalogCover: React.FC<{ imageUrl?: string; title: string }> = ({ imageUrl, title }) => {
+  const safeSrc = sanitizeDisplayImageUrl(imageUrl);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [safeSrc]);
+
+  if (!safeSrc || failed) return null;
+
+  return (
+    <div
+      style={{
+        marginBottom: '1rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid var(--border-color)',
+        background: '#0a0a0a',
+        maxHeight: '200px'
+      }}
+    >
+      <img
+        src={safeSrc}
+        alt={title}
+        onError={() => setFailed(true)}
+        style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }}
+      />
+    </div>
+  );
+};
 
 // Category mapping helper
 const SERVICE_CATEGORIES = [
@@ -625,6 +657,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                             </p>
                           </div>
                         </div>
+
+                        {/* Optional Service Cover Image */}
+                        <ServiceCatalogCover imageUrl={service.imageUrl} title={service.title} />
 
                         {/* Short & Full Descriptions */}
                         <p style={{ fontSize: '1rem', color: '#1c1917', lineHeight: 1.6, marginBottom: '1rem', fontWeight: 500 }}>

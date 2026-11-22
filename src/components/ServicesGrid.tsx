@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Laptop,
   Palette,
@@ -11,6 +11,29 @@ import {
 } from 'lucide-react';
 import { ServiceItem } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { sanitizeDisplayImageUrl } from '../utils/imageUpload';
+
+const ServiceCardImage: React.FC<{
+  src: string;
+  alt: string;
+  fallback: React.ReactNode;
+}> = ({ src, alt, fallback }) => {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (!src || failed) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <div className="service-card-media">
+      <img src={src} alt={alt} onError={() => setFailed(true)} />
+    </div>
+  );
+};
 
 interface ServicesGridProps {
   services: ServiceItem[];
@@ -57,26 +80,37 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
         </div>
 
         <div className="services-grid">
-          {services.map((service) => (
-            <div key={service.id} className="service-card">
-              <div className="service-icon">{getIcon(service.icon)}</div>
-              <h3>{service.title}</h3>
-              <p>{service.shortDesc}</p>
-              <button
-                type="button"
-                className="service-link"
-                onClick={() => {
-                  if (service.slug) {
-                    onSelectService(service);
-                  } else {
-                    onContactClick();
-                  }
-                }}
-              >
-                {strings.services.learnMore} <ArrowRight size={16} />
-              </button>
-            </div>
-          ))}
+          {services.map((service) => {
+            const safeImg = sanitizeDisplayImageUrl(service.imageUrl);
+            return (
+              <div key={service.id} className="service-card">
+                {safeImg ? (
+                  <ServiceCardImage
+                    src={safeImg}
+                    alt={service.title}
+                    fallback={<div className="service-icon">{getIcon(service.icon)}</div>}
+                  />
+                ) : (
+                  <div className="service-icon">{getIcon(service.icon)}</div>
+                )}
+                <h3>{service.title}</h3>
+                <p>{service.shortDesc}</p>
+                <button
+                  type="button"
+                  className="service-link"
+                  onClick={() => {
+                    if (service.slug) {
+                      onSelectService(service);
+                    } else {
+                      onContactClick();
+                    }
+                  }}
+                >
+                  {strings.services.learnMore} <ArrowRight size={16} />
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {onOpenServicesPage && (

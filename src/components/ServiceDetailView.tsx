@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Check, Laptop, Palette, TrendingUp, Smartphone, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { ServiceItem } from '../types';
+import { sanitizeDisplayImageUrl } from '../utils/imageUpload';
 
 interface ServiceDetailViewProps {
   service: ServiceItem;
@@ -13,6 +14,12 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
   onBackToHome,
   onContactClick
 }) => {
+  const safeHeroImage = sanitizeDisplayImageUrl(service.imageUrl);
+  const [heroImageError, setHeroImageError] = useState(false);
+
+  useEffect(() => {
+    setHeroImageError(false);
+  }, [safeHeroImage]);
   const getHeroIcon = () => {
     switch (service.slug) {
       case 'web-development':
@@ -161,7 +168,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
             <ArrowLeft size={16} /> Back to All Services
           </button>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '3rem', alignItems: 'center' }}>
+          <div className="service-detail-hero-grid">
             <div>
               <span
                 style={{
@@ -176,7 +183,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
               >
                 Axe's Era Enterprises Solutions
               </span>
-              <h1 style={{ fontSize: '3.4rem', marginBottom: '1.25rem', color: '#ffffff' }}>
+              <h1 className="service-detail-hero-title">
                 {service.title}
               </h1>
               <p style={{ fontSize: '1.2rem', color: '#d6d3d1', lineHeight: 1.7, marginBottom: '2rem' }}>
@@ -193,23 +200,46 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '220px',
-                  height: '220px',
-                  borderRadius: '50%',
-                  background: 'rgba(212, 175, 55, 0.1)',
-                  border: '2px solid rgba(212, 175, 55, 0.45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto',
-                  color: 'var(--primary-color)',
-                  boxShadow: '0 0 40px rgba(212, 175, 55, 0.18)'
-                }}
-              >
-                {getHeroIcon()}
-              </div>
+              {safeHeroImage && !heroImageError ? (
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '420px',
+                    aspectRatio: '16 / 10',
+                    margin: '0 auto',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '2px solid rgba(212, 175, 55, 0.5)',
+                    boxShadow: '0 24px 48px rgba(0, 0, 0, 0.45)',
+                    background: '#0a0a0a'
+                  }}
+                >
+                  <img
+                    src={safeHeroImage}
+                    alt={service.title}
+                    onError={() => setHeroImageError(true)}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: '220px',
+                    height: '220px',
+                    borderRadius: '50%',
+                    background: 'rgba(212, 175, 55, 0.1)',
+                    border: '2px solid rgba(212, 175, 55, 0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto',
+                    color: 'var(--primary-color)',
+                    boxShadow: '0 0 40px rgba(212, 175, 55, 0.18)'
+                  }}
+                >
+                  {getHeroIcon()}
+                </div>
+              )}
             </div>
           </div>
         </div>

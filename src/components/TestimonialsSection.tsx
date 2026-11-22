@@ -2,6 +2,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import { Testimonial } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { ClientAvatar } from './ClientAvatar';
 
 interface TestimonialsSectionProps {
   testimonials: Testimonial[];
@@ -35,7 +36,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
               </div>
 
               <div className="testimonial-author">
-                <div className="avatar-circle">{item.initials}</div>
+                <ClientAvatar name={item.name} initials={item.initials} imageUrl={item.imageUrl} />
                 <div>
                   <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-dark)' }}>
                     {item.name}

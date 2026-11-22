@@ -1,7 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Project } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { sanitizeDisplayImageUrl } from '../utils/imageUpload';
+
+const CaseStudyThumbnail: React.FC<{ imageUrl?: string; title: string }> = ({ imageUrl, title }) => {
+  const safeSrc = sanitizeDisplayImageUrl(imageUrl);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [safeSrc]);
+
+  if (!safeSrc || failed) {
+    return <div className="portfolio-image-fallback">{title}</div>;
+  }
+
+  return <img src={safeSrc} alt={title} onError={() => setFailed(true)} />;
+};
 
 interface CaseStudiesProps {
   projects: Project[];
@@ -56,7 +72,7 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
           {filteredProjects.map((project) => (
             <div key={project.id} className="portfolio-item">
               <div className="portfolio-image">
-                <img src={project.imageUrl} alt={project.title} />
+                <CaseStudyThumbnail imageUrl={project.imageUrl} title={project.title} />
                 <div className="portfolio-overlay">
                   <h3>{project.title}</h3>
                   <p>{project.subtitle}</p>

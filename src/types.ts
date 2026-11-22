@@ -15,6 +15,7 @@ export interface ServiceItem {
   title: string;
   shortDesc: string;
   icon: string;
+  imageUrl?: string;
   slug?: string;
   features?: string[];
   fullDesc?: string;
@@ -63,6 +64,7 @@ export interface Testimonial {
   name: string;
   role: string;
   initials: string;
+  imageUrl?: string;
   quote: string;
   rating: number;
 }

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowRight, Award, CheckCircle2, Quote, ShieldCheck, Star, TrendingUp } from 'lucide-react';
 import { Testimonial } from '../types';
+import { ClientAvatar } from './ClientAvatar';
 import {
   EditorialCta,
   EditorialHero,
@@ -150,9 +151,11 @@ export const TestimonialsPage: React.FC<TestimonialsPageProps> = ({
                 <p className="editorial-chip">{testimonial.outcome}</p>
                 <blockquote className="editorial-quote">“{testimonial.quote}”</blockquote>
                 <div className="editorial-author">
-                  <span className="avatar-circle" aria-hidden="true">
-                    {testimonial.initials}
-                  </span>
+                  <ClientAvatar
+                    name={testimonial.name}
+                    initials={testimonial.initials}
+                    imageUrl={testimonial.imageUrl}
+                  />
                   <div>
                     <h3 style={{ fontSize: '1rem' }}>{testimonial.name}</h3>
                     <p className="editorial-muted">{testimonial.role}</p>

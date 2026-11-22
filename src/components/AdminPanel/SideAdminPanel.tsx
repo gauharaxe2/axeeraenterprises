@@ -61,6 +61,17 @@ import {
   resolveMemberSkills,
   sanitizeMemberSkills
 } from '../../utils/teamProfile';
+import {
+  PROJECT_IMAGE_MAX_DIMENSION,
+  REVIEW_AVATAR_MAX_DIMENSION,
+  SERVICE_IMAGE_MAX_DIMENSION,
+  TEAM_PHOTO_MAX_DIMENSION,
+  deriveInitials,
+  isWithinFirestoreDocBudget,
+  sanitizeDisplayImageUrl
+} from '../../utils/imageUpload';
+import { ClientAvatar } from '../ClientAvatar';
+import { ImageUploadField } from './ImageUploadField';
 import { QueriesPanel } from './QueriesPanel';
 
 interface SideAdminPanelProps {
@@ -767,6 +778,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       slug: 'web-development',
                       shortDesc: '',
                       icon: 'Laptop',
+                      imageUrl: '',
                       features: ['Custom Solutions', 'Fast Delivery'],
                       fullDesc: ''
                     });
@@ -845,6 +857,24 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   />
                 </div>
 
+                <ImageUploadField
+                  id="service-cover-image"
+                  label="Service Image (Optional)"
+                  value={editingService?.imageUrl || ''}
+                  onChange={(nextUrl) =>
+                    setEditingService(
+                      editingService ? { ...editingService, imageUrl: nextUrl } : null
+                    )
+                  }
+                  onError={(msg) => onShowToast(msg, 'error')}
+                  shape="rounded"
+                  previewFallbackText={deriveInitials(editingService?.title || 'Service')}
+                  maxDimension={SERVICE_IMAGE_MAX_DIMENSION}
+                  urlPlaceholder="https://example.com/service-cover.jpg"
+                  helperText="Upload an optional service image from your device or paste an image URL. Leave empty to display the service icon."
+                  uploadButtonLabel="Upload Service Image"
+                />
+
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
                     Features & Deliverables (Comma-separated)
@@ -879,11 +909,24 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         onShowToast('Please enter a service title', 'error');
                         return;
                       }
+                      const sanitizedService: ServiceItem = {
+                        ...editingService,
+                        title: editingService.title.trim(),
+                        shortDesc: editingService.shortDesc.trim(),
+                        imageUrl: sanitizeDisplayImageUrl(editingService.imageUrl)
+                      };
+                      const nextServicesPreview = isCreatingService
+                        ? [...data.services.filter((s) => s.id !== sanitizedService.id), sanitizedService]
+                        : data.services.map((s) => (s.id === sanitizedService.id ? sanitizedService : s));
+                      if (!isWithinFirestoreDocBudget(nextServicesPreview)) {
+                        onShowToast('Services storage limit reached. Please use smaller images or external URLs.', 'error');
+                        return;
+                      }
                       if (isCreatingService) {
-                        onAddService(editingService);
+                        onAddService(sanitizedService);
                         onShowToast('New service added successfully!', 'success');
                       } else {
-                        onUpdateService(editingService);
+                        onUpdateService(sanitizedService);
                         onShowToast('Service updated successfully!', 'success');
                       }
                       setEditingService(null);
@@ -913,11 +956,44 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     alignItems: 'center'
                   }}
                 >
-                  <div>
-                    <h4 style={{ margin: '0 0 4px', color: '#fff', fontSize: '0.95rem' }}>{svc.title}</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-light)', maxWidth: '380px' }}>
-                      {svc.shortDesc}
-                    </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {sanitizeDisplayImageUrl(svc.imageUrl) ? (
+                      <img
+                        src={sanitizeDisplayImageUrl(svc.imageUrl)}
+                        alt={svc.title}
+                        style={{
+                          width: '54px',
+                          height: '42px',
+                          objectFit: 'cover',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(212, 175, 55, 0.35)',
+                          flexShrink: 0
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '8px',
+                          background: '#0a0a0a',
+                          border: '1px solid rgba(212, 175, 55, 0.35)',
+                          color: 'var(--primary-color)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}
+                      >
+                        <Briefcase size={16} />
+                      </div>
+                    )}
+                    <div>
+                      <h4 style={{ margin: '0 0 4px', color: '#fff', fontSize: '0.95rem' }}>{svc.title}</h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-light)', maxWidth: '340px' }}>
+                        {svc.shortDesc}
+                      </p>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
@@ -1065,17 +1141,23 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   />
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                    Thumbnail Image URL
-                  </label>
-                  <input
-                    type="text"
-                    value={editingProject?.imageUrl || ''}
-                    onChange={(e) => setEditingProject(editingProject ? { ...editingProject, imageUrl: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
-                  />
-                </div>
+                <ImageUploadField
+                  id="project-cover-image"
+                  label="Case Study Image / Thumbnail"
+                  value={editingProject?.imageUrl || ''}
+                  onChange={(nextUrl) =>
+                    setEditingProject(
+                      editingProject ? { ...editingProject, imageUrl: nextUrl } : null
+                    )
+                  }
+                  onError={(msg) => onShowToast(msg, 'error')}
+                  shape="rounded"
+                  previewFallbackText={deriveInitials(editingProject?.title || 'CS')}
+                  maxDimension={PROJECT_IMAGE_MAX_DIMENSION}
+                  urlPlaceholder="https://example.com/project-screenshot.jpg"
+                  helperText="Upload a project screenshot or cover image from your device, or paste an external URL."
+                  uploadButtonLabel="Upload Case Study Image"
+                />
 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
@@ -1111,11 +1193,24 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         onShowToast('Please enter a project title', 'error');
                         return;
                       }
+                      const sanitizedProject: Project = {
+                        ...editingProject,
+                        title: editingProject.title.trim(),
+                        subtitle: editingProject.subtitle.trim(),
+                        imageUrl: sanitizeDisplayImageUrl(editingProject.imageUrl)
+                      };
+                      const nextProjectsPreview = isCreatingProject
+                        ? [...data.projects.filter((p) => p.id !== sanitizedProject.id), sanitizedProject]
+                        : data.projects.map((p) => (p.id === sanitizedProject.id ? sanitizedProject : p));
+                      if (!isWithinFirestoreDocBudget(nextProjectsPreview)) {
+                        onShowToast('Case studies storage limit reached. Please use smaller images or external URLs.', 'error');
+                        return;
+                      }
                       if (isCreatingProject) {
-                        onAddProject(editingProject);
+                        onAddProject(sanitizedProject);
                         onShowToast('New project added!', 'success');
                       } else {
-                        onUpdateProject(editingProject);
+                        onUpdateProject(sanitizedProject);
                         onShowToast('Project updated successfully!', 'success');
                       }
                       setEditingProject(null);
@@ -1145,11 +1240,37 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     gap: '12px'
                   }}
                 >
-                  <img
-                    src={proj.imageUrl}
-                    alt={proj.title}
-                    style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '4px' }}
-                  />
+                  {sanitizeDisplayImageUrl(proj.imageUrl) ? (
+                    <img
+                      src={sanitizeDisplayImageUrl(proj.imageUrl)}
+                      alt={proj.title}
+                      style={{
+                        width: '60px',
+                        height: '45px',
+                        objectFit: 'cover',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(212, 175, 55, 0.3)',
+                        flexShrink: 0
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '60px',
+                        height: '45px',
+                        borderRadius: '6px',
+                        background: '#0a0a0a',
+                        border: '1px solid rgba(212, 175, 55, 0.35)',
+                        color: 'var(--primary-color)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <FolderGit2 size={18} />
+                    </div>
+                  )}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{proj.title}</h4>
@@ -2101,17 +2222,22 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                    Photo URL
-                  </label>
-                  <input
-                    type="text"
-                    value={editingTeamMember?.imageUrl || ''}
-                    onChange={(e) => setEditingTeamMember(editingTeamMember ? { ...editingTeamMember, imageUrl: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
-                  />
-                </div>
+                <ImageUploadField
+                  id="team-member-photo"
+                  label="Team Member Photo"
+                  value={editingTeamMember?.imageUrl || ''}
+                  onChange={(nextUrl) =>
+                    setEditingTeamMember(
+                      editingTeamMember ? { ...editingTeamMember, imageUrl: nextUrl } : null
+                    )
+                  }
+                  onError={(msg) => onShowToast(msg, 'error')}
+                  previewFallbackText={deriveInitials(editingTeamMember?.name || 'Team Member')}
+                  maxDimension={TEAM_PHOTO_MAX_DIMENSION}
+                  urlPlaceholder="https://example.com/team-portrait.jpg"
+                  helperText="Upload a portrait from your device or paste an image URL. Automatically optimized for fast loading."
+                  uploadButtonLabel="Upload Photo"
+                />
 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
@@ -2452,6 +2578,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         ...editingTeamMember,
                         name: editingTeamMember.name.trim(),
                         title: editingTeamMember.title.trim(),
+                        imageUrl: sanitizeDisplayImageUrl(editingTeamMember.imageUrl),
                         skills: sanitizedSkills,
                         socials,
                         extraLinks
@@ -2495,11 +2622,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     gap: '12px'
                   }}
                 >
-                  <img
-                    src={member.imageUrl}
-                    alt={member.name}
-                    style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color)' }}
-                  />
+                  <ClientAvatar name={member.name} imageUrl={member.imageUrl} size={50} />
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{member.name}</h4>
                     <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 600 }}>
@@ -2588,6 +2711,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       name: '',
                       role: 'Director of Operations',
                       initials: 'D.O.',
+                      imageUrl: '',
                       quote: "Axe's Era delivered exceptional results on time.",
                       rating: 5
                     });
@@ -2658,6 +2782,26 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   </div>
                 </div>
 
+                <ImageUploadField
+                  id="testimonial-client-photo"
+                  label="Client Image / Avatar (Optional)"
+                  value={editingTestimonial?.imageUrl || ''}
+                  onChange={(nextUrl) =>
+                    setEditingTestimonial(
+                      editingTestimonial ? { ...editingTestimonial, imageUrl: nextUrl } : null
+                    )
+                  }
+                  onError={(msg) => onShowToast(msg, 'error')}
+                  previewFallbackText={deriveInitials(
+                    editingTestimonial?.name || 'Client',
+                    editingTestimonial?.initials
+                  )}
+                  maxDimension={REVIEW_AVATAR_MAX_DIMENSION}
+                  urlPlaceholder="https://example.com/client-avatar.jpg"
+                  helperText="Upload a client portrait or company avatar from your device, or leave empty to show initials."
+                  uploadButtonLabel="Upload Client Image"
+                />
+
                 <div style={{ marginBottom: '1.25rem' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
                     Client Quote
@@ -2689,11 +2833,19 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         onShowToast('Please enter client name', 'error');
                         return;
                       }
+                      const sanitizedTestimonial: Testimonial = {
+                        ...editingTestimonial,
+                        name: editingTestimonial.name.trim(),
+                        role: editingTestimonial.role.trim(),
+                        initials: deriveInitials(editingTestimonial.name, editingTestimonial.initials),
+                        imageUrl: sanitizeDisplayImageUrl(editingTestimonial.imageUrl),
+                        quote: editingTestimonial.quote.trim()
+                      };
                       if (isCreatingTestimonial) {
-                        onAddTestimonial(editingTestimonial);
+                        onAddTestimonial(sanitizedTestimonial);
                         onShowToast('Testimonial added!', 'success');
                       } else {
-                        onUpdateTestimonial(editingTestimonial);
+                        onUpdateTestimonial(sanitizedTestimonial);
                         onShowToast('Testimonial updated!', 'success');
                       }
                       setEditingTestimonial(null);
@@ -2723,17 +2875,25 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     justifyContent: 'space-between'
                   }}
                 >
-                  <div style={{ maxWidth: '420px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: 'var(--primary-color)', fontWeight: 700 }}>
-                        {'★'.repeat(t.rating)}
-                      </span>
-                      <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{t.name}</h4>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>({t.role})</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', maxWidth: '440px' }}>
+                    <ClientAvatar
+                      name={t.name}
+                      initials={t.initials}
+                      imageUrl={t.imageUrl}
+                      size={42}
+                    />
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ color: 'var(--primary-color)', fontWeight: 700 }}>
+                          {'★'.repeat(t.rating)}
+                        </span>
+                        <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{t.name}</h4>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>({t.role})</span>
+                      </div>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-light)', fontStyle: 'italic' }}>
+                        "{t.quote}"
+                      </p>
                     </div>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-light)', fontStyle: 'italic' }}>
-                      "{t.quote}"
-                    </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
