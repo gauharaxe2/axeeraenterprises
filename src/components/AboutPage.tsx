@@ -21,6 +21,12 @@ import {
   EditorialTopbar,
   openInApp
 } from './editorial/Editorial';
+import {
+  DEFAULT_ABOUT_HERO_SUBTITLE,
+  DEFAULT_ABOUT_HERO_TITLE,
+  normalizeAboutStoryParagraph1,
+  normalizeAboutStoryParagraph2
+} from '../utils/aboutCopy';
 
 interface AboutPageProps {
   generalInfo: AgencyGeneralInfo;
@@ -85,6 +91,8 @@ const milestones = [
 export const AboutPage: React.FC<AboutPageProps> = ({ generalInfo, onBackToHome, onContactClick }) => {
   const { stats, aboutTitle, aboutParagraph1, aboutParagraph2, aboutImageUrl, whatsappNumber } = generalInfo;
   const whatsapp = whatsappNumber || '923157338694';
+  const leadershipParagraph1 = normalizeAboutStoryParagraph1(aboutParagraph1);
+  const leadershipParagraph2 = normalizeAboutStoryParagraph2(aboutParagraph2);
 
   return (
     <EditorialPage page="about">
@@ -99,17 +107,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ generalInfo, onBackToHome,
       />
 
       <EditorialHero
-        eyebrow="About Axe's Era Enterprises"
-        title={aboutTitle || 'Your Digital Transformation Partner'}
-        description={
-          aboutParagraph1 ||
-          "Founded by Gauhar Axe, Axe's Era Enterprises has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results."
-        }
+        eyebrow="About Us"
+        title={DEFAULT_ABOUT_HERO_TITLE}
+        description={aboutTitle || DEFAULT_ABOUT_HERO_SUBTITLE}
       >
-        <p className="editorial-copy">
-          {aboutParagraph2 ||
-            'We believe in building long-term partnerships with our clients, understanding their unique challenges, and crafting tailored solutions that drive real business impact.'}
-        </p>
         <div className="editorial-metrics">
           <div className="editorial-metric">
             <strong>
@@ -149,12 +150,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({ generalInfo, onBackToHome,
             <p className="editorial-kicker-inline">Leadership</p>
             <h2>Gauhar Nadeem (Gauhar Axe)</h2>
             <p className="editorial-muted">Founder & Chief Executive Officer</p>
+            <div className="editorial-copy">
+              <p>{leadershipParagraph1}</p>
+              <p>{leadershipParagraph2}</p>
+            </div>
             <ul className="editorial-facts" style={{ justifyContent: 'flex-start' }}>
               <li>
                 <Building2 size={16} aria-hidden="true" /> Headquarters: Multan, Pakistan
               </li>
               <li>
-                <Users2 size={16} aria-hidden="true" /> Founder & CEO: Gauhar Axe
+                <Users2 size={16} aria-hidden="true" /> Founder & CEO: Gauhar Nadeem
               </li>
               <li>
                 <Clock size={16} aria-hidden="true" /> Established 2023

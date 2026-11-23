@@ -32,7 +32,7 @@ export const en: LocalizedStrings = {
     sectionTitle: "About Our Agency",
     sectionSubtitle: "We're passionate about creating digital solutions that help businesses thrive in the modern world.",
     heading: "Your Digital Transformation Partner",
-    paragraph1: "Founded by Gauhar Axe, Axe's Era Enterprises has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results.",
+    paragraph1: "Founded by Gauhar Nadeem, Axe's Era Enterprises has grown into a leading digital agency with over 3+ years of experience. We've helped hundreds of businesses establish their digital presence and achieve their goals. Our team combines creativity with technical expertise to deliver exceptional results.",
     paragraph2: "We believe in building long-term partnerships with our clients, understanding their unique challenges, and crafting tailored solutions that drive real business impact.",
     yearsLabel: "Years of Experience",
     expertsLabel: "Digital Experts",
