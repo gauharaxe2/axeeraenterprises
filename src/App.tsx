@@ -7,7 +7,7 @@ import { StudioAdmin } from './components/AdminPanel/StudioAdmin';
 import { PublicSite } from './site/PublicSite';
 import { useCatalog } from './hooks/useCatalog';
 import { visibleItems } from './utils/catalog';
-import { watchAdminAuth } from './utils/adminAuth';
+import { finishAdminRedirect, watchAdminAuth } from './utils/adminAuth';
 import { resolveRoute, type AppRoute } from './routing';
 import { applyPrivateMeta, applyPublicMeta, metaForView } from './pageMeta';
 import { POLICIES_DATA } from './data/policiesData';
@@ -27,12 +27,29 @@ function AppContent() {
   const { translateGeneralInfo, translateServices, translateProjects, translateFaqs } = useLanguage();
   const editor = route.page === 'admin';
   const live = useCatalog(editor ? 'editor' : 'public');
+  const showAdminGate = useCallback(() => setAuthReady(true), []);
 
   useEffect(() => {
-    return watchAdminAuth((user) => {
+    let active = true;
+    const unsubscribe = watchAdminAuth((user) => {
+      if (!active) return;
       setAdminUser(user);
       setAuthReady(true);
     });
+    finishAdminRedirect()
+      .then((user) => {
+        if (active && user) {
+          setAdminUser(user);
+          setAuthReady(true);
+        }
+      })
+      .catch(() => {
+        if (active) setAuthReady(true);
+      });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -96,7 +113,7 @@ function AppContent() {
 
   if (route.page === 'admin') {
     if (!authReady || !adminUser) {
-      return <AdminGate onSuccess={() => undefined} />;
+      return <AdminGate onSuccess={showAdminGate} />;
     }
     return (
       <>

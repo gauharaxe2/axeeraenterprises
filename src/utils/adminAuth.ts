@@ -1,7 +1,9 @@
 import {
   GoogleAuthProvider,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   type User
 } from 'firebase/auth';
@@ -44,16 +46,61 @@ export function watchAdminAuth(onChange: (user: User | null) => void): () => voi
   });
 }
 
-export async function signInAdminWithGoogle(): Promise<User> {
+/** Embedded browsers (the in-app preview) block Firebase's Google popup. */
+export function isEmbeddedBrowser(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
+function authCode(error: unknown): string {
+  return error && typeof error === 'object' && 'code' in error && typeof (error as { code?: unknown }).code === 'string'
+    ? (error as { code: string }).code
+    : '';
+}
+
+function rejectUnauthorized(): Promise<never> {
+  return signOut(auth).then(() => {
+    throw new Error('This Google account is not authorized for the admin panel.');
+  });
+}
+
+function acceptAdmin(user: User): Promise<User> {
+  if (!isAllowedAdminEmail(user.email)) return rejectUnauthorized();
+  return Promise.resolve(user);
+}
+
+/**
+ * Finish a redirect sign-in after Google sends the browser back to /admin.
+ * Returns null when this page load is not the return trip.
+ */
+export async function finishAdminRedirect(): Promise<User | null> {
+  const result = await getRedirectResult(auth);
+  if (!result?.user) return null;
+  return acceptAdmin(result.user);
+}
+
+export async function signInAdminWithGoogle(): Promise<User | null> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  const result = await signInWithPopup(auth, provider);
-  const user = result.user;
-  if (!isAllowedAdminEmail(user.email)) {
-    await signOut(auth);
-    throw new Error('This Google account is not authorized for the admin panel.');
+  if (isEmbeddedBrowser()) {
+    await signInWithRedirect(auth, provider);
+    return null;
   }
-  return user;
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return acceptAdmin(result.user);
+  } catch (error) {
+    const code = authCode(error);
+    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function signOutAdmin(): Promise<void> {
@@ -62,9 +109,7 @@ export async function signOutAdmin(): Promise<void> {
 
 export function authErrorMessage(error: unknown): string {
   if (!(error instanceof Error)) return 'Google sign-in failed.';
-  const code = 'code' in error && typeof (error as { code?: unknown }).code === 'string'
-    ? (error as { code: string }).code
-    : '';
+  const code = authCode(error);
   if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
     return 'Sign-in was cancelled.';
   }

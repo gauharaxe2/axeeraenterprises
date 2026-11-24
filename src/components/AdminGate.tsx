@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   authErrorMessage,
+  isEmbeddedBrowser,
   signInAdminWithGoogle,
   watchAdminAuth
 } from '../utils/adminAuth';
@@ -15,8 +16,10 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
   const [phase, setPhase] = useState<'checking' | 'form'>('checking');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const embedded = isEmbeddedBrowser();
 
   useEffect(() => {
+    const giveUp = window.setTimeout(() => setPhase('form'), 1500);
     const unsubscribe = watchAdminAuth((user) => {
       if (user) {
         onSuccess();
@@ -24,7 +27,10 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
       }
       setPhase('form');
     });
-    return () => unsubscribe();
+    return () => {
+      window.clearTimeout(giveUp);
+      unsubscribe();
+    };
   }, [onSuccess]);
 
   const handleGoogleSignIn = async () => {
@@ -32,11 +38,10 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
     setBusy(true);
     setError('');
     try {
-      await signInAdminWithGoogle();
-      onSuccess();
+      const user = await signInAdminWithGoogle();
+      if (user) onSuccess();
     } catch (caught) {
       setError(authErrorMessage(caught));
-    } finally {
       setBusy(false);
     }
   };
@@ -61,16 +66,31 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
                 {error}
               </p>
             )}
+            {embedded ? (
+              <>
+                <p>
+                  This preview is inside another window, so the Google pop-up cannot open here.
+                </p>
+                <a className="studio-btn studio-btn-primary" href="/admin" target="_blank" rel="noopener noreferrer" style={{ width: '100%', marginBottom: '0.7rem' }}>
+                  Open the admin panel in a new tab
+                </a>
+              </>
+            ) : null}
             <button
               type="button"
               onClick={() => void handleGoogleSignIn()}
               disabled={busy}
-              className="studio-btn studio-btn-primary"
+              className={embedded ? 'studio-btn studio-btn-line' : 'studio-btn studio-btn-primary'}
               style={{ width: '100%' }}
             >
               <GoogleMark />
-              {busy ? 'Signing in…' : 'Continue with Google'}
+              {busy ? 'Opening Google…' : embedded ? 'Continue with Google in this tab' : 'Continue with Google'}
             </button>
+            {!embedded && (
+              <p style={{ marginTop: '0.9rem' }}>
+                <a href="/admin" target="_blank" rel="noopener noreferrer">Open the admin panel in a new tab</a>
+              </p>
+            )}
           </>
         )}
 
