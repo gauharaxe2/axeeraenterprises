@@ -9,6 +9,7 @@ export interface PublicPageMeta {
   title: string;
   description: string;
   path: string;
+  image?: string;
 }
 
 const PAGES: Record<string, PublicPageMeta> = {
@@ -30,10 +31,16 @@ const PAGES: Record<string, PublicPageMeta> = {
     path: '/services'
   },
   websites: {
-    title: "Websites | Axe's Era Enterprises",
+    title: "Case Studies | Axe's Era Enterprises",
     description:
-      'Production websites, e-commerce stores, and SaaS platforms built by Axe\'s Era Enterprises.',
-    path: '/websites'
+      'Case studies from Axe\'s Era Enterprises, including Global Trade Hub, Global Softwares Marketplace, Shopaxe, the SaaS dashboard, and EstateCRM.',
+    path: '/case-studies'
+  },
+  blogs: {
+    title: "Blog | Axe's Era Enterprises",
+    description:
+      'Articles by Axe\'s Era Enterprises on web development, mobile apps, branding, SEO, marketing, social media, digital products, and e-commerce.',
+    path: '/blog'
   },
   team: {
     title: "Our Team | Axe's Era Enterprises",
@@ -106,13 +113,33 @@ function removeCanonical() {
   document.head.querySelector('link[rel="canonical"]')?.remove();
 }
 
+export function clipText(text: string, max = 160): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  return `${clean.slice(0, max - 1).trimEnd()}…`;
+}
+
+export function absoluteAsset(url?: string): string {
+  if (!url || url.startsWith('data:')) return `${SITE_ORIGIN}/brand/axe-era-logo.png`;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${SITE_ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
 export function applyPublicMeta(meta: PublicPageMeta) {
   document.title = meta.title;
   const url = canonicalUrl(meta.path);
+  const image = absoluteAsset(meta.image);
   upsertMeta('name', 'description', meta.description);
   upsertMeta('property', 'og:title', meta.title);
   upsertMeta('property', 'og:description', meta.description);
+  upsertMeta('property', 'og:type', 'website');
+  upsertMeta('property', 'og:site_name', "Axe's Era Enterprises");
   upsertMeta('property', 'og:url', url);
+  upsertMeta('property', 'og:image', image);
+  upsertMeta('name', 'twitter:card', 'summary_large_image');
+  upsertMeta('name', 'twitter:title', meta.title);
+  upsertMeta('name', 'twitter:description', meta.description);
+  upsertMeta('name', 'twitter:image', image);
   upsertCanonical(url);
   document.head.querySelector('meta[name="robots"]')?.remove();
 }
@@ -129,4 +156,48 @@ export function applyPrivateMeta(kind: 'admin' | 'not-found') {
   }
   if (!robots.parentElement) document.head.appendChild(robots);
   removeCanonical();
+}
+
+export function metaForView(input: {
+  page: string;
+  path?: string;
+  service?: { id: string; title: string; shortDesc?: string; imageUrl?: string } | null;
+  project?: { id: string; title: string; description?: string; subtitle?: string; imageUrl?: string } | null;
+  blog?: { slug: string; title: string; summary?: string; imageUrl?: string } | null;
+  policyTitle?: string;
+  policySummary?: string;
+}): PublicPageMeta {
+  if (input.page === 'service-detail' && input.service) {
+    return {
+      title: `${input.service.title} | Axe's Era Enterprises`,
+      description: clipText(input.service.shortDesc || input.service.title),
+      path: `/services/${input.service.id}`,
+      image: input.service.imageUrl
+    };
+  }
+  if (input.page === 'project-detail' && input.project) {
+    return {
+      title: `${input.project.title} | Axe's Era Enterprises`,
+      description: clipText(input.project.description || input.project.subtitle || input.project.title),
+      path: `/case-studies/${input.project.id}`,
+      image: input.project.imageUrl
+    };
+  }
+  if (input.page === 'blog-detail' && input.blog) {
+    return {
+      title: `${input.blog.title} | Axe's Era Enterprises`,
+      description: clipText(input.blog.summary || input.blog.title),
+      path: `/blog/${input.blog.slug}`,
+      image: input.blog.imageUrl
+    };
+  }
+  if (input.page === 'policies' && input.policyTitle) {
+    return {
+      title: `${input.policyTitle} | Axe's Era Enterprises`,
+      description: clipText(input.policySummary || input.policyTitle),
+      path: input.path || '/policies'
+    };
+  }
+  const key = input.page === 'blog-hub' ? 'blogs' : input.page;
+  return metaForPage(key) ?? { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, path: '/' };
 }

@@ -28,7 +28,7 @@ const STORAGE_KEY = 'axes_era_admin_data_v3';
 const PREVIOUS_OFFICE_ADDRESS = 'D-26, Wahdat Colony, Multan, 66000';
 const OFFICE_ADDRESS = 'D-26, Wahdat Colony, Multan, Punjab, 66000, Pakistan';
 
-function withOfficePin(info: AgencyGeneralInfo): AgencyGeneralInfo {
+export function withOfficePin(info: AgencyGeneralInfo): AgencyGeneralInfo {
   const contactAddress =
     info.contactAddress.trim() === PREVIOUS_OFFICE_ADDRESS ? OFFICE_ADDRESS : info.contactAddress;
   if (isValidMapPin(info.mapLatitude, info.mapLongitude) && contactAddress === info.contactAddress) return info;

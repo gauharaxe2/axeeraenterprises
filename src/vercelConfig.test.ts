@@ -25,8 +25,6 @@ const legacy: Array<[string, string]> = [
   ['/mobile-apps', '/#service-mobile-apps'],
   ['/seo-services', '/#service-seo-optimization'],
   ['/social-media-marketing', '/#service-social-media'],
-  ['/blogs', '/#blog-hub'],
-  ['/blog', '/#blog-hub'],
   ['/privacy-policy', '/policies#privacy-policy'],
   ['/privacy', '/policies#privacy-policy'],
   ['/terms', '/policies#terms-of-service']
@@ -42,9 +40,16 @@ test('legacy urls permanently redirect to the closest app section', () => {
       assert.equal(match?.permanent, true, variant);
     }
   }
-  const blogSplat = vercel.redirects?.find((rule) => rule.source === '/blog/:slug*');
-  assert.equal(blogSplat?.destination, '/#blog-:slug*');
-  assert.equal(blogSplat?.permanent, true);
+  for (const source of ['/blogs', '/blogs/', '/blogs.html', '/blog.html']) {
+    const match = vercel.redirects?.find((rule) => rule.source === source);
+    assert.equal(match?.destination, '/blog', source);
+    assert.equal(match?.permanent, true, source);
+  }
+  for (const source of ['/blog', '/blog/', '/blog/:slug', '/case-studies', '/case-studies/:projectId', '/services/:serviceId']) {
+    const match = vercel.rewrites?.find((rule) => rule.source === source);
+    assert.equal(match?.destination, '/index.html', source);
+  }
+  assert.equal(vercel.redirects?.some((rule) => rule.source === '/blog/:slug*'), false);
 });
 
 test('uppercase FAQ urls permanently redirect to the canonical faq page', () => {

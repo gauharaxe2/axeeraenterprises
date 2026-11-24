@@ -8,6 +8,8 @@ export interface Project {
   imageUrl: string;
   description?: string;
   tags?: string[];
+  /** Absent means already public. False keeps the case study in admin only. */
+  published?: boolean;
 }
 
 export interface ServiceItem {
@@ -57,6 +59,8 @@ export interface BlogPost {
   readTime?: string;
   author?: string;
   tags?: string[];
+  /** Absent means already public. False keeps the post in admin only. */
+  published?: boolean;
 }
 
 export interface Testimonial {
@@ -67,12 +71,16 @@ export interface Testimonial {
   imageUrl?: string;
   quote: string;
   rating: number;
+  /** Absent means already public. False keeps the review in admin only. */
+  published?: boolean;
 }
 
 export interface FaqItem {
   id?: string;
   question: string;
   answer: string;
+  /** Absent means already public. False keeps the answer in admin only. */
+  published?: boolean;
 }
 
 export interface PartnershipItem {
@@ -125,6 +133,8 @@ export interface TeamMemberData {
     github?: string;
   };
   extraLinks?: TeamExtraLink[];
+  /** Absent means already public. False keeps the profile in admin only. */
+  published?: boolean;
 }
 
 export interface AgencyGeneralInfo {
@@ -176,6 +186,7 @@ export type PageView =
   | 'location'
   | 'faq'
   | 'policies'
+  | 'project-detail'
   | 'not-found';
 
 export type AdminTab =

@@ -300,3 +300,43 @@ export async function subscribeToNewsletter(
     };
   }
 }
+
+export interface NewsletterRecord {
+  id: string;
+  email: string;
+  status: string;
+  source: string;
+  createdAt: string;
+}
+
+function mapNewsletter(entry: { id: string; data: () => Record<string, unknown> }): NewsletterRecord {
+  const data = entry.data();
+  return {
+    id: entry.id,
+    email: asText(data.email),
+    status: asText(data.status) || 'active',
+    source: asText(data.source),
+    createdAt: createdAtIso(data.createdAt)
+  };
+}
+
+/** Live newsletter list for the admin. Writes stay on subscribeToNewsletter. */
+export function subscribeToNewsletterList(
+  onChange: (rows: NewsletterRecord[]) => void,
+  onError?: (message: string) => void
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, 'newsletter_subscribers'),
+    (snap) => {
+      const rows: NewsletterRecord[] = [];
+      snap.forEach((entry) => {
+        rows.push(mapNewsletter({ id: entry.id, data: () => entry.data() as Record<string, unknown> }));
+      });
+      rows.sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
+      onChange(rows);
+    },
+    (error) => {
+      onError?.(error.message || 'Could not load newsletter subscribers.');
+    }
+  );
+}

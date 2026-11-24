@@ -46,7 +46,8 @@ export type AppRoute =
   | { page: 'location' }
   | { page: 'faq' }
   | { page: 'policies'; policy: PolicyId }
-  | { page: 'service-detail'; serviceId: ServiceId }
+  | { page: 'service-detail'; serviceId: string }
+  | { page: 'project-detail'; projectId: string }
   | { page: 'blog-hub' }
   | { page: 'blog-detail'; slug: string }
   | { page: 'admin' }
@@ -156,6 +157,33 @@ export function resolveRoute(pathname: string, hash: string): AppRoute {
   const fragment = parseHash(hash).toLowerCase();
   const directPage = contentRoute(path);
   if (directPage) return directPage;
+
+  if (path === '/blog') return { page: 'blog-hub' };
+  if (path.startsWith('/blog/')) {
+    const slug = path.slice('/blog/'.length).split('/').filter(Boolean)[0] ?? '';
+    if (!slug) return { page: 'blog-hub' };
+    return { page: 'blog-detail', slug };
+  }
+
+  if (path === '/case-studies') return { page: 'websites' };
+  if (path.startsWith('/case-studies/')) {
+    const projectId = path.split('/').filter(Boolean)[1] ?? '';
+    if (!projectId) return { page: 'websites' };
+    return { page: 'project-detail', projectId };
+  }
+  if (path.startsWith('/websites/')) {
+    const projectId = path.split('/').filter(Boolean)[1] ?? '';
+    if (!projectId) return { page: 'websites' };
+    return { page: 'project-detail', projectId };
+  }
+
+  if (path === '/faqs') return { page: 'faq' };
+
+  if (path.startsWith('/services/')) {
+    const serviceId = path.split('/').filter(Boolean)[1] ?? '';
+    if (!serviceId) return { page: 'services' };
+    return { page: 'service-detail', serviceId };
+  }
 
   if (path !== '/' && path !== '/policies') {
     return { page: 'not-found' };

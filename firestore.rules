@@ -1,5 +1,10 @@
 rules_version = '2';
 
+// Rules for the named database in firebase.json.
+// Not deployed by this change. Public reads of editorial records require
+// published == true. Writes require an allowlisted Google account, the same
+// emails as DEFAULT_ADMIN_EMAILS in src/utils/adminAuth.ts.
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -7,44 +12,136 @@ service cloud.firestore {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Health check collection for connection testing
+    function signedInEmail() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email.size() > 0
+        && request.auth.token.email.size() < 200
+        ? request.auth.token.email.lower()
+        : '';
+    }
+
+    function isAdmin() {
+      return signedInEmail() in [
+        'gauharaxe@outlook.com',
+        'gauhar426622@gmail.com'
+      ];
+    }
+
+    function publishedRead() {
+      return isAdmin() || resource.data.published == true;
+    }
+
+    function adminPublishedWrite(docId) {
+      return isAdmin()
+        && isValidId(docId)
+        && request.resource.data.published is bool
+        && request.resource.data.id == docId;
+    }
+
+    // Health check. The site only reads this document.
     match /test/{docId} {
       allow get: if isValidId(docId);
-      allow list: if true;
-      allow write: if isValidId(docId);
+      allow list, write: if false;
     }
 
-    // Site content sections synced between admin panel and public UI
+    // Legacy section blobs. The redesigned site reads them until the catalog
+    // is authoritative. It does not write them. Visitors cannot write them.
     match /site_content/{sectionId} {
       allow get: if isValidId(sectionId);
-      allow list: if true;
-      allow create, update: if isValidId(sectionId) && request.resource.data != null;
-      allow delete: if isValidId(sectionId);
+      allow list: if false;
+      allow create, update, delete: if isAdmin() && isValidId(sectionId);
     }
 
-    // Prospective client inquiry submissions
+    match /studio_settings/{docId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /caseStudies/{docId} {
+      allow read: if publishedRead();
+      allow create, update: if adminPublishedWrite(docId);
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /posts/{docId} {
+      allow read: if publishedRead();
+      allow create, update: if adminPublishedWrite(docId);
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /teamMembers/{docId} {
+      allow read: if publishedRead();
+      allow create, update: if adminPublishedWrite(docId);
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /testimonials/{docId} {
+      allow read: if publishedRead();
+      allow create, update: if adminPublishedWrite(docId);
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /faqs/{docId} {
+      allow read: if publishedRead();
+      allow create, update: if adminPublishedWrite(docId);
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    // Always-public studio records. They have no draft flag.
+    match /services/{docId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(docId) && request.resource.data.id == docId;
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /partnerships/{docId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(docId) && request.resource.data.id == docId;
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    match /partnerLogos/{docId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidId(docId) && request.resource.data.id == docId;
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    // Contact form. Visitors may create a submission. Only an admin may read it.
     match /submissions/{submissionId} {
-      allow create: if isValidId(submissionId) &&
-        request.resource.data.keys().hasAll(['fullName', 'email', 'message']);
-      allow get: if isValidId(submissionId);
-      allow list: if true;
-      allow update, delete: if isValidId(submissionId);
+      allow create: if isValidId(submissionId)
+        && request.resource.data.keys().hasOnly([
+          'fullName', 'email', 'message', 'service', 'company', 'phone', 'budget', 'read', 'createdAt'
+        ])
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() > 0
+        && request.resource.data.fullName.size() <= 150
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$')
+        && request.resource.data.email.size() <= 150
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 4000
+        && request.resource.data.read == false;
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
+      allow delete: if false;
     }
 
-    // Newsletter email subscribers collection
+    // Newsletter signups. Visitors may create. Only an admin may read the list.
     match /newsletter_subscribers/{subscriberId} {
-      allow create: if isValidId(subscriberId) &&
-        request.resource.data.keys().hasAll(['email']) &&
-        request.resource.data.email is string &&
-        request.resource.data.email.size() > 3 &&
-        request.resource.data.email.size() <= 150 &&
-        request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$');
-      allow get: if isValidId(subscriberId);
-      allow list: if true;
-      allow update, delete: if isValidId(subscriberId);
+      allow create: if isValidId(subscriberId)
+        && request.resource.data.keys().hasOnly(['email', 'source', 'status', 'createdAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && request.resource.data.email.size() <= 150
+        && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$');
+      allow read: if isAdmin();
+      allow update, delete: if false;
     }
 
-    // Default deny catch-all
     match /{document=**} {
       allow read, write: if false;
     }
