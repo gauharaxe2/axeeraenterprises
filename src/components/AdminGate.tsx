@@ -42,41 +42,11 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #171717 100%)',
-        padding: '24px'
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '440px',
-          background: '#ffffff',
-          border: '1px solid #d4af37',
-          borderRadius: '16px',
-          padding: '2rem',
-          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.45)'
-        }}
-      >
-        <p
-          style={{
-            color: 'var(--gold-ink)',
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: '0.5rem',
-            fontSize: '0.85rem'
-          }}
-        >
-          Axe&apos;s Era Enterprises
-        </p>
-        <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#0a0a0a' }}>Admin sign in</h1>
-        <p style={{ marginBottom: '1.5rem', color: '#44403c' }}>
+    <div className="studio studio-gate">
+      <div className="studio-gate-card">
+        <p className="studio-kicker">Axe&apos;s Era Enterprises</p>
+        <h1 style={{ fontSize: '2.4rem', marginBottom: '0.6rem' }}>Admin sign in</h1>
+        <p>
           Sign in with an authorized Google account to open the content editor and enquiry inbox.
         </p>
 
@@ -95,15 +65,8 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
               type="button"
               onClick={() => void handleGoogleSignIn()}
               disabled={busy}
-              className="btn btn-primary"
-              style={{
-                width: '100%',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                padding: '12px 16px'
-              }}
+              className="studio-btn studio-btn-primary"
+              style={{ width: '100%' }}
             >
               <GoogleMark />
               {busy ? 'Signing in…' : 'Continue with Google'}
@@ -112,9 +75,7 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
         )}
 
         <p style={{ marginTop: '1.25rem', marginBottom: 0 }}>
-          <a href="/" style={{ color: 'var(--gold-ink)', fontWeight: 600 }}>
-            Back to the website
-          </a>
+          <a href="/">Back to the website</a>
         </p>
       </div>
     </div>

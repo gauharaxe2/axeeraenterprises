@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   query,
   setDoc,
@@ -78,6 +79,11 @@ export async function replaceCollection(
 export async function removeCatalogDoc(name: string, id: string): Promise<void> {
   if (!isSafeDocId(id)) throw new Error(`"${id}" is not a valid Firestore id.`);
   await deleteDoc(doc(db, name, id));
+}
+
+export async function readSettingsDoc(id: string): Promise<Record<string, unknown> | null> {
+  const snap = await getDoc(doc(db, SETTINGS_COLLECTION, id));
+  return snap.exists() ? (snap.data() as Record<string, unknown>) : null;
 }
 
 export async function saveSettingsDoc(id: string, data: Record<string, unknown>): Promise<void> {

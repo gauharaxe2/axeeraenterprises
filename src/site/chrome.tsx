@@ -135,7 +135,7 @@ export function SiteHeader({ page, navigate }: { page: PageView; navigate: SiteN
           >
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.code} value={option.code}>
-                {option.nativeLabel}
+                {option.shortCode}
               </option>
             ))}
           </select>

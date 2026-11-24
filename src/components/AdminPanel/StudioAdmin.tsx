@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import type {
   AgencyGeneralInfo,
   BlogPost,
-  BlogSection,
   FaqItem,
   PartnerLogo,
   PartnershipItem,
@@ -11,11 +10,9 @@ import type {
   TeamMemberData,
   Testimonial
 } from '../../types';
-import { BLOG_CATEGORIES } from '../../types';
 import type { CatalogData } from '../../hooks/useCatalog';
 import { catalogErrorMessage } from '../../hooks/useCatalog';
-import { isPublished, slugify, uniqueDocId } from '../../utils/catalog';
-import { aggregateParagraphs } from '../../utils/blogUtils';
+import { uniqueDocId } from '../../utils/catalog';
 import {
   subscribeToNewsletterList,
   subscribeToSubmissions,
@@ -24,6 +21,7 @@ import {
 } from '../../utils/firebase';
 import { ImageUploadField } from './ImageUploadField';
 import { SERVICE_IMAGE_MAX_DIMENSION } from '../../utils/imageUpload';
+import { CaseStudyEditor, FaqEditor, PostEditor, TeamEditor, TestimonialEditor } from './CatalogEditors';
 
 type Tab = 'leads' | 'projects' | 'blogs' | 'team' | 'testimonials' | 'faqs' | 'services' | 'general' | 'partnerships' | 'logos';
 
@@ -71,12 +69,21 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'logos', label: 'Technology logos' }
 ];
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="studio-field"><span>{label}</span>{children}</label>;
+function ConfirmDelete({ busy, label, onConfirm }: { busy: boolean; label: string; onConfirm: () => void }) {
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return <button type="button" className="studio-danger" disabled={busy} onClick={() => setOpen(true)}>{label}</button>;
+  }
+  return (
+    <>
+      <button type="button" className="studio-danger" disabled={busy} onClick={onConfirm}>Confirm delete</button>
+      <button type="button" className="studio-btn studio-btn-line" disabled={busy} onClick={() => setOpen(false)}>Cancel</button>
+    </>
+  );
 }
 
-function statusLabel(item: { published?: boolean }) {
-  return isPublished(item) ? 'Published' : 'Draft';
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="studio-field"><span>{label}</span>{children}</label>;
 }
 
 export function StudioAdmin({ data, syncStatus, rulesBlocked, onNavigate, onLogout, onNotify, actions }: StudioAdminProps) {
@@ -86,6 +93,7 @@ export function StudioAdmin({ data, syncStatus, rulesBlocked, onNavigate, onLogo
   const [news, setNews] = useState<NewsletterRecord[]>([]);
   const [leadError, setLeadError] = useState('');
   const [newsError, setNewsError] = useState('');
+  const [confirmSeed, setConfirmSeed] = useState(false);
 
   useEffect(() => {
     const stopLeads = subscribeToSubmissions(
@@ -140,18 +148,26 @@ export function StudioAdmin({ data, syncStatus, rulesBlocked, onNavigate, onLogo
               ? ' Firestore is still on the previous rules, so saves to the new collections will be refused until those rules are deployed. This screen does not deploy them.'
               : ' Saves write to the shared Firebase project. They do not change the current production website until this redesign is merged.'}
           </p>
-          <button
-            type="button"
-            className="studio-btn studio-btn-ink"
-            disabled={busy}
-            onClick={() => {
-              const ok = window.confirm('Copy the current case studies, posts, team, testimonials, FAQs, services, and studio details into Firestore? This writes to the live Firebase project and does not deploy security rules.');
-              if (!ok) return;
-              void run(() => actions.seedCatalog(), 'Existing catalog saved to Firestore.');
-            }}
-          >
-            Save existing catalog to Firestore
-          </button>
+          {confirmSeed ? (
+            <div className="studio-actions">
+              <button
+                type="button"
+                className="studio-btn studio-btn-ink"
+                disabled={busy}
+                onClick={() => {
+                  setConfirmSeed(false);
+                  void run(() => actions.seedCatalog(), 'Existing catalog saved to Firestore.');
+                }}
+              >
+                Confirm save to Firestore
+              </button>
+              <button type="button" className="studio-btn studio-btn-line" onClick={() => setConfirmSeed(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button type="button" className="studio-btn studio-btn-ink" disabled={busy} onClick={() => setConfirmSeed(true)}>
+              Save existing catalog to Firestore
+            </button>
+          )}
         </div>
         <div className="studio-admin-layout">
           <nav className="studio-admin-nav" aria-label="Admin sections">
@@ -164,94 +180,19 @@ export function StudioAdmin({ data, syncStatus, rulesBlocked, onNavigate, onLogo
           <div>
             {tab === 'leads' && <Leads leads={leads} news={news} leadError={leadError} newsError={newsError} />}
             {tab === 'projects' && (
-              <RecordList
-                title="Case studies"
-                rows={data.projects.map((item) => ({ id: item.id, title: item.title, status: statusLabel(item) }))}
-                busy={busy}
-                onCreate={() => void editProject(null)}
-                onEdit={(id) => void editProject(data.projects.find((item) => item.id === id) || null)}
-                onToggle={(id) => {
-                  const item = data.projects.find((entry) => entry.id === id);
-                  if (!item) return;
-                  void run(() => actions.saveProject({ ...item, published: !isPublished(item) }), 'Case study updated.');
-                }}
-                onDelete={(id) => {
-                  if (!window.confirm('Delete this case study?')) return;
-                  void run(() => actions.deleteProject(id), 'Case study deleted.');
-                }}
-              />
+              <CaseStudyEditor items={data.projects} busy={busy} run={run} onSave={actions.saveProject} onDelete={actions.deleteProject} />
             )}
             {tab === 'blogs' && (
-              <RecordList
-                title="Blog"
-                rows={data.blogs.map((item) => ({ id: item.id, title: item.title, status: statusLabel(item) }))}
-                busy={busy}
-                onCreate={() => void editPost(null)}
-                onEdit={(id) => void editPost(data.blogs.find((item) => item.id === id) || null)}
-                onToggle={(id) => {
-                  const item = data.blogs.find((entry) => entry.id === id);
-                  if (!item) return;
-                  void run(() => actions.saveBlog({ ...item, published: !isPublished(item) }), 'Article updated.');
-                }}
-                onDelete={(id) => {
-                  if (!window.confirm('Delete this article?')) return;
-                  void run(() => actions.deleteBlog(id), 'Article deleted.');
-                }}
-              />
+              <PostEditor items={data.blogs} busy={busy} run={run} onSave={actions.saveBlog} onDelete={actions.deleteBlog} />
             )}
             {tab === 'team' && (
-              <RecordList
-                title="Team"
-                rows={data.team.map((item) => ({ id: item.id, title: item.name, status: statusLabel(item) }))}
-                busy={busy}
-                onCreate={() => void editMember(null)}
-                onEdit={(id) => void editMember(data.team.find((item) => item.id === id) || null)}
-                onToggle={(id) => {
-                  const item = data.team.find((entry) => entry.id === id);
-                  if (!item) return;
-                  void run(() => actions.saveTeamMember({ ...item, published: !isPublished(item) }), 'Profile updated.');
-                }}
-                onDelete={(id) => {
-                  if (!window.confirm('Delete this profile?')) return;
-                  void run(() => actions.deleteTeamMember(id), 'Profile deleted.');
-                }}
-              />
+              <TeamEditor items={data.team} busy={busy} run={run} onSave={actions.saveTeamMember} onDelete={actions.deleteTeamMember} />
             )}
             {tab === 'testimonials' && (
-              <RecordList
-                title="Testimonials"
-                rows={data.testimonials.map((item) => ({ id: item.id, title: item.name, status: statusLabel(item) }))}
-                busy={busy}
-                onCreate={() => void editQuote(null)}
-                onEdit={(id) => void editQuote(data.testimonials.find((item) => item.id === id) || null)}
-                onToggle={(id) => {
-                  const item = data.testimonials.find((entry) => entry.id === id);
-                  if (!item) return;
-                  void run(() => actions.saveTestimonial({ ...item, published: !isPublished(item) }), 'Testimonial updated.');
-                }}
-                onDelete={(id) => {
-                  if (!window.confirm('Delete this testimonial?')) return;
-                  void run(() => actions.deleteTestimonial(id), 'Testimonial deleted.');
-                }}
-              />
+              <TestimonialEditor items={data.testimonials} busy={busy} run={run} onSave={actions.saveTestimonial} onDelete={actions.deleteTestimonial} />
             )}
             {tab === 'faqs' && (
-              <RecordList
-                title="FAQs"
-                rows={data.faqs.filter((item) => item.id).map((item) => ({ id: item.id as string, title: item.question, status: statusLabel(item) }))}
-                busy={busy}
-                onCreate={() => void editFaq(null)}
-                onEdit={(id) => void editFaq(data.faqs.find((item) => item.id === id) || null)}
-                onToggle={(id) => {
-                  const item = data.faqs.find((entry) => entry.id === id);
-                  if (!item) return;
-                  void run(() => actions.saveFaq({ ...item, published: !isPublished(item) }), 'FAQ updated.');
-                }}
-                onDelete={(id) => {
-                  if (!window.confirm('Delete this FAQ?')) return;
-                  void run(() => actions.deleteFaq(id), 'FAQ deleted.');
-                }}
-              />
+              <FaqEditor items={data.faqs} busy={busy} run={run} onSave={actions.saveFaq} onDelete={actions.deleteFaq} />
             )}
             {tab === 'services' && <ServicesEditor data={data.services} busy={busy} run={run} actions={actions} onNotify={onNotify} />}
             {tab === 'general' && <GeneralEditor info={data.generalInfo} busy={busy} run={run} actions={actions} />}
@@ -263,186 +204,6 @@ export function StudioAdmin({ data, syncStatus, rulesBlocked, onNavigate, onLogo
     </div>
   );
 
-  async function editProject(current: Project | null) {
-    const draft = current || {
-      id: '',
-      title: '',
-      subtitle: '',
-      category: 'web' as const,
-      metric: '',
-      link: '',
-      imageUrl: '',
-      description: '',
-      tags: [],
-      published: false
-    };
-    const title = window.prompt('Title', draft.title);
-    if (!title || !title.trim()) return;
-    const subtitle = window.prompt('Subtitle', draft.subtitle) ?? draft.subtitle;
-    const description = window.prompt('Description', draft.description || '') ?? draft.description;
-    const metric = window.prompt('Result metric, or leave blank', draft.metric) ?? draft.metric;
-    const link = window.prompt('Live URL, or leave blank', draft.link) ?? draft.link;
-    const categoryRaw = window.prompt('Category: ecommerce, saas, or web', draft.category) || draft.category;
-    const category = categoryRaw === 'ecommerce' || categoryRaw === 'saas' ? categoryRaw : 'web';
-    const tags = window.prompt('Tags, comma separated', (draft.tags || []).join(', ')) || '';
-    const imageUrl = window.prompt('Image URL', draft.imageUrl) ?? draft.imageUrl;
-    const id = draft.id || uniqueDocId(title, data.projects.map((item) => item.id));
-    await run(() => actions.saveProject({
-      ...draft,
-      id,
-      title: title.trim(),
-      subtitle,
-      description,
-      metric,
-      link,
-      category,
-      imageUrl,
-      tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
-      published: draft.published !== false && Boolean(draft.id)
-    }), 'Case study saved.');
-  }
-
-  async function editPost(current: BlogPost | null) {
-    const draft: BlogPost = current || {
-      id: '',
-      title: '',
-      slug: '',
-      imageUrl: '',
-      summary: '',
-      paragraphs: [],
-      sections: [],
-      published: false,
-      author: 'Gauhar Axe',
-      category: BLOG_CATEGORIES[0]
-    };
-    const title = window.prompt('Title', draft.title);
-    if (!title || !title.trim()) return;
-    const summary = window.prompt('Summary', draft.summary) ?? draft.summary;
-    const category = window.prompt('Category', draft.category || BLOG_CATEGORIES[0]) || draft.category;
-    const body = window.prompt('Body. Separate paragraphs with a blank line.', (draft.sections?.[0]?.paragraphs || draft.paragraphs || []).join('\n\n')) ?? '';
-    const paragraphs = body.split(/\n\n+/).map((part) => part.trim()).filter(Boolean);
-    const sections: BlogSection[] = paragraphs.length
-      ? [{ id: 'sec-1', heading: draft.sections?.[0]?.heading || '', paragraphs }]
-      : draft.sections || [];
-    const slug = draft.slug || slugify(title);
-    const id = draft.id || uniqueDocId(slug, data.blogs.map((item) => item.id));
-    const next: BlogPost = {
-      ...draft,
-      id,
-      title: title.trim(),
-      slug: draft.slug || slug,
-      summary,
-      category,
-      sections,
-      paragraphs: aggregateParagraphs(sections),
-      published: draft.published !== false && Boolean(draft.id)
-    };
-    await run(() => actions.saveBlog(next), 'Article saved.');
-  }
-
-  async function editMember(current: TeamMemberData | null) {
-    const draft: TeamMemberData = current || {
-      id: '',
-      name: '',
-      title: '',
-      bio: '',
-      imageUrl: '',
-      skills: [],
-      socials: {},
-      published: false
-    };
-    const name = window.prompt('Name', draft.name);
-    if (!name || !name.trim()) return;
-    const title = window.prompt('Title', draft.title) ?? draft.title;
-    const bio = window.prompt('Bio', draft.bio) ?? draft.bio;
-    const skills = window.prompt('Skills, one per line or comma separated', (draft.skills || []).join(', ')) || '';
-    const linkedin = window.prompt('LinkedIn URL', draft.socials.linkedin || '') ?? '';
-    const id = draft.id || uniqueDocId(name, data.team.map((item) => item.id));
-    await run(() => actions.saveTeamMember({
-      ...draft,
-      id,
-      name: name.trim(),
-      title,
-      bio,
-      skills: skills.split(/[\n,]+/).map((skill) => skill.trim()).filter(Boolean),
-      socials: { ...draft.socials, linkedin },
-      published: draft.published !== false && Boolean(draft.id)
-    }), 'Profile saved.');
-  }
-
-  async function editQuote(current: Testimonial | null) {
-    const draft: Testimonial = current || { id: '', name: '', role: '', initials: '', quote: '', rating: 5, published: false };
-    const name = window.prompt('Name', draft.name);
-    if (!name || !name.trim()) return;
-    const role = window.prompt('Role', draft.role) ?? draft.role;
-    const quote = window.prompt('Quote', draft.quote) ?? draft.quote;
-    const rating = Number(window.prompt('Rating 1-5', String(draft.rating)) || draft.rating);
-    const id = draft.id || uniqueDocId(name, data.testimonials.map((item) => item.id));
-    const initials = name.trim().split(/\s+/).map((part) => part[0]).join('.').slice(0, 4);
-    await run(() => actions.saveTestimonial({
-      ...draft,
-      id,
-      name: name.trim(),
-      role,
-      quote,
-      rating: Number.isFinite(rating) ? Math.min(5, Math.max(1, rating)) : 5,
-      initials: draft.initials || initials,
-      published: draft.published !== false && Boolean(draft.id)
-    }), 'Testimonial saved.');
-  }
-
-  async function editFaq(current: FaqItem | null) {
-    const draft = current || { id: '', question: '', answer: '', published: false };
-    const question = window.prompt('Question', draft.question);
-    if (!question || !question.trim()) return;
-    const answer = window.prompt('Answer', draft.answer) ?? draft.answer;
-    const id = draft.id || uniqueDocId(question, data.faqs.map((item) => item.id || ''));
-    await run(() => actions.saveFaq({ ...draft, id, question: question.trim(), answer, published: draft.published !== false && Boolean(draft.id) }), 'FAQ saved.');
-  }
-}
-
-function RecordList({
-  title,
-  rows,
-  busy,
-  onCreate,
-  onEdit,
-  onToggle,
-  onDelete
-}: {
-  title: string;
-  rows: Array<{ id: string; title: string; status: string }>;
-  busy: boolean;
-  onCreate: () => void;
-  onEdit: (id: string) => void;
-  onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-}) {
-  return (
-    <section>
-      <div className="studio-section-head">
-        <h2>{title}</h2>
-        <button type="button" className="studio-btn studio-btn-primary" disabled={busy} onClick={onCreate}>New</button>
-      </div>
-      {rows.length === 0 && <p>Nothing here yet.</p>}
-      {rows.map((row) => (
-        <div className="studio-row" key={row.id}>
-          <div>
-            <strong>{row.title}</strong>
-            <div className="studio-meta">{row.id}</div>
-          </div>
-          <span className={`studio-pill ${row.status === 'Published' ? 'live' : 'draft'}`}>{row.status}</span>
-          <div className="studio-row-actions">
-            <button type="button" className="studio-btn studio-btn-line" disabled={busy} onClick={() => onEdit(row.id)}>Edit</button>
-            <button type="button" className="studio-btn studio-btn-line" disabled={busy} onClick={() => onToggle(row.id)}>
-              {row.status === 'Published' ? 'Unpublish' : 'Publish'}
-            </button>
-            <button type="button" className="studio-danger" disabled={busy} onClick={() => onDelete(row.id)}>Delete</button>
-          </div>
-        </div>
-      ))}
-    </section>
-  );
 }
 
 function Leads({
@@ -569,9 +330,7 @@ function ServicesEditor({
           <span className="studio-meta">{item.id}</span>
           <div className="studio-row-actions">
             <button type="button" className="studio-btn studio-btn-line" onClick={() => setCurrent(item)}>Edit</button>
-            <button type="button" className="studio-danger" onClick={() => {
-              if (window.confirm('Delete this service?')) void run(() => actions.deleteService(item.id), 'Service deleted.');
-            }}>Delete</button>
+            <ConfirmDelete busy={busy} label="Delete" onConfirm={() => void run(() => actions.deleteService(item.id), 'Service deleted.')} />
           </div>
         </div>
       ))}
@@ -622,9 +381,7 @@ function PartnershipEditor({
           <span />
           <div className="studio-row-actions">
             <button type="button" className="studio-btn studio-btn-line" onClick={() => setCurrent(item)}>Edit</button>
-            <button type="button" className="studio-danger" onClick={() => {
-              if (window.confirm('Delete this note?')) void run(() => actions.deletePartnership(item.id), 'Partnership note deleted.');
-            }}>Delete</button>
+            <ConfirmDelete busy={busy} label="Delete" onConfirm={() => void run(() => actions.deletePartnership(item.id), 'Partnership note deleted.')} />
           </div>
         </div>
       ))}
@@ -673,9 +430,7 @@ function LogoEditor({
           <span className="studio-meta">{item.websiteUrl}</span>
           <div className="studio-row-actions">
             <button type="button" className="studio-btn studio-btn-line" onClick={() => setCurrent(item)}>Edit</button>
-            <button type="button" className="studio-danger" onClick={() => {
-              if (window.confirm('Remove this logo?')) void run(() => actions.deletePartnerLogo(item.id), 'Logo removed.');
-            }}>Delete</button>
+            <ConfirmDelete busy={busy} label="Delete" onConfirm={() => void run(() => actions.deletePartnerLogo(item.id), 'Logo removed.')} />
           </div>
         </div>
       ))}

@@ -30,7 +30,7 @@ import {
   type CatalogCollection,
   type CatalogMarker
 } from '../utils/catalog';
-import { replaceCollection, saveSettingsDoc, watchCollection, watchDocument } from '../utils/catalogStore';
+import { readSettingsDoc, replaceCollection, saveSettingsDoc, watchCollection, watchDocument } from '../utils/catalogStore';
 
 export interface CatalogData {
   generalInfo: AgencyGeneralInfo;
@@ -125,32 +125,6 @@ export function useCatalog(scope: 'public' | 'editor') {
           setSyncStatus('connected');
         },
         () => setSyncStatus('offline')
-      ),
-      watchDocument(
-        SETTINGS_COLLECTION,
-        GENERAL_SETTINGS_ID,
-        (data) => {
-          if (data && typeof data === 'object') setGeneralDoc(withOfficePin(data as unknown as AgencyGeneralInfo));
-        },
-        (error) => {
-          if (permissionDenied(error)) setRulesBlocked(true);
-        }
-      ),
-      watchDocument(
-        SETTINGS_COLLECTION,
-        CATALOG_SETTINGS_ID,
-        (data) => {
-          const authoritative = data && typeof data.authoritative === 'object' && data.authoritative
-            ? (data.authoritative as CatalogMarker['authoritative'])
-            : {};
-          setMarker({
-            authoritative,
-            seededAt: typeof data?.seededAt === 'string' ? data.seededAt : undefined
-          });
-        },
-        (error) => {
-          if (permissionDenied(error)) setRulesBlocked(true);
-        }
       )
     ];
 
@@ -177,24 +151,64 @@ export function useCatalog(scope: 'public' | 'editor') {
   }, []);
 
   useEffect(() => {
-    const unsubs = (Object.keys(LIST_SOURCES) as ListKey[]).map((key) => {
-      const name = LIST_SOURCES[key].collection;
-      const publishedOnly = scope === 'public' && (PUBLISHED_COLLECTIONS as readonly string[]).includes(name);
-      return watchCollection(
-        name,
-        publishedOnly,
-        (rows) => {
-          setRemote((prev) => ({ ...prev, [name]: rows }));
-          setRulesBlocked(false);
-          setSyncStatus('connected');
-        },
-        (error) => {
-          if (permissionDenied(error)) setRulesBlocked(true);
-          else setSyncStatus('offline');
-        }
-      );
-    });
-    return () => unsubs.forEach((stop) => stop());
+    let cancelled = false;
+    const stops: Array<() => void> = [];
+    readSettingsDoc(CATALOG_SETTINGS_ID)
+      .then((data) => {
+        if (cancelled) return;
+        setRulesBlocked(false);
+        const authoritative = data && typeof data.authoritative === 'object' && data.authoritative
+          ? (data.authoritative as CatalogMarker['authoritative'])
+          : {};
+        setMarker({
+          authoritative,
+          seededAt: typeof data?.seededAt === 'string' ? data.seededAt : undefined
+        });
+        stops.push(watchDocument(
+          SETTINGS_COLLECTION,
+          GENERAL_SETTINGS_ID,
+          (next) => {
+            if (next && typeof next === 'object') setGeneralDoc(withOfficePin(next as unknown as AgencyGeneralInfo));
+          },
+          () => undefined
+        ));
+        stops.push(watchDocument(
+          SETTINGS_COLLECTION,
+          CATALOG_SETTINGS_ID,
+          (next) => {
+            const flags = next && typeof next.authoritative === 'object' && next.authoritative
+              ? (next.authoritative as CatalogMarker['authoritative'])
+              : {};
+            setMarker({
+              authoritative: flags,
+              seededAt: typeof next?.seededAt === 'string' ? next.seededAt : undefined
+            });
+          },
+          () => undefined
+        ));
+        (Object.keys(LIST_SOURCES) as ListKey[]).forEach((key) => {
+          const name = LIST_SOURCES[key].collection;
+          const publishedOnly = scope === 'public' && (PUBLISHED_COLLECTIONS as readonly string[]).includes(name);
+          stops.push(watchCollection(
+            name,
+            publishedOnly,
+            (rows) => {
+              setRemote((prev) => ({ ...prev, [name]: rows }));
+              setSyncStatus('connected');
+            },
+            () => setSyncStatus('offline')
+          ));
+        });
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        if (permissionDenied(error)) setRulesBlocked(true);
+        else setSyncStatus('offline');
+      });
+    return () => {
+      cancelled = true;
+      stops.forEach((stop) => stop());
+    };
   }, [scope]);
 
   const data = useMemo<CatalogData>(() => {
