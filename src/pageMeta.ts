@@ -85,6 +85,18 @@ export function metaForProject(title: string, summary: string, typeLabel: string
   };
 }
 
+export function metaForBlog(
+  title: string,
+  metaDescription?: string,
+  summary?: string
+): PublicPageMeta {
+  return {
+    title: `${title} | Axe's Era Enterprises`,
+    description: metaDescription?.trim() || summary?.trim() || DEFAULT_DESCRIPTION,
+    path: '/'
+  };
+}
+
 export function canonicalUrl(path: string): string {
   if (path === '/' || path === '') return `${SITE_ORIGIN}/`;
   return `${SITE_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;

@@ -52,8 +52,10 @@ import {
   normalizeBlogSections,
   collectArticleImages,
   extractExtraArticleImages,
-  prepareBlogForPublish
+  prepareBlogForPublish,
+  mergeMissingBuiltinBlogs
 } from '../../utils/blogUtils';
+import { blogsData, CURATED_WEB_DEV_BLOG_IDS, CURATED_MOBILE_APP_BLOG_IDS } from '../../data/blogs';
 import {
   ACCOUNT_LINK_PRESETS,
   type AccountLinkPreset,
@@ -139,6 +141,7 @@ interface SideAdminPanelProps {
   onAddBlog: (blog: BlogPost) => Promise<boolean> | void;
   onUpdateBlog: (blog: BlogPost) => Promise<boolean> | void;
   onDeleteBlog: (id: string) => Promise<boolean> | void;
+  onImportBuiltinBlogs?: (blogIds?: string[]) => Promise<{ ok: boolean; addedCount: number }>;
   onAddTeamMember: (member: TeamMemberData) => void;
   onUpdateTeamMember: (member: TeamMemberData) => void;
   onDeleteTeamMember: (id: string) => void;
@@ -181,6 +184,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   onAddBlog,
   onUpdateBlog,
   onDeleteBlog,
+  onImportBuiltinBlogs,
   onAddTeamMember,
   onUpdateTeamMember,
   onDeleteTeamMember,
@@ -233,6 +237,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   const [isUploadingBlogGallery, setIsUploadingBlogGallery] = useState(false);
   const [isDraggingBlogGallery, setIsDraggingBlogGallery] = useState(false);
   const [isPublishingBlog, setIsPublishingBlog] = useState(false);
+  const [isSyncingBuiltinBlogs, setIsSyncingBuiltinBlogs] = useState(false);
   const [blogFormError, setBlogFormError] = useState('');
 
   // Team state for multiple team members
@@ -2372,49 +2377,165 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   </strong>
                 </p>
               </div>
-              {!isCreatingBlog && !editingBlog && (
-                <button
-                  onClick={() => {
-                    setBlogFormError('');
-                    setIsCreatingBlog(true);
-                    setEditingBlog({
-                      id: `blog-${Date.now()}`,
-                      title: '',
-                      slug: `article-${Date.now()}`,
-                      imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
-                      summary: '',
-                      category: '🌐 Web Development',
-                      date: 'March 2026',
-                      readTime: '5 min read',
-                      author: 'Gauhar Axe',
-                      tags: ['Web Dev', 'Tech'],
-                      paragraphs: [],
-                      images: [],
-                      sections: [
-                        {
-                          id: `sec-${Date.now()}-1`,
-                          heading: '1. Strategic Overview & Industry Insights',
-                          paragraphs: ['Write the first comprehensive paragraph exploring industry trends, architecture patterns, and enterprise execution.'],
-                          imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80',
-                          imageCaption: 'High-performance digital engineering workflow'
-                        },
-                        {
-                          id: `sec-${Date.now()}-2`,
-                          heading: '2. Technical Architecture & Core Benchmarks',
-                          paragraphs: ['Explain the technical implementation details, security safeguards, and responsive benchmarks achieved.'],
-                          imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
-                          imageCaption: 'Responsive architecture & Core Web Vitals optimization'
-                        }
-                      ]
-                    });
-                    setNewGalleryImageUrl('');
-                  }}
-                  className="btn btn-primary"
-                  style={{ padding: '7px 16px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <Plus size={16} /> Create Complete Blog
-                </button>
-              )}
+              {!isCreatingBlog && !editingBlog && (() => {
+                const { addedCount: missingWebDevCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_WEB_DEV_BLOG_IDS);
+                const { addedCount: missingMobileAppCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_MOBILE_APP_BLOG_IDS);
+                const { addedCount: missingBuiltinCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData);
+                return (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {missingWebDevCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_WEB_DEV_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Web Dev articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Web Development article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Web Development articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingWebDevCount} New Web Dev Article${missingWebDevCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingMobileAppCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_MOBILE_APP_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Mobile App articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Mobile App Development article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Mobile App Development articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingMobileAppCount} New Mobile App Article${missingMobileAppCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingWebDevCount === 0 && missingMobileAppCount === 0 && missingBuiltinCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs();
+                              if (!res.ok) {
+                                onShowToast('Failed to sync built-in articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} built-in article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingBuiltinCount} Built-in Article${missingBuiltinCount === 1 ? '' : 's'}`}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setBlogFormError('');
+                        setIsCreatingBlog(true);
+                        setEditingBlog({
+                          id: `blog-${Date.now()}`,
+                          title: '',
+                          slug: `article-${Date.now()}`,
+                          imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
+                          summary: '',
+                          category: '🌐 Web Development',
+                          date: 'March 2026',
+                          readTime: '5 min read',
+                          author: 'Gauhar Axe',
+                          tags: ['Web Dev', 'Tech'],
+                          paragraphs: [],
+                          images: [],
+                          sections: [
+                            {
+                              id: `sec-${Date.now()}-1`,
+                              heading: '1. Strategic Overview & Industry Insights',
+                              paragraphs: ['Write the first comprehensive paragraph exploring industry trends, architecture patterns, and enterprise execution.'],
+                              imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80',
+                              imageCaption: 'High-performance digital engineering workflow'
+                            },
+                            {
+                              id: `sec-${Date.now()}-2`,
+                              heading: '2. Technical Architecture & Core Benchmarks',
+                              paragraphs: ['Explain the technical implementation details, security safeguards, and responsive benchmarks achieved.'],
+                              imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
+                              imageCaption: 'Responsive architecture & Core Web Vitals optimization'
+                            }
+                          ]
+                        });
+                        setNewGalleryImageUrl('');
+                      }}
+                      className="btn btn-primary"
+                      style={{ padding: '7px 16px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Plus size={16} /> Create Complete Blog
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Blog Form */}
@@ -2505,6 +2626,25 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         setEditingBlog({ ...editingBlog, summary: e.target.value });
                       }}
                       style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.88rem', lineHeight: 1.5 }}
+                    />
+                  </div>
+
+                  {/* 3b. SEO META DESCRIPTION */}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                      <label style={{ fontSize: '0.82rem', color: '#f1f5f9', fontWeight: 600 }}>
+                        SEO Meta Description
+                      </label>
+                      <span style={{ fontSize: '0.72rem', color: '#a3a3a3' }}>
+                        {(editingBlog.metaDescription || '').length}/160 chars (defaults to Summary if blank)
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={editingBlog.metaDescription || ''}
+                      placeholder="Concise search-engine meta description (140-160 characters)..."
+                      onChange={(e) => setEditingBlog({ ...editingBlog, metaDescription: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem', lineHeight: 1.5 }}
                     />
                   </div>
 

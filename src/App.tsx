@@ -40,6 +40,7 @@ import {
   applyPublicMeta,
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
+  metaForBlog,
   metaForPage,
   metaForProject
 } from './pageMeta';
@@ -117,6 +118,7 @@ const AppContent: React.FC = () => {
     addBlog,
     updateBlog,
     deleteBlog,
+    importBuiltinBlogs,
     addTeamMember,
     updateTeamMember,
     deleteTeamMember,
@@ -377,6 +379,12 @@ const AppContent: React.FC = () => {
       );
       return;
     }
+    if (currentPage === 'blog-detail' && selectedBlog) {
+      applyPublicMeta(
+        metaForBlog(selectedBlog.title, selectedBlog.metaDescription, selectedBlog.summary)
+      );
+      return;
+    }
     applyPublicMeta(
       metaForPage(currentPage) ?? {
         title: DEFAULT_TITLE,
@@ -384,7 +392,7 @@ const AppContent: React.FC = () => {
         path: '/'
       }
     );
-  }, [currentPage, adminGate, selectedProject]);
+  }, [currentPage, adminGate, selectedProject, selectedBlog]);
 
   const pageOpenKey = `${currentPage}|${selectedBlog?.slug ?? ''}|${selectedService?.id ?? ''}|${selectedProject?.id ?? ''}|${currentPage === 'policies' ? selectedPolicy : ''}`;
   const preloaderHoldMs = 1100;
@@ -808,6 +816,7 @@ const AppContent: React.FC = () => {
             onAddBlog={addBlog}
             onUpdateBlog={updateBlog}
             onDeleteBlog={deleteBlog}
+            onImportBuiltinBlogs={importBuiltinBlogs}
             onAddTeamMember={addTeamMember}
             onUpdateTeamMember={updateTeamMember}
             onDeleteTeamMember={deleteTeamMember}

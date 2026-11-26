@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CONTENT_PAGE_PATHS } from './routing.ts';
-import { canonicalUrl, metaForPage } from './pageMeta.ts';
+import { canonicalUrl, metaForBlog, metaForPage } from './pageMeta.ts';
 
 test('the seven redesigned pages keep titles and canonical paths', () => {
   const expected: Record<string, string> = {
@@ -25,4 +25,13 @@ test('the seven redesigned pages keep titles and canonical paths', () => {
     assert.ok(meta && meta.description.length > 40, path);
     assert.equal(canonicalUrl(path), `https://www.gauharaxe.org${path}`);
   }
+});
+
+test('metaForBlog prefers explicit metaDescription and falls back to summary', () => {
+  const withMeta = metaForBlog('Custom Web Guide', 'Concise SEO meta description.', 'Longer summary text.');
+  assert.equal(withMeta.title, "Custom Web Guide | Axe's Era Enterprises");
+  assert.equal(withMeta.description, 'Concise SEO meta description.');
+
+  const fallbackMeta = metaForBlog('Custom Web Guide', '   ', 'Longer summary text.');
+  assert.equal(fallbackMeta.description, 'Longer summary text.');
 });

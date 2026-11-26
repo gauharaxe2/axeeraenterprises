@@ -9,8 +9,10 @@ import {
   countWords,
   getArticleWordCount,
   estimateReadingTime,
-  calculateReadingProgress
+  calculateReadingProgress,
+  mergeMissingBuiltinBlogs
 } from './blogUtils.ts';
+import { blogsData, CURATED_WEB_DEV_BLOG_IDS, CURATED_MOBILE_APP_BLOG_IDS } from '../data/blogs.ts';
 import type { BlogPost, BlogSection } from '../types.ts';
 
 test('normalizeBlogSections preserves existing structured sections', () => {
@@ -210,6 +212,7 @@ test('prepareBlogForPublish stores cover and section images once instead of dupl
       slug: '',
       imageUrl: coverDataUrl,
       summary: 'How to structure fast React and Firestore platforms without hitting document limits.',
+      metaDescription: '  Enterprise React and Firestore performance blueprint.  ',
       paragraphs: [],
       images: [coverDataUrl, sectionDataUrl, extraDataUrl],
       category: '⚡ Performance & Security'
@@ -229,6 +232,7 @@ test('prepareBlogForPublish stores cover and section images once instead of dupl
   assert.equal(result.ok, true);
   if (result.ok) {
     assert.equal(result.finalizedBlog.slug, 'enterprise-performance-guide');
+    assert.equal(result.finalizedBlog.metaDescription, 'Enterprise React and Firestore performance blueprint.');
     assert.deepEqual(result.finalizedBlog.images, [extraDataUrl]);
     assert.deepEqual(
       collectArticleImages(
@@ -387,4 +391,95 @@ test('calculateReadingProgress tracks scroll from 0 to 100 and clamps bounds', (
     }),
     50
   );
+});
+
+test('mergeMissingBuiltinBlogs adds missing articles without duplicating or overwriting existing ones', () => {
+  const customPost: BlogPost = {
+    id: 'what-is-web-development',
+    title: 'Custom Edited Title',
+    slug: 'what-is-web-development',
+    imageUrl: 'https://example.com/custom.jpg',
+    summary: 'Edited summary',
+    paragraphs: ['Custom paragraph']
+  };
+  const builtinA: BlogPost = {
+    id: 'what-is-web-development',
+    title: 'Original Builtin',
+    slug: 'what-is-web-development',
+    imageUrl: '',
+    summary: 'Original',
+    paragraphs: ['Original']
+  };
+  const builtinB: BlogPost = {
+    id: '10-signs-website-needs-redesign',
+    title: '10 Signs',
+    slug: '10-signs-website-needs-redesign',
+    imageUrl: '',
+    summary: 'Signs',
+    paragraphs: ['Content']
+  };
+
+  const merged = mergeMissingBuiltinBlogs([customPost], [builtinA, builtinB]);
+  assert.equal(merged.addedCount, 1);
+  assert.equal(merged.nextBlogs.length, 2);
+  assert.equal(merged.nextBlogs[0].title, 'Custom Edited Title');
+  assert.equal(merged.nextBlogs[1].id, '10-signs-website-needs-redesign');
+
+  const noOp = mergeMissingBuiltinBlogs(merged.nextBlogs, [builtinA, builtinB]);
+  assert.equal(noOp.addedCount, 0);
+  assert.equal(noOp.nextBlogs.length, 2);
+
+  const selective = mergeMissingBuiltinBlogs([customPost], [builtinA, builtinB], ['only-missing-other-id']);
+  assert.equal(selective.addedCount, 0);
+  assert.equal(selective.nextBlogs.length, 1);
+});
+
+test('blogsData includes all curated Web Development articles ready for admin section images', () => {
+  const ids = blogsData.map((b) => b.id);
+  const slugs = blogsData.map((b) => b.slug);
+  assert.equal(new Set(ids).size, ids.length, 'Blog IDs must be unique');
+  assert.equal(new Set(slugs).size, slugs.length, 'Blog slugs must be unique');
+  assert.equal(CURATED_WEB_DEV_BLOG_IDS.length, 14);
+
+  for (const id of CURATED_WEB_DEV_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in blog ${id}`);
+    assert.equal(post.category, '🌐 Web Development');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 10 curated Mobile App Development articles ready for admin section images', () => {
+  assert.equal(CURATED_MOBILE_APP_BLOG_IDS.length, 10);
+
+  for (const id of CURATED_MOBILE_APP_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in mobile app blog ${id}`);
+    assert.equal(post.category, '📱 Mobile App Development');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
 });

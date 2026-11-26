@@ -173,18 +173,24 @@ export function prepareBlogForPublish(params: {
     editingBlog.id ||
     `article-${Date.now()}`;
 
+  const trimmedMetaDescription = editingBlog.metaDescription?.trim() || undefined;
+
   const finalizedBlog: BlogPost = {
     ...editingBlog,
     id: editingBlog.id || `blog-${Date.now()}`,
     slug: (editingBlog.slug || '').trim() || fallbackSlug,
     title: trimmedTitle,
     summary: trimmedSummary,
+    ...(trimmedMetaDescription ? { metaDescription: trimmedMetaDescription } : {}),
     imageUrl: coverImage,
     images: extraImages,
     category: editingBlog.category || '🌐 Web Development',
     paragraphs: aggregatedParagraphs.length > 0 ? aggregatedParagraphs : [trimmedSummary],
     sections: cleanSections
   };
+  if (!trimmedMetaDescription) {
+    delete finalizedBlog.metaDescription;
+  }
 
   const nextBlogs = isCreating
     ? [finalizedBlog, ...existingBlogs.filter((b) => b.id !== finalizedBlog.id)]
@@ -205,6 +211,29 @@ export function prepareBlogForPublish(params: {
     finalizedBlog,
     nextBlogs,
     bytes
+  };
+}
+
+/**
+ * Merges missing built-in articles into an existing blog collection without
+ * duplicating or overwriting any articles already customized or published.
+ */
+export function mergeMissingBuiltinBlogs(
+  existingBlogs: BlogPost[],
+  builtinBlogs: BlogPost[],
+  targetIds?: string[]
+): { nextBlogs: BlogPost[]; addedCount: number } {
+  const existingIds = new Set(existingBlogs.map((b) => b.id));
+  const targetSet = targetIds ? new Set(targetIds) : null;
+  const missing = builtinBlogs.filter(
+    (b) => !existingIds.has(b.id) && (!targetSet || targetSet.has(b.id))
+  );
+  if (missing.length === 0) {
+    return { nextBlogs: existingBlogs, addedCount: 0 };
+  }
+  return {
+    nextBlogs: [...existingBlogs, ...missing],
+    addedCount: missing.length
   };
 }
 

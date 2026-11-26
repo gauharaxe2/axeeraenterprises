@@ -22,6 +22,7 @@ import { db, testConnection, saveSectionToFirestore } from '../utils/firebase';
 import { mergeProjectsWithDefaults } from '../utils/mergeProjects';
 import { isValidMapPin, WAHDAT_COLONY_PIN } from '../utils/maps';
 import { shouldAcceptSnapshotData, formatSyncErrorMessage } from '../utils/firestoreSyncGuard';
+import { mergeMissingBuiltinBlogs } from '../utils/blogUtils';
 import { isAdminSessionActive } from '../utils/adminAuth';
 import { collection, onSnapshot } from 'firebase/firestore';
 
@@ -330,6 +331,25 @@ export const useAdminData = (onSyncError?: (message: string) => void) => {
     return true;
   };
 
+  const importBuiltinBlogs = async (
+    blogIds?: string[]
+  ): Promise<{ ok: boolean; addedCount: number }> => {
+    const previousBlogs = dataRef.current.blogs;
+    const { nextBlogs, addedCount } = mergeMissingBuiltinBlogs(previousBlogs, blogsData, blogIds);
+    if (addedCount === 0) {
+      return { ok: true, addedCount: 0 };
+    }
+    dataRef.current = { ...dataRef.current, blogs: nextBlogs };
+    setData((prev) => ({ ...prev, blogs: nextBlogs }));
+    const ok = await syncSection('blogs', nextBlogs);
+    if (!ok) {
+      dataRef.current = { ...dataRef.current, blogs: previousBlogs };
+      setData((prev) => ({ ...prev, blogs: previousBlogs }));
+      return { ok: false, addedCount: 0 };
+    }
+    return { ok: true, addedCount };
+  };
+
   // Team Members
   const addTeamMember = (member: TeamMemberData) => {
     const currentTeam = dataRef.current.team;
@@ -552,6 +572,7 @@ export const useAdminData = (onSyncError?: (message: string) => void) => {
     addBlog,
     updateBlog,
     deleteBlog,
+    importBuiltinBlogs,
     addTeamMember,
     updateTeamMember,
     deleteTeamMember,

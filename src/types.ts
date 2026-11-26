@@ -76,6 +76,7 @@ export interface BlogPost {
   imageUrl: string;
   images?: string[];
   summary: string;
+  metaDescription?: string;
   paragraphs: string[];
   sections?: BlogSection[];
   date?: string;
