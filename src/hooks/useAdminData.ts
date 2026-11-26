@@ -285,6 +285,13 @@ export const useAdminData = () => {
     });
   };
 
+  const reorderProjects = (nextProjects: Project[]) => {
+    setData((prev) => ({ ...prev, projects: nextProjects }));
+    saveSectionToFirestore('projects', nextProjects).catch((err) => {
+      console.warn('Firestore sync failed for projects:', err);
+    });
+  };
+
   // Blogs
   const addBlog = (blog: BlogPost) => {
     const currentBlogs = dataRef.current.blogs;
@@ -557,6 +564,7 @@ export const useAdminData = () => {
     addProject,
     updateProject,
     deleteProject,
+    reorderProjects,
     addBlog,
     updateBlog,
     deleteBlog,

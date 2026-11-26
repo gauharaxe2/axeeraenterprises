@@ -47,6 +47,7 @@ export type AppRoute =
   | { page: 'faq' }
   | { page: 'policies'; policy: PolicyId }
   | { page: 'service-detail'; serviceId: ServiceId }
+  | { page: 'case-study-detail'; projectId: string }
   | { page: 'blog-hub' }
   | { page: 'blog-detail'; slug: string }
   | { page: 'admin' }
@@ -211,6 +212,19 @@ export function resolveRoute(pathname: string, hash: string): AppRoute {
       return { page: 'service-detail', serviceId };
     }
     return { page: 'home', section: 'services' };
+  }
+
+  if (fragment.startsWith('case-study-') || fragment.startsWith('product-') || fragment.startsWith('website-')) {
+    const rawId = fragment
+      .replace(/^case-study-/, '')
+      .replace(/^product-/, '')
+      .replace(/^website-/, '')
+      .replace(/\.html$/, '')
+      .trim();
+    if (!rawId) {
+      return { page: 'websites' };
+    }
+    return { page: 'case-study-detail', projectId: rawId };
   }
 
   if (fragment === 'blog-hub') {

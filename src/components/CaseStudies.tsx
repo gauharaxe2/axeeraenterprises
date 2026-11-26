@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { Project } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { sanitizeDisplayImageUrl } from '../utils/imageUpload';
+import { buildCaseStudyHash, getProjectTypeLabel, resolveProjectType } from '../utils/projectUtils';
 
 const CaseStudyThumbnail: React.FC<{ imageUrl?: string; title: string }> = ({ imageUrl, title }) => {
   const safeSrc = sanitizeDisplayImageUrl(imageUrl);
@@ -21,10 +22,15 @@ const CaseStudyThumbnail: React.FC<{ imageUrl?: string; title: string }> = ({ im
 
 interface CaseStudiesProps {
   projects: Project[];
+  onSelectProject?: (project: Project) => void;
   onOpenWebsitesPage?: () => void;
 }
 
-export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsitesPage }) => {
+export const CaseStudies: React.FC<CaseStudiesProps> = ({
+  projects,
+  onSelectProject,
+  onOpenWebsitesPage
+}) => {
   const { strings } = useLanguage();
   const [activeFilter, setActiveFilter] = useState<'all' | 'ecommerce' | 'saas' | 'web'>('all');
 
@@ -69,28 +75,50 @@ export const CaseStudies: React.FC<CaseStudiesProps> = ({ projects, onOpenWebsit
         </div>
 
         <div className="portfolio-grid">
-          {filteredProjects.map((project) => (
-            <div key={project.id} className="portfolio-item">
-              <div className="portfolio-image">
-                <CaseStudyThumbnail imageUrl={project.imageUrl} title={project.title} />
-                <div className="portfolio-overlay">
-                  <h3>{project.title}</h3>
-                  <p>{project.subtitle}</p>
-                  {project.metric && (
-                    <div className="case-study-metric">{project.metric}</div>
-                  )}
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="portfolio-link"
-                  >
-                    {strings.caseStudies.viewLiveSite} <ExternalLink size={15} />
-                  </a>
+          {filteredProjects.map((project) => {
+            const pType = resolveProjectType(project);
+            const hasLiveLink = /^https?:\/\/.+/i.test((project.link || '').trim());
+            return (
+              <div key={project.id} className="portfolio-item">
+                <div className="portfolio-image">
+                  <CaseStudyThumbnail imageUrl={project.imageUrl} title={project.title} />
+                  <div className="portfolio-overlay">
+                    <span className="portfolio-type-pill">{getProjectTypeLabel(pType)}</span>
+                    <h3>{project.title}</h3>
+                    <p>{project.subtitle}</p>
+                    {project.metric && (
+                      <div className="case-study-metric">{project.metric}</div>
+                    )}
+                    <div className="portfolio-overlay-actions">
+                      {onSelectProject && (
+                        <a
+                          href={buildCaseStudyHash(project)}
+                          onClick={(event) => {
+                            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                            event.preventDefault();
+                            onSelectProject(project);
+                          }}
+                          className="portfolio-link portfolio-link-primary"
+                        >
+                          {pType === 'digital-product' ? 'Product Specs' : 'Case Study'} <ArrowRight size={15} />
+                        </a>
+                      )}
+                      {hasLiveLink && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="portfolio-link"
+                        >
+                          {strings.caseStudies.viewLiveSite} <ExternalLink size={14} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {onOpenWebsitesPage && (

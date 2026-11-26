@@ -28,13 +28,27 @@ import { LocationPage } from './components/LocationPage';
 import { FaqPage } from './components/FaqPage';
 import { PoliciesView } from './components/PoliciesView';
 import { HomePoliciesBlock } from './components/HomePoliciesBlock';
+import { CaseStudyDetailView } from './components/CaseStudyDetailView';
 import { NotFound } from './components/NotFound';
-import { PageView, BlogPost, ServiceItem, PolicyType } from './types';
+import { PageView, BlogPost, ServiceItem, PolicyType, Project } from './types';
 import { useAdminData } from './hooks/useAdminData';
 import { AppRoute, isAdminLocation, resolveRoute } from './routing';
 import { AdminGate, clearAdminSession } from './components/AdminGate';
 import { isAdminSessionActive } from './utils/adminAuth';
-import { applyPrivateMeta, applyPublicMeta, DEFAULT_DESCRIPTION, DEFAULT_TITLE, metaForPage } from './pageMeta';
+import {
+  applyPrivateMeta,
+  applyPublicMeta,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  metaForPage,
+  metaForProject
+} from './pageMeta';
+import {
+  buildCaseStudyHash,
+  findProjectByRouteId,
+  getProjectTypeLabel,
+  resolveProjectType
+} from './utils/projectUtils';
 import { Preloader } from './components/Preloader';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
@@ -57,6 +71,8 @@ function pageFromRoute(route: AppRoute): PageView {
       return route.page;
     case 'service-detail':
       return 'service-detail';
+    case 'case-study-detail':
+      return 'case-study-detail';
     case 'blog-hub':
       return 'blogs';
     case 'blog-detail':
@@ -87,6 +103,7 @@ const AppContent: React.FC = () => {
     addProject,
     updateProject,
     deleteProject,
+    reorderProjects,
     addBlog,
     updateBlog,
     deleteBlog,
@@ -137,6 +154,9 @@ const AppContent: React.FC = () => {
     if (route.page === 'service-detail' && !data.services.some((service) => service.id === route.serviceId)) {
       return 'home';
     }
+    if (route.page === 'case-study-detail' && !findProjectByRouteId(data.projects, route.projectId)) {
+      return 'websites';
+    }
     return pageFromRoute(route);
   });
   const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(() => {
@@ -148,6 +168,11 @@ const AppContent: React.FC = () => {
     const route = resolveRoute(window.location.pathname, window.location.hash);
     if (route.page !== 'service-detail') return null;
     return data.services.find((service) => service.id === route.serviceId) ?? null;
+  });
+  const [selectedProject, setSelectedProject] = useState<Project | null>(() => {
+    const route = resolveRoute(window.location.pathname, window.location.hash);
+    if (route.page !== 'case-study-detail') return null;
+    return findProjectByRouteId(data.projects, route.projectId) ?? null;
   });
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyType>(() => {
     const route = resolveRoute(window.location.pathname, window.location.hash);
@@ -164,7 +189,7 @@ const AppContent: React.FC = () => {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [preloaderPhase, setPreloaderPhase] = useState<'on' | 'out' | 'off'>('on');
 
-  // Keep selectedBlog and selectedService synchronized when live data updates from Firestore
+  // Keep selectedBlog, selectedService, and selectedProject synchronized when live data updates from Firestore
   useEffect(() => {
     if (selectedBlog) {
       const refreshed = data.blogs.find((b) => b.id === selectedBlog.id || b.slug === selectedBlog.slug);
@@ -182,6 +207,18 @@ const AppContent: React.FC = () => {
       }
     }
   }, [data.services, selectedService]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      const refreshed = findProjectByRouteId(
+        data.projects,
+        selectedProject.slug || selectedProject.id
+      ) || data.projects.find((p) => p.id === selectedProject.id);
+      if (refreshed && refreshed !== selectedProject) {
+        setSelectedProject(refreshed);
+      }
+    }
+  }, [data.projects, selectedProject]);
 
   const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     setNotification({
@@ -202,7 +239,7 @@ const AppContent: React.FC = () => {
     setIsAdminOpen(false);
 
     const route = resolveRoute(window.location.pathname, window.location.hash);
-    const { services, blogs } = dataRef.current;
+    const { services, blogs, projects } = dataRef.current;
 
     if (route.page === 'not-found') {
       setCurrentPage('not-found');
@@ -232,6 +269,19 @@ const AppContent: React.FC = () => {
       }
       setSelectedService(service);
       setCurrentPage('service-detail');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (route.page === 'case-study-detail') {
+      const matchedProject = findProjectByRouteId(projects, route.projectId);
+      if (!matchedProject) {
+        setCurrentPage('websites');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      setSelectedProject(matchedProject);
+      setCurrentPage('case-study-detail');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -314,6 +364,16 @@ const AppContent: React.FC = () => {
       applyPrivateMeta('not-found');
       return;
     }
+    if (currentPage === 'case-study-detail' && selectedProject) {
+      applyPublicMeta(
+        metaForProject(
+          selectedProject.title,
+          selectedProject.overview || selectedProject.description || selectedProject.subtitle,
+          getProjectTypeLabel(resolveProjectType(selectedProject))
+        )
+      );
+      return;
+    }
     applyPublicMeta(
       metaForPage(currentPage) ?? {
         title: DEFAULT_TITLE,
@@ -321,9 +381,9 @@ const AppContent: React.FC = () => {
         path: '/'
       }
     );
-  }, [currentPage, adminGate]);
+  }, [currentPage, adminGate, selectedProject]);
 
-  const pageOpenKey = `${currentPage}|${selectedBlog?.slug ?? ''}|${selectedService?.id ?? ''}|${currentPage === 'policies' ? selectedPolicy : ''}`;
+  const pageOpenKey = `${currentPage}|${selectedBlog?.slug ?? ''}|${selectedService?.id ?? ''}|${selectedProject?.id ?? ''}|${currentPage === 'policies' ? selectedPolicy : ''}`;
   const preloaderHoldMs = 1100;
 
   useEffect(() => {
@@ -468,6 +528,18 @@ const AppContent: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectProject = (project: Project) => {
+    setSelectedProject(project);
+    setCurrentPage('case-study-detail');
+    pushUrl(buildCaseStudyHash(project));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const activeSelectedProject = useMemo(() => {
+    if (!selectedProject) return null;
+    return activeProjects.find((p) => p.id === selectedProject.id) ?? selectedProject;
+  }, [activeProjects, selectedProject]);
+
   const handleBackToHome = () => {
     pushUrl('/');
     setPendingSection(null);
@@ -514,6 +586,7 @@ const AppContent: React.FC = () => {
           />
           <CaseStudies
             projects={activeProjects}
+            onSelectProject={handleSelectProject}
             onOpenWebsitesPage={() => handleSetCurrentPage('websites')}
           />
           <HomeBlogsPreview
@@ -581,6 +654,17 @@ const AppContent: React.FC = () => {
         <WebsitesPage
           projects={activeProjects}
           onBackToHome={handleBackToHome}
+          onSelectProject={handleSelectProject}
+          onContactClick={() => handleSetCurrentPage('contact')}
+        />
+      )}
+
+      {currentPage === 'case-study-detail' && activeSelectedProject && (
+        <CaseStudyDetailView
+          project={activeSelectedProject}
+          allProjects={activeProjects}
+          onBackToWebsites={() => handleSetCurrentPage('websites')}
+          onSelectProject={handleSelectProject}
           onContactClick={() => handleSetCurrentPage('contact')}
         />
       )}
@@ -713,6 +797,11 @@ const AppContent: React.FC = () => {
             onAddProject={addProject}
             onUpdateProject={updateProject}
             onDeleteProject={deleteProject}
+            onReorderProjects={reorderProjects}
+            onPreviewProject={(project) => {
+              handleAdminClose();
+              handleSelectProject(project);
+            }}
             onAddBlog={addBlog}
             onUpdateBlog={updateBlog}
             onDeleteBlog={deleteBlog}

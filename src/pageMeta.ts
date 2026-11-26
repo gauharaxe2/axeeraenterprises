@@ -77,6 +77,14 @@ export function metaForPage(page: string): PublicPageMeta | null {
   return PAGES[page] ?? null;
 }
 
+export function metaForProject(title: string, summary: string, typeLabel: string): PublicPageMeta {
+  return {
+    title: `${title} | ${typeLabel} | Axe's Era Enterprises`,
+    description: summary || DEFAULT_DESCRIPTION,
+    path: '/websites'
+  };
+}
+
 export function canonicalUrl(path: string): string {
   if (path === '/' || path === '') return `${SITE_ORIGIN}/`;
   return `${SITE_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;

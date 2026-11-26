@@ -1,12 +1,38 @@
+export type ProjectType = 'case-study' | 'digital-product';
+export type ProjectStatus = 'live' | 'beta' | 'in-development' | 'archived';
+
+export interface ProjectOutcome {
+  label: string;
+  value: string;
+}
+
 export interface Project {
   id: string;
+  slug?: string;
   title: string;
   subtitle: string;
   category: 'ecommerce' | 'saas' | 'web';
+  projectType?: ProjectType;
+  status?: ProjectStatus;
+  featured?: boolean;
   metric: string;
   link: string;
+  demoUrl?: string;
   imageUrl: string;
+  galleryImages?: string[];
   description?: string;
+  overview?: string;
+  clientName?: string;
+  industry?: string;
+  timeline?: string;
+  role?: string;
+  pricingModel?: string;
+  challenge?: string;
+  solution?: string;
+  keyFeatures?: string[];
+  deliverables?: string[];
+  outcomes?: ProjectOutcome[];
+  architectureHighlights?: string[];
   tags?: string[];
 }
 
@@ -166,6 +192,7 @@ export type PageView =
   | 'about'
   | 'services'
   | 'websites'
+  | 'case-study-detail'
   | 'blogs'
   | 'blog-detail'
   | 'service-detail'

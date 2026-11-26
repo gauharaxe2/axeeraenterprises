@@ -60,6 +60,18 @@ test('home, sections, services, blogs, and policies resolve', () => {
     assert.deepEqual(resolveRoute(path, ''), { page });
     assert.deepEqual(resolveRoute(`${path}/`, ''), { page });
   }
+  assert.deepEqual(resolveRoute('/', '#case-study-estate-crm'), {
+    page: 'case-study-detail',
+    projectId: 'estate-crm'
+  });
+  assert.deepEqual(resolveRoute('/', '#product-saas-dashboard'), {
+    page: 'case-study-detail',
+    projectId: 'saas-dashboard'
+  });
+  assert.deepEqual(resolveRoute('/', '#website-global-trade-hub'), {
+    page: 'case-study-detail',
+    projectId: 'global-trade-hub'
+  });
   assert.deepEqual(resolveRoute('/', '#blog-hub'), { page: 'blog-hub' });
   assert.deepEqual(resolveRoute('/', '#blog-what-is-web-development.html'), {
     page: 'blog-detail',

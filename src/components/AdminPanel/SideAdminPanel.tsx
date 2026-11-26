@@ -26,13 +26,19 @@ import {
   ChevronDown,
   FileText,
   Mail,
-  UploadCloud
+  UploadCloud,
+  Copy,
+  Search,
+  Sparkles,
+  Eye
 } from 'lucide-react';
 import {
   AdminTab,
   AgencyGeneralInfo,
   ServiceItem,
   Project,
+  ProjectStatus,
+  ProjectType,
   BlogPost,
   BlogSection,
   TeamMemberData,
@@ -62,14 +68,30 @@ import {
   sanitizeMemberSkills
 } from '../../utils/teamProfile';
 import {
+  FIRESTORE_SAFE_SECTION_BYTES,
   PROJECT_IMAGE_MAX_DIMENSION,
   REVIEW_AVATAR_MAX_DIMENSION,
   SERVICE_IMAGE_MAX_DIMENSION,
   TEAM_PHOTO_MAX_DIMENSION,
   deriveInitials,
+  estimateJsonSectionBytes,
   isWithinFirestoreDocBudget,
+  processImageFileToDataUrl,
   sanitizeDisplayImageUrl
 } from '../../utils/imageUpload';
+import {
+  createDuplicatedProject,
+  filterAdminProjects,
+  getProjectStatusLabel,
+  getProjectTypeLabel,
+  reorderProjectList,
+  resolveProjectDetails,
+  resolveProjectStatus,
+  resolveProjectType,
+  sanitizeProjectOutcomes,
+  sanitizeStringList,
+  slugifyProjectTitle
+} from '../../utils/projectUtils';
 import { ClientAvatar } from '../ClientAvatar';
 import { ImageUploadField } from './ImageUploadField';
 import { QueriesPanel } from './QueriesPanel';
@@ -96,6 +118,8 @@ interface SideAdminPanelProps {
   onAddProject: (project: Project) => void;
   onUpdateProject: (project: Project) => void;
   onDeleteProject: (id: string) => void;
+  onReorderProjects?: (projects: Project[]) => void;
+  onPreviewProject?: (project: Project) => void;
   onAddBlog: (blog: BlogPost) => void;
   onUpdateBlog: (blog: BlogPost) => void;
   onDeleteBlog: (id: string) => void;
@@ -136,6 +160,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   onAddProject,
   onUpdateProject,
   onDeleteProject,
+  onReorderProjects,
+  onPreviewProject,
   onAddBlog,
   onUpdateBlog,
   onDeleteBlog,
@@ -171,6 +197,15 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [projectSearch, setProjectSearch] = useState('');
+  const [projectTypeFilter, setProjectTypeFilter] = useState<'all' | ProjectType>('all');
+  const [newProjectFeature, setNewProjectFeature] = useState('');
+  const [newProjectDeliverable, setNewProjectDeliverable] = useState('');
+  const [newProjectArchHighlight, setNewProjectArchHighlight] = useState('');
+  const [newOutcomeValue, setNewOutcomeValue] = useState('');
+  const [newOutcomeLabel, setNewOutcomeLabel] = useState('');
+  const [newProjectGalleryUrl, setNewProjectGalleryUrl] = useState('');
+  const [isUploadingProjectGallery, setIsUploadingProjectGallery] = useState(false);
 
   const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
   const [isCreatingBlog, setIsCreatingBlog] = useState(false);
@@ -485,7 +520,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           },
           { id: 'general', label: 'General & Hero', icon: <LayoutTemplate size={15} /> },
           { id: 'services', label: `Services (${data.services.length})`, icon: <Briefcase size={15} /> },
-          { id: 'projects', label: `Case Studies (${data.projects.length})`, icon: <FolderGit2 size={15} /> },
+          { id: 'projects', label: `Websites (${data.projects.length})`, icon: <FolderGit2 size={15} /> },
           { id: 'blogs', label: `Blogs (${data.blogs.length})`, icon: <BookOpen size={15} /> },
           { id: 'team', label: `Team (${data.team.length})`, icon: <Users size={15} /> },
           { id: 'testimonials', label: `Reviews (${data.testimonials.length})`, icon: <Star size={15} /> },
@@ -1034,308 +1069,1174 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
           </div>
         )}
 
-        {/* TAB 3: CASE STUDIES */}
-        {activeTab === 'projects' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div>
-                <h3 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '1.15rem' }}>
-                  Manage Case Studies
-                </h3>
-                <p style={{ margin: 0, color: 'var(--text-light)', fontSize: '0.8rem' }}>
-                  Client projects, live URLs, and ROI badges
-                </p>
+        {/* TAB 3: WEBSITES, CASE STUDIES & DIGITAL PRODUCTS */}
+        {activeTab === 'projects' && (() => {
+          const projectStorageBytes = estimateJsonSectionBytes(data.projects);
+          const storagePct = Math.min(100, Math.round((projectStorageBytes / FIRESTORE_SAFE_SECTION_BYTES) * 100));
+          const caseStudyTotal = data.projects.filter((p) => resolveProjectType(p) === 'case-study').length;
+          const productTotal = data.projects.filter((p) => resolveProjectType(p) === 'digital-product').length;
+          const filteredProjectsList = filterAdminProjects(data.projects, {
+            query: projectSearch,
+            typeFilter: projectTypeFilter
+          });
+          const canReorder = Boolean(onReorderProjects) && !projectSearch.trim() && projectTypeFilter === 'all';
+
+          const resetProjectScratchInputs = () => {
+            setNewProjectFeature('');
+            setNewProjectDeliverable('');
+            setNewProjectArchHighlight('');
+            setNewOutcomeValue('');
+            setNewOutcomeLabel('');
+            setNewProjectGalleryUrl('');
+          };
+
+          const openProjectForCreate = () => {
+            const now = Date.now();
+            setIsCreatingProject(true);
+            setEditingProject({
+              id: `project-${now}`,
+              slug: `website-${String(now).slice(-6)}`,
+              title: '',
+              subtitle: '',
+              category: 'ecommerce',
+              projectType: 'case-study',
+              status: 'live',
+              featured: false,
+              metric: '+100% Growth',
+              link: 'https://',
+              demoUrl: '',
+              imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
+              galleryImages: [],
+              description: '',
+              overview: '',
+              clientName: '',
+              industry: '',
+              timeline: '6 Weeks Sprint',
+              role: 'Architecture, UI/UX Design & Full-Stack Engineering',
+              pricingModel: 'Bespoke Enterprise Build',
+              challenge: '',
+              solution: '',
+              keyFeatures: ['Responsive High-Conversion UI', 'Sub-Second Edge Performance'],
+              deliverables: ['Design System & Frontend Architecture', 'Production Launch & 30-Day Hypercare'],
+              architectureHighlights: ['TypeScript + React Modular Architecture', 'Global CDN Caching'],
+              outcomes: [{ value: '+100%', label: 'Primary Growth Target' }],
+              tags: ['React', 'TypeScript']
+            });
+            resetProjectScratchInputs();
+          };
+
+          const openProjectForEdit = (proj: Project) => {
+            const resolved = resolveProjectDetails(proj);
+            setIsCreatingProject(false);
+            setEditingProject({
+              ...proj,
+              slug: proj.slug || resolved.slug,
+              projectType: proj.projectType || resolved.projectType,
+              status: proj.status || resolved.status,
+              featured: Boolean(proj.featured),
+              demoUrl: proj.demoUrl || '',
+              clientName: proj.clientName ?? resolved.clientName,
+              industry: proj.industry ?? resolved.industry,
+              timeline: proj.timeline ?? resolved.timeline,
+              role: proj.role ?? resolved.role,
+              pricingModel: proj.pricingModel ?? resolved.pricingModel,
+              overview: proj.overview ?? resolved.overview,
+              challenge: proj.challenge ?? resolved.challenge,
+              solution: proj.solution ?? resolved.solution,
+              keyFeatures: proj.keyFeatures ? [...proj.keyFeatures] : [...resolved.keyFeatures],
+              deliverables: proj.deliverables ? [...proj.deliverables] : [...resolved.deliverables],
+              architectureHighlights: proj.architectureHighlights
+                ? [...proj.architectureHighlights]
+                : [...resolved.architectureHighlights],
+              outcomes: proj.outcomes ? proj.outcomes.map((o) => ({ ...o })) : resolved.outcomes.map((o) => ({ ...o })),
+              galleryImages: Array.isArray(proj.galleryImages) ? [...proj.galleryImages] : []
+            });
+            resetProjectScratchInputs();
+          };
+
+          const handleUploadGalleryFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (!file || !editingProject) return;
+            setIsUploadingProjectGallery(true);
+            try {
+              const dataUrl = await processImageFileToDataUrl(file, {
+                maxDimension: PROJECT_IMAGE_MAX_DIMENSION
+              });
+              const nextGallery = [...(editingProject.galleryImages || []), dataUrl];
+              const candidateProject = { ...editingProject, galleryImages: nextGallery };
+              const nextPreview = isCreatingProject
+                ? [candidateProject, ...data.projects.filter((p) => p.id !== candidateProject.id)]
+                : data.projects.map((p) => (p.id === candidateProject.id ? candidateProject : p));
+              if (!isWithinFirestoreDocBudget(nextPreview)) {
+                onShowToast('Adding this screenshot exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
+                return;
+              }
+              setEditingProject(candidateProject);
+              onShowToast('Screenshot added to gallery.', 'success');
+            } catch (err) {
+              onShowToast(err instanceof Error ? err.message : 'Unable to upload gallery image.', 'error');
+            } finally {
+              setIsUploadingProjectGallery(false);
+            }
+          };
+
+          return (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <h3 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '1.15rem' }}>
+                    Manage Websites, Case Studies & Digital Products
+                  </h3>
+                  <p style={{ margin: '2px 0 0', color: 'var(--text-light)', fontSize: '0.8rem' }}>
+                    Full portfolio builds, case study narratives, KPI outcomes & SaaS product specifications
+                  </p>
+                </div>
+                {!isCreatingProject && !editingProject && (
+                  <button
+                    type="button"
+                    onClick={openProjectForCreate}
+                    className="btn btn-primary"
+                    style={{ padding: '7px 14px', fontSize: '0.8rem' }}
+                  >
+                    <Plus size={16} /> Add Website / Product
+                  </button>
+                )}
               </div>
-              {!isCreatingProject && !editingProject && (
-                <button
-                  onClick={() => {
-                    setIsCreatingProject(true);
-                    setEditingProject({
-                      id: `project-${Date.now()}`,
-                      title: '',
-                      subtitle: '',
-                      category: 'ecommerce',
-                      metric: '+100% Growth',
-                      link: 'https://',
-                      imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
-                      description: '',
-                      tags: ['React', 'Custom']
-                    });
-                  }}
-                  className="btn btn-primary"
-                  style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-                >
-                  <Plus size={16} /> Add Case Study
-                </button>
-              )}
-            </div>
 
-            {/* Project Form */}
-            {(isCreatingProject || editingProject) && (
-              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
-                <h4 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>
-                  {isCreatingProject ? 'Add New Case Study' : `Edit: ${editingProject?.title}`}
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                      Project Title
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProject?.title || ''}
-                      onChange={(e) => setEditingProject(editingProject ? { ...editingProject, title: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                      Category
-                    </label>
-                    <select
-                      value={editingProject?.category || 'ecommerce'}
-                      onChange={(e) => setEditingProject(editingProject ? { ...editingProject, category: e.target.value as any } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
-                    >
-                      <option value="ecommerce">E-Commerce</option>
-                      <option value="saas">SaaS & Analytics</option>
-                      <option value="web">Marketplace / Web Apps</option>
-                    </select>
-                  </div>
+              {/* Firestore Storage Meter */}
+              <div
+                style={{
+                  background: '#141414',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '8px',
+                  padding: '0.65rem 0.9rem',
+                  marginBottom: '1.15rem'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: '#a3a3a3', marginBottom: '5px' }}>
+                  <span>Cloud Document Budget (Websites & Media)</span>
+                  <span style={{ color: storagePct > 90 ? '#f87171' : storagePct > 75 ? '#fbbf24' : '#34d399', fontWeight: 700 }}>
+                    {Math.round(projectStorageBytes / 1024)} KB / {Math.round(FIRESTORE_SAFE_SECTION_BYTES / 1024)} KB ({storagePct}%)
+                  </span>
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                      Subtitle
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProject?.subtitle || ''}
-                      onChange={(e) => setEditingProject(editingProject ? { ...editingProject, subtitle: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                      ROI Metric (e.g. +150% Online Sales)
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProject?.metric || ''}
-                      onChange={(e) => setEditingProject(editingProject ? { ...editingProject, metric: e.target.value } : null)}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                    Live URL
-                  </label>
-                  <input
-                    type="url"
-                    value={editingProject?.link || ''}
-                    onChange={(e) => setEditingProject(editingProject ? { ...editingProject, link: e.target.value } : null)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                <div style={{ height: '6px', borderRadius: '9999px', background: '#262626', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: `${storagePct}%`,
+                      height: '100%',
+                      background: storagePct > 90 ? '#ef4444' : storagePct > 75 ? '#f59e0b' : 'var(--primary-color)',
+                      transition: 'width 0.25s ease'
+                    }}
                   />
                 </div>
+              </div>
 
-                <ImageUploadField
-                  id="project-cover-image"
-                  label="Case Study Image / Thumbnail"
-                  value={editingProject?.imageUrl || ''}
-                  onChange={(nextUrl) =>
-                    setEditingProject(
-                      editingProject ? { ...editingProject, imageUrl: nextUrl } : null
-                    )
-                  }
-                  onError={(msg) => onShowToast(msg, 'error')}
-                  shape="rounded"
-                  previewFallbackText={deriveInitials(editingProject?.title || 'CS')}
-                  maxDimension={PROJECT_IMAGE_MAX_DIMENSION}
-                  urlPlaceholder="https://example.com/project-screenshot.jpg"
-                  helperText="Upload a project screenshot or cover image from your device, or paste an external URL."
-                  uploadButtonLabel="Upload Case Study Image"
-                />
+              {/* Rich Add / Edit Website, Case Study & Digital Product Form */}
+              {(isCreatingProject || editingProject) && editingProject && (
+                <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--primary-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+                    <h4 style={{ color: '#fff', margin: 0, fontSize: '1rem' }}>
+                      {isCreatingProject ? 'Add Website / Case Study / Digital Product' : `Edit: ${editingProject.title}`}
+                    </h4>
+                    <label
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '9999px',
+                        background: editingProject.featured ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.06)',
+                        border: editingProject.featured ? '1px solid var(--primary-color)' : '1px solid #333',
+                        color: editingProject.featured ? 'var(--primary-color)' : '#d4d4d4',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(editingProject.featured)}
+                        onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })}
+                      />
+                      Featured Flagship
+                    </label>
+                  </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                    Tags (comma-separated)
-                  </label>
+                  {/* Row 1: Title & Slug */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginBottom: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Project / Product Title *
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.title}
+                        onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
+                        placeholder="e.g. EstateCRM Real Estate SaaS"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                          URL Slug (/#case-study-...)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditingProject({
+                              ...editingProject,
+                              slug: slugifyProjectTitle(editingProject.title)
+                            })
+                          }
+                          style={{ background: 'none', border: 'none', color: 'var(--primary-color)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                        >
+                          Generate from Title
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={editingProject.slug || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, slug: e.target.value })}
+                        placeholder="estate-crm"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 2: Track Type, Category, Deployment Status */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Showcase Track
+                      </label>
+                      <select
+                        value={editingProject.projectType || resolveProjectType(editingProject)}
+                        onChange={(e) => setEditingProject({ ...editingProject, projectType: e.target.value as ProjectType })}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      >
+                        <option value="case-study">Client Case Study</option>
+                        <option value="digital-product">Digital Product / SaaS</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Category
+                      </label>
+                      <select
+                        value={editingProject.category}
+                        onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value as Project['category'] })}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      >
+                        <option value="ecommerce">E-Commerce</option>
+                        <option value="saas">SaaS & Analytics</option>
+                        <option value="web">Marketplace / Web Apps</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Release Status
+                      </label>
+                      <select
+                        value={editingProject.status || resolveProjectStatus(editingProject.status)}
+                        onChange={(e) => setEditingProject({ ...editingProject, status: e.target.value as ProjectStatus })}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      >
+                        <option value="live">Live Production</option>
+                        <option value="beta">Public Beta</option>
+                        <option value="in-development">In Development</option>
+                        <option value="archived">Archived</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Subtitle & Headline ROI Metric */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginBottom: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.subtitle}
+                        onChange={(e) => setEditingProject({ ...editingProject, subtitle: e.target.value })}
+                        placeholder="Real Estate Operations & CRM Suite"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Headline ROI / KPI Badge
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.metric}
+                        onChange={(e) => setEditingProject({ ...editingProject, metric: e.target.value })}
+                        placeholder="+240% Qualified Leads"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 4: Client, Industry, Timeline, Pricing/Licensing, Role */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px', marginBottom: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Client / Division
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.clientName || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, clientName: e.target.value })}
+                        placeholder="Global Trade Enterprises"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Industry Vertical
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.industry || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, industry: e.target.value })}
+                        placeholder="PropTech & Brokerage CRM"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Delivery Timeline
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.timeline || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, timeline: e.target.value })}
+                        placeholder="8 Weeks Sprint"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Engagement / Pricing Model
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProject.pricingModel || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, pricingModel: e.target.value })}
+                        placeholder="SaaS Licensing / Custom Build"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '0.9rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                      Agency Role & Scope
+                    </label>
+                    <input
+                      type="text"
+                      value={editingProject.role || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, role: e.target.value })}
+                      placeholder="Architecture, UI/UX Design & Full-Stack Engineering"
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                    />
+                  </div>
+
+                  {/* Row 5: URLs */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginBottom: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Live Website URL
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProject.link}
+                        onChange={(e) => setEditingProject({ ...editingProject, link: e.target.value })}
+                        placeholder="https://example.com"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Interactive Demo / Docs URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProject.demoUrl || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, demoUrl: e.target.value })}
+                        placeholder="https://demo.example.com"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Primary Image */}
+                  <ImageUploadField
+                    id="project-cover-image"
+                    label="Primary Cover Image"
+                    value={editingProject.imageUrl || ''}
+                    onChange={(nextUrl) => setEditingProject({ ...editingProject, imageUrl: nextUrl })}
+                    onError={(msg) => onShowToast(msg, 'error')}
+                    shape="rounded"
+                    previewFallbackText={deriveInitials(editingProject.title || 'CS')}
+                    maxDimension={PROJECT_IMAGE_MAX_DIMENSION}
+                    urlPlaceholder="https://example.com/project-screenshot.jpg"
+                    helperText="Upload the main showcase image or paste an external URL."
+                    uploadButtonLabel="Upload Cover Image"
+                  />
+
+                  {/* Multi-Screenshot Gallery Manager */}
+                  <div style={{ marginBottom: '1rem', padding: '0.85rem', borderRadius: '8px', background: '#101010', border: '1px solid #262626' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '8px' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-color)' }}>
+                        Additional Gallery Screenshots ({editingProject.galleryImages?.length || 0})
+                      </label>
+                      <label
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '5px 11px',
+                          borderRadius: '6px',
+                          background: 'rgba(212, 175, 55, 0.16)',
+                          border: '1px solid rgba(212, 175, 55, 0.45)',
+                          color: 'var(--primary-color)',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          cursor: isUploadingProjectGallery ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={14} />
+                        {isUploadingProjectGallery ? 'Processing...' : 'Upload Gallery Screenshot'}
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                          disabled={isUploadingProjectGallery}
+                          onChange={handleUploadGalleryFile}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '0.65rem' }}>
+                      <input
+                        type="url"
+                        value={newProjectGalleryUrl}
+                        onChange={(e) => setNewProjectGalleryUrl(e.target.value)}
+                        placeholder="Or paste screenshot URL (https://...)"
+                        style={{ flex: 1, padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const safeUrl = sanitizeDisplayImageUrl(newProjectGalleryUrl);
+                          if (!safeUrl) {
+                            onShowToast('Enter a valid https:// screenshot URL.', 'error');
+                            return;
+                          }
+                          setEditingProject({
+                            ...editingProject,
+                            galleryImages: [...(editingProject.galleryImages || []), safeUrl]
+                          });
+                          setNewProjectGalleryUrl('');
+                        }}
+                        style={{
+                          padding: '7px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(212,175,55,0.4)',
+                          background: 'rgba(212,175,55,0.12)',
+                          color: 'var(--primary-color)',
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Add URL
+                      </button>
+                    </div>
+                    {editingProject.galleryImages && editingProject.galleryImages.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: '8px' }}>
+                        {editingProject.galleryImages.map((imgUrl, idx) => (
+                          <div key={`${imgUrl}-${idx}`} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid #333', height: '66px', background: '#0a0a0a' }}>
+                            <img src={imgUrl} alt={`Gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditingProject({
+                                  ...editingProject,
+                                  galleryImages: (editingProject.galleryImages || []).filter((_, i) => i !== idx)
+                                })
+                              }
+                              aria-label={`Remove screenshot ${idx + 1}`}
+                              style={{
+                                position: 'absolute',
+                                top: '4px',
+                                right: '4px',
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                border: 'none',
+                                background: 'rgba(0,0,0,0.8)',
+                                color: '#f87171',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Narrative Fields */}
+                  <div style={{ marginBottom: '0.9rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                      Short Card Summary
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={editingProject.description}
+                      onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
+                      placeholder="Concise summary shown on grid cards..."
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '0.9rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                      Extended Product / Case Study Introduction
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={editingProject.overview || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, overview: e.target.value })}
+                      placeholder="Detailed introduction explaining the project vision, target users, and market fit..."
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '0.9rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Business & Technical Challenge
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingProject.challenge || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, challenge: e.target.value })}
+                        placeholder="What problem or bottleneck did this solve?"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                        Engineered Solution
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingProject.solution || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, solution: e.target.value })}
+                        placeholder="How did Axe's Era Enterprises solve it?"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Interactive Outcomes KPI Builder */}
+                  <div style={{ marginBottom: '0.9rem', padding: '0.85rem', borderRadius: '8px', background: '#101010', border: '1px solid #262626' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-color)', marginBottom: '0.5rem' }}>
+                      Measured Outcomes & KPI Benchmarks ({editingProject.outcomes?.length || 0})
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr auto', gap: '6px', marginBottom: '0.6rem' }}>
+                      <input
+                        type="text"
+                        value={newOutcomeValue}
+                        onChange={(e) => setNewOutcomeValue(e.target.value)}
+                        placeholder="+240%"
+                        style={{ padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
+                      />
+                      <input
+                        type="text"
+                        value={newOutcomeLabel}
+                        onChange={(e) => setNewOutcomeLabel(e.target.value)}
+                        placeholder="Outcome label (e.g. Qualified Lead Volume)"
+                        style={{ padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newOutcomeValue.trim() || !newOutcomeLabel.trim()) {
+                            onShowToast('Provide both an outcome value and label.', 'error');
+                            return;
+                          }
+                          setEditingProject({
+                            ...editingProject,
+                            outcomes: [
+                              ...(editingProject.outcomes || []),
+                              { value: newOutcomeValue.trim(), label: newOutcomeLabel.trim() }
+                            ]
+                          });
+                          setNewOutcomeValue('');
+                          setNewOutcomeLabel('');
+                        }}
+                        style={{
+                          padding: '7px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(212,175,55,0.4)',
+                          background: 'rgba(212,175,55,0.12)',
+                          color: 'var(--primary-color)',
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Add KPI
+                      </button>
+                    </div>
+                    {editingProject.outcomes && editingProject.outcomes.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {editingProject.outcomes.map((o, idx) => (
+                          <span
+                            key={`${o.label}-${idx}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              background: '#1c1c1c',
+                              border: '1px solid rgba(212,175,55,0.35)',
+                              color: '#fafafa',
+                              fontSize: '0.78rem'
+                            }}
+                          >
+                            <strong style={{ color: 'var(--primary-color)' }}>{o.value}</strong>
+                            <span>{o.label}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditingProject({
+                                  ...editingProject,
+                                  outcomes: (editingProject.outcomes || []).filter((_, i) => i !== idx)
+                                })
+                              }
+                              aria-label={`Remove outcome ${o.label}`}
+                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, display: 'flex' }}
+                            >
+                              <X size={13} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Key Features / Deliverables / Architecture Highlights List Builders */}
+                  {[
+                    {
+                      label: 'Key Features',
+                      field: 'keyFeatures' as const,
+                      draft: newProjectFeature,
+                      setDraft: setNewProjectFeature,
+                      placeholder: 'Add feature (e.g. Role-based lead routing & pipeline)'
+                    },
+                    {
+                      label: 'Project Deliverables',
+                      field: 'deliverables' as const,
+                      draft: newProjectDeliverable,
+                      setDraft: setNewProjectDeliverable,
+                      placeholder: 'Add deliverable (e.g. Custom Shopify Liquid theme)'
+                    },
+                    {
+                      label: 'Architecture Highlights',
+                      field: 'architectureHighlights' as const,
+                      draft: newProjectArchHighlight,
+                      setDraft: setNewProjectArchHighlight,
+                      placeholder: 'Add architecture highlight (e.g. Edge CDN + Firebase sync)'
+                    }
+                  ].map((builder) => {
+                    const list = editingProject[builder.field] || [];
+                    const handleAdd = () => {
+                      const trimmed = builder.draft.trim();
+                      if (!trimmed) return;
+                      if (!list.some((item) => item.toLowerCase() === trimmed.toLowerCase())) {
+                        setEditingProject({
+                          ...editingProject,
+                          [builder.field]: [...list, trimmed]
+                        });
+                      }
+                      builder.setDraft('');
+                    };
+                    return (
+                      <div key={builder.field} style={{ marginBottom: '0.85rem', padding: '0.8rem', borderRadius: '8px', background: '#101010', border: '1px solid #262626' }}>
+                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#e5e5e5', marginBottom: '0.45rem' }}>
+                          {builder.label} ({list.length})
+                        </label>
+                        <div style={{ display: 'flex', gap: '6px', marginBottom: list.length > 0 ? '0.5rem' : 0 }}>
+                          <input
+                            type="text"
+                            value={builder.draft}
+                            onChange={(e) => builder.setDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAdd();
+                              }
+                            }}
+                            placeholder={builder.placeholder}
+                            style={{ flex: 1, padding: '7px 10px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAdd}
+                            style={{
+                              padding: '7px 12px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(212,175,55,0.4)',
+                              background: 'rgba(212,175,55,0.12)',
+                              color: 'var(--primary-color)',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {list.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {list.map((item, idx) => (
+                              <span
+                                key={`${item}-${idx}`}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  padding: '4px 9px',
+                                  borderRadius: '6px',
+                                  background: '#1c1c1c',
+                                  border: '1px solid #333',
+                                  color: '#e5e5e5',
+                                  fontSize: '0.76rem'
+                                }}
+                              >
+                                <span>{item}</span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setEditingProject({
+                                      ...editingProject,
+                                      [builder.field]: list.filter((_, i) => i !== idx)
+                                    })
+                                  }
+                                  aria-label={`Remove ${item}`}
+                                  style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, display: 'flex' }}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                      Technology Stack Tags (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={editingProject.tags?.join(', ') || ''}
+                      onChange={(e) => {
+                        const tags = e.target.value.split(',').map((t) => t.trim()).filter(Boolean);
+                        setEditingProject({ ...editingProject, tags });
+                      }}
+                      placeholder="React, TypeScript, Cloud Edge, CRM"
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingProject(null);
+                        setIsCreatingProject(false);
+                        resetProjectScratchInputs();
+                      }}
+                      className="btn btn-outline"
+                      style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!editingProject.title.trim()) {
+                          onShowToast('Please enter a project title', 'error');
+                          return;
+                        }
+                        const normalizedSlug = slugifyProjectTitle(editingProject.slug || editingProject.title);
+                        const sanitizedProject: Project = {
+                          ...editingProject,
+                          slug: normalizedSlug,
+                          title: editingProject.title.trim(),
+                          subtitle: editingProject.subtitle.trim(),
+                          projectType: editingProject.projectType || resolveProjectType(editingProject),
+                          status: editingProject.status || 'live',
+                          featured: Boolean(editingProject.featured),
+                          link: (editingProject.link || '').trim(),
+                          demoUrl: (editingProject.demoUrl || '').trim() || undefined,
+                          imageUrl: sanitizeDisplayImageUrl(editingProject.imageUrl),
+                          galleryImages: (editingProject.galleryImages || [])
+                            .map((u) => sanitizeDisplayImageUrl(u))
+                            .filter(Boolean),
+                          description: (editingProject.description || '').trim(),
+                          overview: (editingProject.overview || '').trim() || undefined,
+                          clientName: (editingProject.clientName || '').trim() || undefined,
+                          industry: (editingProject.industry || '').trim() || undefined,
+                          timeline: (editingProject.timeline || '').trim() || undefined,
+                          role: (editingProject.role || '').trim() || undefined,
+                          pricingModel: (editingProject.pricingModel || '').trim() || undefined,
+                          challenge: (editingProject.challenge || '').trim() || undefined,
+                          solution: (editingProject.solution || '').trim() || undefined,
+                          keyFeatures: sanitizeStringList(editingProject.keyFeatures),
+                          deliverables: sanitizeStringList(editingProject.deliverables),
+                          architectureHighlights: sanitizeStringList(editingProject.architectureHighlights),
+                          outcomes: sanitizeProjectOutcomes(editingProject.outcomes),
+                          tags: sanitizeStringList(editingProject.tags)
+                        };
+                        const nextProjectsPreview = isCreatingProject
+                          ? [sanitizedProject, ...data.projects.filter((p) => p.id !== sanitizedProject.id)]
+                          : data.projects.map((p) => (p.id === sanitizedProject.id ? sanitizedProject : p));
+                        if (!isWithinFirestoreDocBudget(nextProjectsPreview)) {
+                          onShowToast('Websites storage limit reached (850 KB). Please use smaller images or external URLs.', 'error');
+                          return;
+                        }
+                        if (isCreatingProject) {
+                          onAddProject(sanitizedProject);
+                          onShowToast('Website / product published successfully!', 'success');
+                        } else {
+                          onUpdateProject(sanitizedProject);
+                          onShowToast('Website / product updated successfully!', 'success');
+                        }
+                        setEditingProject(null);
+                        setIsCreatingProject(false);
+                        resetProjectScratchInputs();
+                      }}
+                      className="btn btn-primary"
+                      style={{ padding: '6px 16px', fontSize: '0.85rem' }}
+                    >
+                      <Save size={14} /> Save Website / Product
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Search & Filter Toolbar */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
+                <div style={{ position: 'relative' }}>
+                  <Search size={15} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#737373', pointerEvents: 'none' }} />
                   <input
                     type="text"
-                    value={editingProject?.tags?.join(', ') || ''}
-                    onChange={(e) => {
-                      const tags = e.target.value.split(',').map((t) => t.trim()).filter(Boolean);
-                      setEditingProject(editingProject ? { ...editingProject, tags } : null);
-                    }}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff' }}
+                    value={projectSearch}
+                    onChange={(e) => setProjectSearch(e.target.value)}
+                    placeholder="Search websites, clients, industries, or stack..."
+                    style={{ width: '100%', padding: '8px 12px 8px 34px', borderRadius: '8px', background: '#141414', border: '1px solid #262626', color: '#fff', fontSize: '0.84rem' }}
                   />
                 </div>
-
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingProject(null);
-                      setIsCreatingProject(false);
-                    }}
-                    className="btn btn-outline"
-                    style={{ padding: '6px 14px', fontSize: '0.85rem' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!editingProject?.title.trim()) {
-                        onShowToast('Please enter a project title', 'error');
-                        return;
-                      }
-                      const sanitizedProject: Project = {
-                        ...editingProject,
-                        title: editingProject.title.trim(),
-                        subtitle: editingProject.subtitle.trim(),
-                        imageUrl: sanitizeDisplayImageUrl(editingProject.imageUrl)
-                      };
-                      const nextProjectsPreview = isCreatingProject
-                        ? [...data.projects.filter((p) => p.id !== sanitizedProject.id), sanitizedProject]
-                        : data.projects.map((p) => (p.id === sanitizedProject.id ? sanitizedProject : p));
-                      if (!isWithinFirestoreDocBudget(nextProjectsPreview)) {
-                        onShowToast('Case studies storage limit reached. Please use smaller images or external URLs.', 'error');
-                        return;
-                      }
-                      if (isCreatingProject) {
-                        onAddProject(sanitizedProject);
-                        onShowToast('New project added!', 'success');
-                      } else {
-                        onUpdateProject(sanitizedProject);
-                        onShowToast('Project updated successfully!', 'success');
-                      }
-                      setEditingProject(null);
-                      setIsCreatingProject(false);
-                    }}
-                    className="btn btn-primary"
-                    style={{ padding: '6px 16px', fontSize: '0.85rem' }}
-                  >
-                    <Save size={14} /> Save Case Study
-                  </button>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {[
+                    { id: 'all' as const, label: `All (${data.projects.length})` },
+                    { id: 'case-study' as const, label: `Case Studies (${caseStudyTotal})` },
+                    { id: 'digital-product' as const, label: `Digital Products (${productTotal})` }
+                  ].map((pill) => {
+                    const selected = projectTypeFilter === pill.id;
+                    return (
+                      <button
+                        key={pill.id}
+                        type="button"
+                        onClick={() => setProjectTypeFilter(pill.id)}
+                        style={{
+                          padding: '5px 11px',
+                          borderRadius: '9999px',
+                          border: selected ? '1px solid var(--primary-color)' : '1px solid #2e2e2e',
+                          background: selected ? 'rgba(212, 175, 55, 0.16)' : '#141414',
+                          color: selected ? 'var(--primary-color)' : '#d4d4d4',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {pill.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            )}
 
-            {/* List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {data.projects.map((proj) => (
-                <div
-                  key={proj.id}
-                  style={{
-                    background: '#141414',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}
-                >
-                  {sanitizeDisplayImageUrl(proj.imageUrl) ? (
-                    <img
-                      src={sanitizeDisplayImageUrl(proj.imageUrl)}
-                      alt={proj.title}
-                      style={{
-                        width: '60px',
-                        height: '45px',
-                        objectFit: 'cover',
-                        borderRadius: '6px',
-                        border: '1px solid rgba(212, 175, 55, 0.3)',
-                        flexShrink: 0
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '60px',
-                        height: '45px',
-                        borderRadius: '6px',
-                        background: '#0a0a0a',
-                        border: '1px solid rgba(212, 175, 55, 0.35)',
-                        color: 'var(--primary-color)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}
-                    >
-                      <FolderGit2 size={18} />
-                    </div>
-                  )}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{proj.title}</h4>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 8px', borderRadius: '10px' }}>
-                        {proj.metric}
-                      </span>
-                    </div>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--text-light)' }}>
-                      {proj.subtitle} • {proj.category}
-                    </p>
+              {/* Websites / Case Studies / Products List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {filteredProjectsList.length === 0 ? (
+                  <div style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '8px', background: '#141414', border: '1px dashed #333', color: '#a3a3a3', fontSize: '0.85rem' }}>
+                    No websites or digital products match your search filter.
                   </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <a
-                      href={proj.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        color: '#e5e5e5',
-                        padding: '6px',
-                        borderRadius: '6px',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
-                      title="Open Live Link"
-                    >
-                      <ExternalLink size={16} />
-                    </a>
-                    <button
-                      onClick={() => {
-                        setEditingProject(proj);
-                        setIsCreatingProject(false);
-                      }}
-                      style={{
-                        background: 'rgba(212, 175, 55, 0.15)',
-                        border: '1px solid rgba(212, 175, 55, 0.3)',
-                        color: 'var(--primary-color)',
-                        padding: '6px',
-                        borderRadius: '6px',
-                        cursor: 'pointer'
-                      }}
-                      title="Edit"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirmTarget({ type: 'project', id: proj.id, title: proj.title })}
-                      style={{
-                        background: 'rgba(239, 68, 68, 0.15)',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        color: '#f87171',
-                        padding: '6px',
-                        borderRadius: '6px',
-                        cursor: 'pointer'
-                      }}
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ) : (
+                  filteredProjectsList.map((proj, idx) => {
+                    const projType = resolveProjectType(proj);
+                    const projStatus = resolveProjectStatus(proj.status);
+                    const hasSafeLiveUrl = /^https?:\/\/.+/i.test((proj.link || '').trim());
+                    return (
+                      <div
+                        key={proj.id}
+                        style={{
+                          background: '#141414',
+                          padding: '0.9rem 1rem',
+                          borderRadius: '8px',
+                          border: proj.featured ? '1px solid rgba(212, 175, 55, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        {sanitizeDisplayImageUrl(proj.imageUrl) ? (
+                          <img
+                            src={sanitizeDisplayImageUrl(proj.imageUrl)}
+                            alt={proj.title}
+                            style={{
+                              width: '62px',
+                              height: '46px',
+                              objectFit: 'cover',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(212, 175, 55, 0.3)',
+                              flexShrink: 0
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: '62px',
+                              height: '46px',
+                              borderRadius: '6px',
+                              background: '#0a0a0a',
+                              border: '1px solid rgba(212, 175, 55, 0.35)',
+                              color: 'var(--primary-color)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}
+                          >
+                            {projType === 'digital-product' ? <Sparkles size={18} /> : <FolderGit2 size={18} />}
+                          </div>
+                        )}
+                        <div style={{ flex: 1, minWidth: '180px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <h4 style={{ margin: 0, color: '#fff', fontSize: '0.94rem' }}>{proj.title}</h4>
+                            <span
+                              style={{
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                color: projType === 'digital-product' ? '#f5d061' : '#e5e5e5',
+                                background: projType === 'digital-product' ? 'rgba(212, 175, 55, 0.16)' : 'rgba(255,255,255,0.08)',
+                                padding: '2px 7px',
+                                borderRadius: '9999px'
+                              }}
+                            >
+                              {getProjectTypeLabel(projType)}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                color: projStatus === 'live' ? '#6ee7b7' : '#fbbf24',
+                                background: projStatus === 'live' ? 'rgba(16,185,129,0.14)' : 'rgba(245,158,11,0.14)',
+                                padding: '2px 7px',
+                                borderRadius: '9999px'
+                              }}
+                            >
+                              {getProjectStatusLabel(projStatus)}
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--primary-color)', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 7px', borderRadius: '10px' }}>
+                              {proj.metric}
+                            </span>
+                          </div>
+                          <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                            {proj.subtitle} • {proj.category}
+                            {proj.galleryImages && proj.galleryImages.length > 0 ? ` • ${proj.galleryImages.length} extra screenshot(s)` : ''}
+                          </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onUpdateProject({
+                                ...proj,
+                                featured: !proj.featured
+                              })
+                            }
+                            style={{
+                              background: proj.featured ? 'rgba(212, 175, 55, 0.22)' : 'rgba(255, 255, 255, 0.06)',
+                              border: proj.featured ? '1px solid var(--primary-color)' : '1px solid transparent',
+                              color: proj.featured ? 'var(--primary-color)' : '#a3a3a3',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              cursor: 'pointer'
+                            }}
+                            title={proj.featured ? 'Unfeature flagship' : 'Mark as Featured Flagship'}
+                          >
+                            <Star size={15} fill={proj.featured ? 'currentColor' : 'none'} />
+                          </button>
+
+                          {canReorder && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => onReorderProjects && onReorderProjects(reorderProjectList(data.projects, proj.id, 'up'))}
+                                style={{
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: 'none',
+                                  color: idx === 0 ? '#525252' : '#e5e5e5',
+                                  padding: '6px',
+                                  borderRadius: '6px',
+                                  cursor: idx === 0 ? 'default' : 'pointer'
+                                }}
+                                title="Move Up"
+                              >
+                                <ChevronUp size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === filteredProjectsList.length - 1}
+                                onClick={() => onReorderProjects && onReorderProjects(reorderProjectList(data.projects, proj.id, 'down'))}
+                                style={{
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: 'none',
+                                  color: idx === filteredProjectsList.length - 1 ? '#525252' : '#e5e5e5',
+                                  padding: '6px',
+                                  borderRadius: '6px',
+                                  cursor: idx === filteredProjectsList.length - 1 ? 'default' : 'pointer'
+                                }}
+                                title="Move Down"
+                              >
+                                <ChevronDown size={15} />
+                              </button>
+                            </>
+                          )}
+
+                          {onPreviewProject && (
+                            <button
+                              type="button"
+                              onClick={() => onPreviewProject(proj)}
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                border: 'none',
+                                color: '#e5e5e5',
+                                padding: '6px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                              title="Open Detail Page"
+                            >
+                              <Eye size={15} />
+                            </button>
+                          )}
+
+                          {hasSafeLiveUrl && (
+                            <a
+                              href={proj.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                color: '#e5e5e5',
+                                padding: '6px',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                              title="Open Live Link"
+                            >
+                              <ExternalLink size={15} />
+                            </a>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const duplicated = createDuplicatedProject(proj);
+                              const nextPreview = [duplicated, ...data.projects];
+                              if (!isWithinFirestoreDocBudget(nextPreview)) {
+                                onShowToast('Cannot duplicate: cloud budget reached.', 'error');
+                                return;
+                              }
+                              onAddProject(duplicated);
+                              onShowToast(`Duplicated: ${proj.title}`, 'success');
+                            }}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.08)',
+                              border: 'none',
+                              color: '#e5e5e5',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              cursor: 'pointer'
+                            }}
+                            title="Duplicate"
+                          >
+                            <Copy size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => openProjectForEdit(proj)}
+                            style={{
+                              background: 'rgba(212, 175, 55, 0.15)',
+                              border: '1px solid rgba(212, 175, 55, 0.3)',
+                              color: 'var(--primary-color)',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              cursor: 'pointer'
+                            }}
+                            title="Edit"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setDeleteConfirmTarget({ type: 'project', id: proj.id, title: proj.title })}
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.15)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#f87171',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              cursor: 'pointer'
+                            }}
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 4: BLOGS */}
         {activeTab === 'blogs' && (
