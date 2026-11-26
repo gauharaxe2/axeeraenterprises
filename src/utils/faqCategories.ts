@@ -5,11 +5,19 @@ export interface FaqCategoryOption {
   label: string;
 }
 
+export const DEFAULT_FAQ_CATEGORY_ID: FaqCategoryId = 'custom-web-dev';
+
 export const BUILTIN_FAQ_CATEGORIES: readonly { id: FaqCategoryId; label: string }[] = [
-  { id: 'engineering', label: 'Architecture & Tech' },
-  { id: 'ownership', label: 'IP & Code Ownership' },
-  { id: 'billing', label: 'Billing & Milestones' },
-  { id: 'support', label: 'Warranties & Support' }
+  { id: 'custom-web-dev', label: 'Custom Web Development & Full-Stack Engineering' },
+  { id: 'shopify-ecommerce', label: 'Shopify & E-commerce Development' },
+  { id: 'mobile-apps', label: 'Mobile Application Development' },
+  { id: 'ui-ux-brand', label: 'UI/UX Design & Brand Identity' },
+  { id: 'seo-audits', label: 'Search Engine Optimization (SEO) & Technical Audits' },
+  { id: 'digital-marketing', label: 'Digital Marketing & Paid Advertising' },
+  { id: 'cloud-infrastructure', label: 'Cloud Infrastructure, DNS & Hosting Architecture' },
+  { id: 'contracts-ip', label: 'Agency Workflows, Contracts & Intellectual Property' },
+  { id: 'maintenance-support', label: 'Post-Launch Maintenance, Security & Support' },
+  { id: 'partnerships-hiring', label: 'Hiring, Collaboration & Enterprise Partnerships' }
 ] as const;
 
 const BUILTIN_LABELS: Record<string, string> = Object.fromEntries(
@@ -20,12 +28,24 @@ const LABEL_TO_ID: Record<string, FaqCategoryId> = Object.fromEntries(
   BUILTIN_FAQ_CATEGORIES.map((item) => [item.label.toLowerCase(), item.id])
 ) as Record<string, FaqCategoryId>;
 
+const LEGACY_CATEGORY_ALIASES: Record<string, FaqCategoryId> = {
+  engineering: 'custom-web-dev',
+  'architecture & tech': 'custom-web-dev',
+  ownership: 'contracts-ip',
+  'ip & code ownership': 'contracts-ip',
+  billing: 'contracts-ip',
+  'billing & milestones': 'contracts-ip',
+  support: 'maintenance-support',
+  'warranties & support': 'maintenance-support'
+};
+
 export function normalizeFaqCategoryValue(raw: string | undefined | null): string {
   const trimmed = (raw || '').trim();
   if (!trimmed) return '';
   const lower = trimmed.toLowerCase();
   if (lower in BUILTIN_LABELS) return lower;
   if (lower in LABEL_TO_ID) return LABEL_TO_ID[lower];
+  if (lower in LEGACY_CATEGORY_ALIASES) return LEGACY_CATEGORY_ALIASES[lower];
   return trimmed;
 }
 
@@ -35,30 +55,99 @@ export function resolveFaqCategory(faq: Pick<FaqItem, 'question' | 'category'>):
 
   const question = (faq.question || '').toLowerCase();
   if (
+    question.includes('shopify') ||
+    question.includes('e-commerce') ||
+    question.includes('ecommerce') ||
+    question.includes('storefront') ||
+    question.includes('checkout')
+  ) {
+    return 'shopify-ecommerce';
+  }
+  if (
+    question.includes('mobile') ||
+    question.includes('ios') ||
+    question.includes('android') ||
+    question.includes('react native') ||
+    question.includes('flutter') ||
+    question.includes('app store')
+  ) {
+    return 'mobile-apps';
+  }
+  if (
+    question.includes('ui/ux') ||
+    question.includes('figma') ||
+    question.includes('brand') ||
+    question.includes('redesign') ||
+    question.includes('design system')
+  ) {
+    return 'ui-ux-brand';
+  }
+  if (
+    /\bseo\b/.test(question) ||
+    question.includes('search engine') ||
+    question.includes('technical audit') ||
+    question.includes('core web vitals') ||
+    question.includes('ranking')
+  ) {
+    return 'seo-audits';
+  }
+  if (
+    question.includes('marketing') ||
+    question.includes('paid advertising') ||
+    question.includes('meta ads') ||
+    question.includes('google ads') ||
+    question.includes('ppc') ||
+    question.includes('roas')
+  ) {
+    return 'digital-marketing';
+  }
+  if (
+    question.includes('cloud') ||
+    /\bdns\b/.test(question) ||
+    question.includes('hosting') ||
+    question.includes('aws') ||
+    question.includes('vercel') ||
+    question.includes('firebase') ||
+    question.includes('server')
+  ) {
+    return 'cloud-infrastructure';
+  }
+  if (
     question.includes('own') ||
     question.includes('source code') ||
     question.includes('intellectual property') ||
-    /\bip\b/.test(question)
-  ) {
-    return 'ownership';
-  }
-  if (
+    question.includes('contract') ||
+    question.includes('workflow') ||
     question.includes('payment') ||
     question.includes('billing') ||
     question.includes('cost') ||
-    question.includes('price')
+    question.includes('price') ||
+    /\bip\b/.test(question) ||
+    /\bnda\b/.test(question)
   ) {
-    return 'billing';
+    return 'contracts-ip';
   }
   if (
     question.includes('maintenance') ||
     question.includes('support') ||
     question.includes('warranty') ||
+    question.includes('security') ||
     question.includes('post-launch')
   ) {
-    return 'support';
+    return 'maintenance-support';
   }
-  return 'engineering';
+  if (
+    question.includes('hiring') ||
+    question.includes('partner') ||
+    question.includes('collaborat') ||
+    question.includes('white-label') ||
+    question.includes('enterprise partnership') ||
+    question.includes('dedicated team') ||
+    question.includes('retainer')
+  ) {
+    return 'partnerships-hiring';
+  }
+  return DEFAULT_FAQ_CATEGORY_ID;
 }
 
 export function isBuiltinFaqCategory(category: string | undefined | null): category is FaqCategoryId {
@@ -68,7 +157,7 @@ export function isBuiltinFaqCategory(category: string | undefined | null): categ
 
 export function getFaqCategoryLabel(category: string | undefined | null): string {
   const normalized = normalizeFaqCategoryValue(category);
-  if (!normalized) return BUILTIN_LABELS.engineering;
+  if (!normalized) return BUILTIN_LABELS[DEFAULT_FAQ_CATEGORY_ID];
   return BUILTIN_LABELS[normalized] || normalized;
 }
 

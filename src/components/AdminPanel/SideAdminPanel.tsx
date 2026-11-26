@@ -95,6 +95,7 @@ import {
 } from '../../utils/projectUtils';
 import {
   BUILTIN_FAQ_CATEGORIES,
+  DEFAULT_FAQ_CATEGORY_ID,
   collectFaqCategories,
   filterFaqs,
   getFaqCategoryLabel,
@@ -4343,7 +4344,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
             category: faqCategoryFilter,
             search: faqSearch
           });
-          const editingFaqCategory = editingFaq ? resolveFaqCategory(editingFaq) : 'engineering';
+          const editingFaqCategory = editingFaq ? resolveFaqCategory(editingFaq) : DEFAULT_FAQ_CATEGORY_ID;
 
           return (
           <div>
@@ -4360,7 +4361,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const initialCategory = faqCategoryFilter !== 'all' ? faqCategoryFilter : 'engineering';
+                    const initialCategory = faqCategoryFilter !== 'all' ? faqCategoryFilter : DEFAULT_FAQ_CATEGORY_ID;
                     setIsCreatingFaq(true);
                     setCustomFaqCategoryMode(!isBuiltinFaqCategory(initialCategory));
                     setEditingFaq({
@@ -4508,7 +4509,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               <div style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '6px', fontWeight: 600 }}>
                 Filter by Category:
               </div>
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', paddingBottom: '4px', marginBottom: '10px' }}>
                 {faqCategoryOptions.map((cat) => {
                   const isSelected = faqCategoryFilter === cat.id;
                   return (

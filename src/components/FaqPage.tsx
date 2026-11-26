@@ -4,7 +4,8 @@ import { FaqItem } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import {
   collectFaqCategories,
-  filterFaqs
+  filterFaqs,
+  getFaqCategoryLabel
 } from '../utils/faqCategories';
 import {
   EditorialCta,
@@ -36,9 +37,6 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
     [faqs, activeCategory, searchQuery]
   );
 
-  const ownershipCount = categoryOptions.find((c) => c.id === 'ownership')?.count ?? 0;
-  const billingCount = categoryOptions.find((c) => c.id === 'billing')?.count ?? 0;
-
   return (
     <EditorialPage page="faq">
       <EditorialTopbar
@@ -54,7 +52,7 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
       <EditorialHero
         eyebrow="Comprehensive Client Knowledge Base"
         title="Everything You Need to Know Before Partnering"
-        description="Transparent answers about our engineering process, intellectual property rights, milestone-based billing structures, and 30-day post-launch warranty commitments."
+        description="Transparent answers across engineering, Shopify, mobile apps, UI/UX, SEO, cloud infrastructure, contracts, post-launch maintenance, and enterprise partnerships."
       />
 
       <div className="editorial-toolbar">
@@ -64,7 +62,7 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
             label="Search frequently asked questions"
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search questions by keyword (e.g. source code, pricing, warranty, mobile apps)..."
+            placeholder="Search questions by keyword (e.g. Shopify, SEO, DNS, source code, maintenance)..."
           />
           <EditorialPills
             label="FAQ categories"
@@ -88,7 +86,7 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
         {filteredFaqs.length === 0 ? (
           <EditorialEmpty
             title="No matching questions found"
-            description="Try a different keyword or reach out directly to founder Gauhar Axe on WhatsApp."
+            description="No questions are filed under this filter yet. Try another category, adjust your search keyword, or ask founder Gauhar Axe directly."
             action={
               <button
                 type="button"
@@ -98,7 +96,7 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
                   setActiveCategory('all');
                 }}
               >
-                Clear Search
+                Show All Questions
               </button>
             }
           />
@@ -108,6 +106,7 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
               const isOpen = openIndex === faq.index;
               const panelId = `faq-panel-${faq.id || faq.index}`;
               const buttonId = `faq-button-${faq.id || faq.index}`;
+              const categoryLabel = getFaqCategoryLabel(faq.resolvedCategory);
               return (
                 <div key={faq.id || faq.index} className={`editorial-panel editorial-faq-item${isOpen ? ' is-open' : ''}`}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
@@ -119,7 +118,12 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
                       aria-controls={panelId}
                       onClick={() => setOpenIndex(isOpen ? null : faq.index)}
                     >
-                      <span>{faq.question}</span>
+                      <span style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--gold-ink)', letterSpacing: '0.02em' }}>
+                          {categoryLabel}
+                        </span>
+                        <span>{faq.question}</span>
+                      </span>
                       <ChevronDown size={18} aria-hidden="true" />
                     </button>
                   </h3>
@@ -133,16 +137,6 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
             })}
           </div>
         )}
-
-        {billingCount === 0 || ownershipCount === 0 ? (
-          <p className="editorial-todo" style={{ marginTop: '1.25rem' }}>
-            TODO: The published FAQ list has no entries filed under{' '}
-            {[ownershipCount === 0 ? 'IP & Code Ownership' : null, billingCount === 0 ? 'Billing & Milestones' : null]
-              .filter(Boolean)
-              .join(' or ')}
-            . Those filters stay empty until matching questions are added in admin.
-          </p>
-        ) : null}
       </EditorialSection>
 
       <EditorialCta

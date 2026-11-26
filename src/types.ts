@@ -95,7 +95,17 @@ export interface Testimonial {
   rating: number;
 }
 
-export type FaqCategoryId = 'engineering' | 'ownership' | 'billing' | 'support';
+export type FaqCategoryId =
+  | 'custom-web-dev'
+  | 'shopify-ecommerce'
+  | 'mobile-apps'
+  | 'ui-ux-brand'
+  | 'seo-audits'
+  | 'digital-marketing'
+  | 'cloud-infrastructure'
+  | 'contracts-ip'
+  | 'maintenance-support'
+  | 'partnerships-hiring';
 
 export interface FaqItem {
   id?: string;
