@@ -4,6 +4,7 @@ import {
   signInAdminWithGoogle,
   watchAdminAuth
 } from '../utils/adminAuth';
+import { withBasePath } from '../routing';
 
 export { signOutAdmin as clearAdminSession } from '../utils/adminAuth';
 
@@ -112,7 +113,7 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onSuccess }) => {
         )}
 
         <p style={{ marginTop: '1.25rem', marginBottom: 0 }}>
-          <a href="/" style={{ color: 'var(--gold-ink)', fontWeight: 600 }}>
+          <a href={withBasePath('/')} style={{ color: 'var(--gold-ink)', fontWeight: 600 }}>
             Back to the website
           </a>
         </p>

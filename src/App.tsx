@@ -32,7 +32,7 @@ import { CaseStudyDetailView } from './components/CaseStudyDetailView';
 import { NotFound } from './components/NotFound';
 import { PageView, BlogPost, ServiceItem, PolicyType, Project } from './types';
 import { useAdminData } from './hooks/useAdminData';
-import { AppRoute, isAdminLocation, resolveRoute } from './routing';
+import { AppRoute, isAdminLocation, resolveRoute, withBasePath } from './routing';
 import { AdminGate, clearAdminSession } from './components/AdminGate';
 import { isAdminSessionActive } from './utils/adminAuth';
 import {
@@ -85,9 +85,10 @@ function pageFromRoute(route: AppRoute): PageView {
 }
 
 function pushUrl(url: string) {
+  const targetUrl = withBasePath(url);
   const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  if (current !== url) {
-    window.history.pushState(null, '', url);
+  if (current !== targetUrl) {
+    window.history.pushState(null, '', targetUrl);
   }
 }
 

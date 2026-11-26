@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CONTENT_PAGE_PATHS, isAdminLocation, normalizePath, resolveRoute, SERVICE_IDS } from './routing.ts';
+import {
+  CONTENT_PAGE_PATHS,
+  isAdminLocation,
+  normalizePath,
+  resolveRoute,
+  SERVICE_IDS,
+  stripBasePath,
+  withBasePath
+} from './routing.ts';
 
 test('normalizePath strips trailing slash, html, and index', () => {
   assert.equal(normalizePath('/Policies/'), '/policies');
@@ -81,6 +89,21 @@ test('home, sections, services, blogs, and policies resolve', () => {
     page: 'blog-detail',
     slug: 'how-we-build-from-idea-to-launch'
   });
+});
+
+test('GitHub Pages repository subpath resolves routes and formats URLs cleanly', () => {
+  assert.equal(stripBasePath('/axes-era/', '/axes-era/'), '/');
+  assert.equal(stripBasePath('/axes-era', '/axes-era/'), '/');
+  assert.equal(stripBasePath('/axes-era/about', '/axes-era/'), '/about');
+  assert.equal(withBasePath('/', '/axes-era/'), '/axes-era/');
+  assert.equal(withBasePath('/about', '/axes-era/'), '/axes-era/about');
+  assert.equal(withBasePath('/#blog-hub', '/axes-era/'), '/axes-era/#blog-hub');
+  assert.equal(withBasePath('/brand/axe-era-logo.png', '/axes-era/'), '/axes-era/brand/axe-era-logo.png');
+
+  assert.deepEqual(resolveRoute('/axes-era/', '', '/axes-era/'), { page: 'home' });
+  assert.deepEqual(resolveRoute('/axes-era/about', '', '/axes-era/'), { page: 'about' });
+  assert.deepEqual(resolveRoute('/axes-era/admin', '', '/axes-era/'), { page: 'admin' });
+  assert.equal(isAdminLocation('/axes-era/admin', '', '/axes-era/'), true);
 });
 
 test('service ids used by redirects exist', () => {

@@ -53,6 +53,42 @@ export type AppRoute =
   | { page: 'admin' }
   | { page: 'not-found' };
 
+export function getAppBasePath(overrideBase?: string): string {
+  const rawBase =
+    overrideBase ??
+    ((typeof import.meta !== 'undefined' &&
+      (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL) ||
+      '/');
+  const trimmed = rawBase.trim();
+  if (!trimmed || trimmed === '/') return '/';
+  const withLeading = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  return withLeading.endsWith('/') ? withLeading : `${withLeading}/`;
+}
+
+export function stripBasePath(pathname: string, baseUrl?: string): string {
+  const path = pathname || '/';
+  const cleanBase = getAppBasePath(baseUrl);
+  if (cleanBase === '/') return path;
+  const prefix = cleanBase.slice(0, -1); // e.g. '/repo'
+  if (path.toLowerCase() === prefix.toLowerCase() || path.toLowerCase() === cleanBase.toLowerCase()) {
+    return '/';
+  }
+  if (path.toLowerCase().startsWith(cleanBase.toLowerCase())) {
+    const rest = path.slice(prefix.length);
+    return rest || '/';
+  }
+  return path;
+}
+
+export function withBasePath(appPath: string, baseUrl?: string): string {
+  const cleanBase = getAppBasePath(baseUrl);
+  const normalizedTarget = appPath.startsWith('/') ? appPath : `/${appPath}`;
+  if (cleanBase === '/') return normalizedTarget;
+  const prefix = cleanBase.slice(0, -1);
+  if (normalizedTarget === '/') return cleanBase;
+  return `${prefix}${normalizedTarget}`;
+}
+
 export function normalizePath(pathname: string): string {
   let path = pathname || '/';
   try {
@@ -86,14 +122,14 @@ export function parseHash(hash: string): string {
 }
 
 /** True for the admin entry points, /admin and #admin. Nested admin URLs stay not found. */
-export function isAdminLocation(pathname: string, hash: string): boolean {
-  const path = normalizePath(pathname);
+export function isAdminLocation(pathname: string, hash: string, baseUrl?: string): boolean {
+  const path = normalizePath(stripBasePath(pathname, baseUrl));
   const fragment = parseHash(hash).toLowerCase();
   return path === '/admin' || (path === '/' && fragment === 'admin');
 }
 
-function isRetiredAdminAlias(pathname: string, hash: string): boolean {
-  const path = normalizePath(pathname);
+function isRetiredAdminAlias(pathname: string, hash: string, baseUrl?: string): boolean {
+  const path = normalizePath(stripBasePath(pathname, baseUrl));
   const fragment = parseHash(hash).toLowerCase();
   return path.startsWith('/admin/') || fragment.startsWith('admin/');
 }
@@ -145,15 +181,15 @@ function contentRoute(path: string): AppRoute | null {
  * paths. Legacy URLs are 301'd by the host redirects before this runs.
  * Anything else is not found.
  */
-export function resolveRoute(pathname: string, hash: string): AppRoute {
-  if (isAdminLocation(pathname, hash)) {
+export function resolveRoute(pathname: string, hash: string, baseUrl?: string): AppRoute {
+  if (isAdminLocation(pathname, hash, baseUrl)) {
     return { page: 'admin' };
   }
-  if (isRetiredAdminAlias(pathname, hash)) {
+  if (isRetiredAdminAlias(pathname, hash, baseUrl)) {
     return { page: 'not-found' };
   }
 
-  const path = normalizePath(pathname);
+  const path = normalizePath(stripBasePath(pathname, baseUrl));
   const fragment = parseHash(hash).toLowerCase();
   const directPage = contentRoute(path);
   if (directPage) return directPage;

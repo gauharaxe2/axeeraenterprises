@@ -1,1 +1,3 @@
-export const SITE_LOGO_SRC = '/brand/axe-era-logo.png';
+import { withBasePath } from './routing.ts';
+
+export const SITE_LOGO_SRC = withBasePath('/brand/axe-era-logo.png');
