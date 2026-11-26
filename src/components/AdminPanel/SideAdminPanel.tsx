@@ -75,6 +75,7 @@ import {
   TEAM_PHOTO_MAX_DIMENSION,
   deriveInitials,
   estimateJsonSectionBytes,
+  filterSupportedImageFiles,
   isUploadedDataUrl,
   isWithinFirestoreDocBudget,
   processImageFileToDataUrl,
@@ -223,7 +224,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   const [newGalleryImageUrl, setNewGalleryImageUrl] = useState('');
   const [blogCategoryFilter, setBlogCategoryFilter] = useState('All');
   const [uploadingBlogSectionIdx, setUploadingBlogSectionIdx] = useState<number | null>(null);
+  const [draggingBlogSectionIdx, setDraggingBlogSectionIdx] = useState<number | null>(null);
   const [isUploadingBlogGallery, setIsUploadingBlogGallery] = useState(false);
+  const [isDraggingBlogGallery, setIsDraggingBlogGallery] = useState(false);
 
   // Team state for multiple team members
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMemberData | null>(null);
@@ -276,6 +279,96 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
       onShowToast('Cloud synchronization encountered an error.', 'error');
     } finally {
       setIsPublishingAll(false);
+    }
+  };
+
+  const handleBlogSectionImageFile = async (sIdx: number, file: File | undefined | null) => {
+    if (!file || !editingBlog) return;
+    setUploadingBlogSectionIdx(sIdx);
+    try {
+      const dataUrl = await processImageFileToDataUrl(file, {
+        maxDimension: SERVICE_IMAGE_MAX_DIMENSION,
+        maxEncodedLength: 160_000
+      });
+      const baseSections =
+        editingBlog.sections && editingBlog.sections.length > 0
+          ? editingBlog.sections
+          : ensureBlogSections(editingBlog);
+      const updated = [...baseSections];
+      if (!updated[sIdx]) return;
+      updated[sIdx] = { ...updated[sIdx], imageUrl: dataUrl };
+      const candidate = { ...editingBlog, sections: updated };
+      const nextBlogs = isCreatingBlog
+        ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
+        : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
+      if (!isWithinFirestoreDocBudget(nextBlogs)) {
+        onShowToast('Adding this section image exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
+        return;
+      }
+      setEditingBlog(candidate);
+      onShowToast('Section image uploaded!', 'success');
+    } catch (err) {
+      onShowToast(err instanceof Error ? err.message : 'Unable to upload section image.', 'error');
+    } finally {
+      setUploadingBlogSectionIdx(null);
+    }
+  };
+
+  const handleBlogGalleryFiles = async (fileList: FileList | File[] | null | undefined) => {
+    if (!fileList || fileList.length === 0 || !editingBlog) return;
+    const { accepted, rejected } = filterSupportedImageFiles(fileList);
+    if (rejected.length > 0 && accepted.length === 0) {
+      onShowToast(rejected[0].error, 'error');
+      return;
+    }
+
+    setIsUploadingBlogGallery(true);
+    try {
+      let workingBlog = editingBlog;
+      let addedCount = 0;
+
+      for (const file of accepted) {
+        const dataUrl = await processImageFileToDataUrl(file, {
+          maxDimension: SERVICE_IMAGE_MAX_DIMENSION,
+          maxEncodedLength: 160_000
+        });
+        const nextImages = [...(workingBlog.images || []), dataUrl];
+        const candidate = { ...workingBlog, images: nextImages };
+        const nextBlogs = isCreatingBlog
+          ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
+          : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
+        if (!isWithinFirestoreDocBudget(nextBlogs)) {
+          onShowToast(
+            addedCount > 0
+              ? `Uploaded ${addedCount} photo(s); remaining file(s) would exceed the 850 KB cloud budget.`
+              : 'Adding this gallery photo exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.',
+            'error'
+          );
+          if (addedCount > 0) {
+            setEditingBlog(workingBlog);
+          }
+          return;
+        }
+        workingBlog = candidate;
+        addedCount += 1;
+      }
+
+      if (addedCount > 0) {
+        setEditingBlog(workingBlog);
+        onShowToast(
+          addedCount === 1
+            ? 'Photo uploaded to article gallery!'
+            : `${addedCount} photos uploaded to article gallery!`,
+          'success'
+        );
+      }
+      if (rejected.length > 0) {
+        onShowToast(rejected[0].error, 'error');
+      }
+    } catch (err) {
+      onShowToast(err instanceof Error ? err.message : 'Unable to upload gallery photo.', 'error');
+    } finally {
+      setIsUploadingBlogGallery(false);
     }
   };
 
@@ -2623,11 +2716,51 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                             />
                           </div>
 
-                          {/* Section Image Upload / URL & Caption */}
-                          <div style={{ background: '#0a0a0a', padding: '10px', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          {/* Section Image Drag & Drop / URL & Caption */}
+                          <div
+                            onDragEnter={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setDraggingBlogSectionIdx(sIdx);
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (e.dataTransfer) {
+                                e.dataTransfer.dropEffect = 'copy';
+                              }
+                              setDraggingBlogSectionIdx(sIdx);
+                            }}
+                            onDragLeave={(e) => {
+                              const related = e.relatedTarget as Node | null;
+                              if (!related || !e.currentTarget.contains(related)) {
+                                setDraggingBlogSectionIdx((prev) => (prev === sIdx ? null : prev));
+                              }
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setDraggingBlogSectionIdx(null);
+                              const droppedFile = e.dataTransfer?.files?.[0];
+                              void handleBlogSectionImageFile(sIdx, droppedFile);
+                            }}
+                            style={{
+                              background: draggingBlogSectionIdx === sIdx ? 'rgba(212, 175, 55, 0.12)' : '#0a0a0a',
+                              padding: '10px',
+                              borderRadius: '6px',
+                              marginBottom: '10px',
+                              border: `1.5px dashed ${
+                                draggingBlogSectionIdx === sIdx ? 'var(--primary-color)' : 'rgba(212, 175, 55, 0.35)'
+                              }`,
+                              transition: 'border-color 0.2s ease, background 0.2s ease'
+                            }}
+                          >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
                               <label style={{ fontSize: '0.76rem', color: '#93c5fd', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <ImageIcon size={13} /> Section Image (Upload or URL)
+                                <ImageIcon size={13} />
+                                {draggingBlogSectionIdx === sIdx
+                                  ? `Drop image here for Section #${sIdx + 1}`
+                                  : 'Section Image (Drag & Drop, Upload, or URL)'}
                               </label>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <label
@@ -2652,33 +2785,10 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                     accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
                                     aria-label={`Upload image for section ${sIdx + 1}`}
                                     disabled={uploadingBlogSectionIdx === sIdx}
-                                    onChange={async (e) => {
+                                    onChange={(e) => {
                                       const file = e.target.files?.[0];
                                       e.target.value = '';
-                                      if (!file || !editingBlog) return;
-                                      setUploadingBlogSectionIdx(sIdx);
-                                      try {
-                                        const dataUrl = await processImageFileToDataUrl(file, {
-                                          maxDimension: SERVICE_IMAGE_MAX_DIMENSION,
-                                          maxEncodedLength: 160_000
-                                        });
-                                        const updated = [...currentSections];
-                                        updated[sIdx] = { ...updated[sIdx], imageUrl: dataUrl };
-                                        const candidate = { ...editingBlog, sections: updated };
-                                        const nextBlogs = isCreatingBlog
-                                          ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
-                                          : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
-                                        if (!isWithinFirestoreDocBudget(nextBlogs)) {
-                                          onShowToast('Adding this section image exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
-                                          return;
-                                        }
-                                        setEditingBlog(candidate);
-                                        onShowToast('Section image uploaded!', 'success');
-                                      } catch (err) {
-                                        onShowToast(err instanceof Error ? err.message : 'Unable to upload section image.', 'error');
-                                      } finally {
-                                        setUploadingBlogSectionIdx(null);
-                                      }
+                                      void handleBlogSectionImageFile(sIdx, file);
                                     }}
                                     style={{ display: 'none' }}
                                   />
@@ -2698,6 +2808,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                 )}
                               </div>
                             </div>
+                            <p style={{ margin: '0 0 8px', fontSize: '0.71rem', color: '#a3a3a3' }}>
+                              Drag & drop a PNG, JPG, or WebP file anywhere in this box, click Upload Image, or paste a URL.
+                            </p>
                             <div style={{ display: 'grid', gridTemplateColumns: sec.imageUrl ? '1fr 1fr 60px' : '1fr 1fr', gap: '8px', alignItems: 'center' }}>
                               <input
                                 type="text"
@@ -2789,8 +2902,42 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   </div>
 
                   {/* 5. ADDITIONAL GALLERY PHOTOS MANAGER */}
-                  <div style={{ background: '#0a0a0a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '1.25rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div
+                    onDragEnter={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsDraggingBlogGallery(true);
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (e.dataTransfer) {
+                        e.dataTransfer.dropEffect = 'copy';
+                      }
+                      setIsDraggingBlogGallery(true);
+                    }}
+                    onDragLeave={(e) => {
+                      const related = e.relatedTarget as Node | null;
+                      if (!related || !e.currentTarget.contains(related)) {
+                        setIsDraggingBlogGallery(false);
+                      }
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsDraggingBlogGallery(false);
+                      void handleBlogGalleryFiles(e.dataTransfer?.files);
+                    }}
+                    style={{
+                      background: isDraggingBlogGallery ? 'rgba(212, 175, 55, 0.12)' : '#0a0a0a',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      border: `1.5px dashed ${isDraggingBlogGallery ? 'var(--primary-color)' : 'rgba(212, 175, 55, 0.35)'}`,
+                      marginBottom: '1.25rem',
+                      transition: 'border-color 0.2s ease, background 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                       <label style={{ fontSize: '0.85rem', color: 'var(--primary-color)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <ImageIcon size={15} /> Extra Article Showcase Photos ({editingBlog.images?.length || 0})
                       </label>
@@ -2810,42 +2957,39 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         }}
                       >
                         <UploadCloud size={14} />
-                        {isUploadingBlogGallery ? 'Processing...' : 'Upload Photo'}
+                        {isUploadingBlogGallery ? 'Processing...' : 'Upload Photos'}
                         <input
                           type="file"
+                          multiple
                           accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
-                          aria-label="Upload extra article gallery photo"
+                          aria-label="Upload extra article gallery photos"
                           disabled={isUploadingBlogGallery}
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
+                          onChange={(e) => {
+                            const files = e.target.files ? Array.from(e.target.files) : [];
                             e.target.value = '';
-                            if (!file || !editingBlog) return;
-                            setIsUploadingBlogGallery(true);
-                            try {
-                              const dataUrl = await processImageFileToDataUrl(file, {
-                                maxDimension: SERVICE_IMAGE_MAX_DIMENSION,
-                                maxEncodedLength: 160_000
-                              });
-                              const nextImages = [...(editingBlog.images || []), dataUrl];
-                              const candidate = { ...editingBlog, images: nextImages };
-                              const nextBlogs = isCreatingBlog
-                                ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
-                                : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
-                              if (!isWithinFirestoreDocBudget(nextBlogs)) {
-                                onShowToast('Adding this gallery photo exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
-                                return;
-                              }
-                              setEditingBlog(candidate);
-                              onShowToast('Photo uploaded to article gallery!', 'success');
-                            } catch (err) {
-                              onShowToast(err instanceof Error ? err.message : 'Unable to upload gallery photo.', 'error');
-                            } finally {
-                              setIsUploadingBlogGallery(false);
-                            }
+                            void handleBlogGalleryFiles(files);
                           }}
                           style={{ display: 'none' }}
                         />
                       </label>
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '0.85rem',
+                        borderRadius: '6px',
+                        background: isDraggingBlogGallery ? 'rgba(212, 175, 55, 0.16)' : '#141414',
+                        border: `1px dashed ${isDraggingBlogGallery ? 'var(--primary-color)' : 'rgba(255, 255, 255, 0.16)'}`,
+                        textAlign: 'center',
+                        marginBottom: '12px',
+                        color: isDraggingBlogGallery ? 'var(--primary-color)' : '#a8a29e',
+                        fontSize: '0.76rem',
+                        fontWeight: isDraggingBlogGallery ? 700 : 500
+                      }}
+                    >
+                      {isDraggingBlogGallery
+                        ? 'Drop photos here to add them to this blog gallery'
+                        : 'Drag & drop one or more PNG, JPG, or WebP photos here, or click Upload Photos above.'}
                     </div>
 
                     {/* Existing gallery images list */}

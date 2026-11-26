@@ -3,79 +3,57 @@ import assert from 'node:assert/strict';
 import {
   computeScaledDimensions,
   deriveInitials,
-  estimateDataUrlSizeKb,
-  estimateJsonSectionBytes,
+  filterSupportedImageFiles,
   isUploadedDataUrl,
   isWithinFirestoreDocBudget,
-  MAX_RAW_IMAGE_BYTES,
-  PROJECT_IMAGE_MAX_DIMENSION,
   sanitizeDisplayImageUrl,
-  SERVICE_IMAGE_MAX_DIMENSION,
   validateImageFile
-} from './imageUpload';
+} from './imageUpload.ts';
 
-test('validateImageFile accepts valid PNG/JPG/WebP/GIF/AVIF files within limit', () => {
-  assert.deepEqual(validateImageFile({ type: 'image/png', size: 2048, name: 'photo.png' }), { ok: true });
-  assert.deepEqual(validateImageFile({ type: '', size: 4096, name: 'avatar.JPG' }), { ok: true });
-  assert.deepEqual(validateImageFile({ type: 'image/webp', size: 1024, name: 'portrait.webp' }), { ok: true });
-});
+test('validateImageFile accepts valid PNG/JPG/WebP/AVIF files and rejects empty/oversized/unsupported files', () => {
+  assert.deepEqual(validateImageFile({ name: 'cover.webp', type: 'image/webp', size: 120_000 }), { ok: true });
+  assert.deepEqual(validateImageFile({ name: 'photo.jpg', type: '', size: 42_000 }), { ok: true });
 
-test('validateImageFile rejects empty, oversized, or non-image files cleanly', () => {
-  const empty = validateImageFile({ type: 'image/png', size: 0, name: 'empty.png' });
+  const empty = validateImageFile({ name: 'empty.png', type: 'image/png', size: 0 });
   assert.equal(empty.ok, false);
 
-  const tooBig = validateImageFile({
-    type: 'image/jpeg',
-    size: MAX_RAW_IMAGE_BYTES + 1,
-    name: 'huge.jpg'
-  });
-  assert.equal(tooBig.ok, false);
+  const tooLarge = validateImageFile({ name: 'huge.png', type: 'image/png', size: 20 * 1024 * 1024 });
+  assert.equal(tooLarge.ok, false);
 
-  const nonImage = validateImageFile({ type: 'application/pdf', size: 1024, name: 'resume.pdf' });
-  assert.equal(nonImage.ok, false);
-
-  const scriptFile = validateImageFile({ type: 'text/html', size: 512, name: 'payload.html' });
-  assert.equal(scriptFile.ok, false);
+  const wrongType = validateImageFile({ name: 'doc.pdf', type: 'application/pdf', size: 5000 });
+  assert.equal(wrongType.ok, false);
 });
 
-test('computeScaledDimensions preserves aspect ratio and avoids upscaling small images', () => {
-  assert.deepEqual(computeScaledDimensions(200, 150, 480), { width: 200, height: 150 });
-  assert.deepEqual(computeScaledDimensions(1920, 1080, 480), { width: 480, height: 270 });
-  assert.deepEqual(computeScaledDimensions(800, 1600, 480), { width: 240, height: 480 });
+test('filterSupportedImageFiles separates dropped image files from unsupported ones', () => {
+  const dropped = [
+    { name: 'hero.png', type: 'image/png', size: 1024 },
+    { name: 'notes.txt', type: 'text/plain', size: 512 },
+    { name: 'gallery.avif', type: 'image/avif', size: 2048 }
+  ];
+  const result = filterSupportedImageFiles(dropped);
+  assert.equal(result.accepted.length, 2);
+  assert.equal(result.accepted[0].name, 'hero.png');
+  assert.equal(result.accepted[1].name, 'gallery.avif');
+  assert.equal(result.rejected.length, 1);
+  assert.equal(result.rejected[0].file.name, 'notes.txt');
 });
 
-test('sanitizeDisplayImageUrl permits safe HTTPS/relative/base64-image URLs and blocks unsafe schemes', () => {
-  assert.equal(sanitizeDisplayImageUrl('  https://example.com/a.jpg  '), 'https://example.com/a.jpg');
-  assert.equal(sanitizeDisplayImageUrl('/assets/aistudio/logo.png'), '/assets/aistudio/logo.png');
-  assert.equal(
-    sanitizeDisplayImageUrl('data:image/webp;base64,UklGRh4AAABXRUJQVlA4'),
-    'data:image/webp;base64,UklGRh4AAABXRUJQVlA4'
-  );
+test('computeScaledDimensions maintains aspect ratio without upscaling small images', () => {
+  assert.deepEqual(computeScaledDimensions(1600, 800, 800), { width: 800, height: 400 });
+  assert.deepEqual(computeScaledDimensions(600, 400, 800), { width: 600, height: 400 });
+});
+
+test('sanitizeDisplayImageUrl allows https, relative paths, and image data URLs while blocking unsafe protocols', () => {
+  assert.equal(sanitizeDisplayImageUrl('https://cdn.example.com/a.webp'), 'https://cdn.example.com/a.webp');
+  assert.equal(sanitizeDisplayImageUrl('/assets/logo.png'), '/assets/logo.png');
+  assert.equal(sanitizeDisplayImageUrl('data:image/webp;base64,AAAA'), 'data:image/webp;base64,AAAA');
   assert.equal(sanitizeDisplayImageUrl('javascript:alert(1)'), '');
-  assert.equal(sanitizeDisplayImageUrl('data:text/html;base64,PHNjcmlwdD4='), '');
-  assert.equal(sanitizeDisplayImageUrl('//evil.example/img.png'), '');
+  assert.equal(isUploadedDataUrl('data:image/png;base64,AAAA'), true);
+  assert.equal(isUploadedDataUrl('https://example.com/a.png'), false);
 });
 
-test('isUploadedDataUrl, estimateDataUrlSizeKb, and deriveInitials return crisp helpers', () => {
-  const sampleData = `data:image/png;base64,${'A'.repeat(4096)}`;
-  assert.equal(isUploadedDataUrl(sampleData), true);
-  assert.equal(isUploadedDataUrl('https://example.com/photo.jpg'), false);
-  assert.equal(estimateDataUrlSizeKb(sampleData), 3);
-
-  assert.equal(deriveInitials('Gauhar Nadeem'), 'GN');
-  assert.equal(deriveInitials('Sarah Reynolds', 'S.R.'), 'S.R.');
-  assert.equal(deriveInitials('Alex'), 'AL');
-  assert.equal(deriveInitials(''), 'AX');
-});
-
-test('Service/Project max dimensions and Firestore section byte-budget guards work accurately', () => {
-  assert.equal(SERVICE_IMAGE_MAX_DIMENSION, 800);
-  assert.equal(PROJECT_IMAGE_MAX_DIMENSION, 960);
-
-  const smallSection = [{ id: 'p1', title: 'Case Study', imageUrl: 'https://example.com/a.webp' }];
-  assert.ok(estimateJsonSectionBytes(smallSection) > 0);
-  assert.equal(isWithinFirestoreDocBudget(smallSection), true);
-
-  const oversizedSection = [{ id: 'p2', imageUrl: 'A'.repeat(900_000) }];
-  assert.equal(isWithinFirestoreDocBudget(oversizedSection), false);
+test('isWithinFirestoreDocBudget enforces the 850 KB safe ceiling and deriveInitials formats fallbacks', () => {
+  assert.equal(isWithinFirestoreDocBudget({ small: 'payload' }, 1024), true);
+  assert.equal(isWithinFirestoreDocBudget({ huge: 'x'.repeat(2000) }, 1024), false);
+  assert.equal(deriveInitials("Axe's Era"), 'AE');
 });

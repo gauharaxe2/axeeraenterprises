@@ -61,6 +61,30 @@ export function validateImageFile(file: ImageValidationInput): ImageValidationRe
   return { ok: true };
 }
 
+export function filterSupportedImageFiles<T extends ImageValidationInput>(files: ArrayLike<T> | null | undefined): {
+  accepted: T[];
+  rejected: Array<{ file: T; error: string }>;
+} {
+  const accepted: T[] = [];
+  const rejected: Array<{ file: T; error: string }> = [];
+  if (!files) {
+    return { accepted, rejected };
+  }
+
+  for (let i = 0; i < files.length; i += 1) {
+    const file = files[i];
+    if (!file) continue;
+    const validation = validateImageFile(file);
+    if (validation.ok) {
+      accepted.push(file);
+    } else {
+      rejected.push({ file, error: validation.error });
+    }
+  }
+
+  return { accepted, rejected };
+}
+
 export function computeScaledDimensions(
   width: number,
   height: number,

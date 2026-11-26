@@ -81,20 +81,50 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       </label>
 
       <div
-        onDragOver={(event) => {
+        onDragEnter={(event) => {
           event.preventDefault();
+          event.stopPropagation();
           setIsDragging(true);
         }}
-        onDragLeave={() => setIsDragging(false)}
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = 'copy';
+          }
+          setIsDragging(true);
+        }}
+        onDragLeave={(event) => {
+          const related = event.relatedTarget as Node | null;
+          if (!related || !event.currentTarget.contains(related)) {
+            setIsDragging(false);
+          }
+        }}
         onDrop={handleDrop}
         style={{
-          background: '#1a1a1a',
-          border: `1px dashed ${isDragging ? 'var(--primary-color)' : 'rgba(212, 175, 55, 0.35)'}`,
+          background: isDragging ? 'rgba(212, 175, 55, 0.14)' : '#1a1a1a',
+          border: `1.5px dashed ${isDragging ? 'var(--primary-color)' : 'rgba(212, 175, 55, 0.4)'}`,
           borderRadius: '10px',
           padding: '0.85rem',
           transition: 'border-color 0.2s ease, background 0.2s ease'
         }}
       >
+        {isDragging && (
+          <div
+            style={{
+              marginBottom: '0.65rem',
+              padding: '6px 10px',
+              borderRadius: '6px',
+              background: 'rgba(212, 175, 55, 0.18)',
+              color: 'var(--primary-color)',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              textAlign: 'center'
+            }}
+          >
+            Drop image file here to upload
+          </div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           {/* Live Preview Thumbnail */}
           <div
