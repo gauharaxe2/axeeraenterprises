@@ -3,6 +3,10 @@ import { ArrowRight, ChevronDown, HelpCircle } from 'lucide-react';
 import { FaqItem } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import {
+  collectFaqCategories,
+  filterFaqs
+} from '../utils/faqCategories';
+import {
   EditorialCta,
   EditorialEmpty,
   EditorialHero,
@@ -20,72 +24,20 @@ interface FaqPageProps {
   onContactClick: () => void;
 }
 
-type FaqCategory = 'all' | 'engineering' | 'ownership' | 'billing' | 'support';
-
-const categories: { id: FaqCategory; label: string }[] = [
-  { id: 'all', label: 'All Questions' },
-  { id: 'engineering', label: 'Architecture & Tech' },
-  { id: 'ownership', label: 'IP & Code Ownership' },
-  { id: 'billing', label: 'Billing & Milestones' },
-  { id: 'support', label: 'Warranties & Support' }
-];
-
 export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<FaqCategory>('all');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const enrichedFaqs = useMemo(() => {
-    return faqs.map((faq, index) => {
-      const question = faq.question.toLowerCase();
-      let category: Exclude<FaqCategory, 'all'> = 'engineering';
+  const categoryOptions = useMemo(() => collectFaqCategories(faqs), [faqs]);
 
-      if (
-        question.includes('own') ||
-        question.includes('source code') ||
-        question.includes('intellectual property') ||
-        question.includes('ip')
-      ) {
-        category = 'ownership';
-      } else if (
-        question.includes('payment') ||
-        question.includes('billing') ||
-        question.includes('cost') ||
-        question.includes('price')
-      ) {
-        category = 'billing';
-      } else if (
-        question.includes('maintenance') ||
-        question.includes('support') ||
-        question.includes('warranty') ||
-        question.includes('post-launch')
-      ) {
-        category = 'support';
-      }
+  const filteredFaqs = useMemo(
+    () => filterFaqs(faqs, { category: activeCategory, search: searchQuery }),
+    [faqs, activeCategory, searchQuery]
+  );
 
-      return { ...faq, index, category };
-    });
-  }, [faqs]);
-
-  const filteredFaqs = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    return enrichedFaqs.filter((faq) => {
-      const matchesCategory = activeCategory === 'all' || faq.category === activeCategory;
-      const matchesSearch =
-        !query || faq.question.toLowerCase().includes(query) || faq.answer.toLowerCase().includes(query);
-      return matchesCategory && matchesSearch;
-    });
-  }, [enrichedFaqs, activeCategory, searchQuery]);
-
-  const counts = useMemo(() => {
-    return {
-      all: enrichedFaqs.length,
-      engineering: enrichedFaqs.filter((faq) => faq.category === 'engineering').length,
-      ownership: enrichedFaqs.filter((faq) => faq.category === 'ownership').length,
-      billing: enrichedFaqs.filter((faq) => faq.category === 'billing').length,
-      support: enrichedFaqs.filter((faq) => faq.category === 'support').length
-    };
-  }, [enrichedFaqs]);
+  const ownershipCount = categoryOptions.find((c) => c.id === 'ownership')?.count ?? 0;
+  const billingCount = categoryOptions.find((c) => c.id === 'billing')?.count ?? 0;
 
   return (
     <EditorialPage page="faq">
@@ -117,8 +69,8 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
           <EditorialPills
             label="FAQ categories"
             value={activeCategory}
-            onChange={(id) => setActiveCategory(id as FaqCategory)}
-            options={categories.map((category) => ({ ...category, count: counts[category.id] }))}
+            onChange={(id) => setActiveCategory(id)}
+            options={categoryOptions}
           />
         </div>
       </div>
@@ -182,10 +134,10 @@ export const FaqPage: React.FC<FaqPageProps> = ({ faqs, onBackToHome, onContactC
           </div>
         )}
 
-        {counts.billing === 0 || counts.ownership === 0 ? (
+        {billingCount === 0 || ownershipCount === 0 ? (
           <p className="editorial-todo" style={{ marginTop: '1.25rem' }}>
             TODO: The published FAQ list has no entries filed under{' '}
-            {[counts.ownership === 0 ? 'IP & Code Ownership' : null, counts.billing === 0 ? 'Billing & Milestones' : null]
+            {[ownershipCount === 0 ? 'IP & Code Ownership' : null, billingCount === 0 ? 'Billing & Milestones' : null]
               .filter(Boolean)
               .join(' or ')}
             . Those filters stay empty until matching questions are added in admin.

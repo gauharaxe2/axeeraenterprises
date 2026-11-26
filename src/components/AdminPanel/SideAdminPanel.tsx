@@ -75,6 +75,7 @@ import {
   TEAM_PHOTO_MAX_DIMENSION,
   deriveInitials,
   estimateJsonSectionBytes,
+  isUploadedDataUrl,
   isWithinFirestoreDocBudget,
   processImageFileToDataUrl,
   sanitizeDisplayImageUrl
@@ -92,6 +93,14 @@ import {
   sanitizeStringList,
   slugifyProjectTitle
 } from '../../utils/projectUtils';
+import {
+  BUILTIN_FAQ_CATEGORIES,
+  collectFaqCategories,
+  filterFaqs,
+  getFaqCategoryLabel,
+  isBuiltinFaqCategory,
+  resolveFaqCategory
+} from '../../utils/faqCategories';
 import { ClientAvatar } from '../ClientAvatar';
 import { ImageUploadField } from './ImageUploadField';
 import { QueriesPanel } from './QueriesPanel';
@@ -212,6 +221,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   const [blogSearch, setBlogSearch] = useState('');
   const [newGalleryImageUrl, setNewGalleryImageUrl] = useState('');
   const [blogCategoryFilter, setBlogCategoryFilter] = useState('All');
+  const [uploadingBlogSectionIdx, setUploadingBlogSectionIdx] = useState<number | null>(null);
+  const [isUploadingBlogGallery, setIsUploadingBlogGallery] = useState(false);
 
   // Team state for multiple team members
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMemberData | null>(null);
@@ -228,6 +239,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
   const [editingFaq, setEditingFaq] = useState<FaqItem | null>(null);
   const [isCreatingFaq, setIsCreatingFaq] = useState(false);
+  const [faqCategoryFilter, setFaqCategoryFilter] = useState<string>('all');
+  const [faqSearch, setFaqSearch] = useState<string>('');
+  const [customFaqCategoryMode, setCustomFaqCategoryMode] = useState<boolean>(false);
 
   const [editingPartnership, setEditingPartnership] = useState<PartnershipItem | null>(null);
   const [isCreatingPartnership, setIsCreatingPartnership] = useState(false);
@@ -2311,7 +2325,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         {isCreatingBlog ? '✨ Create New Blog Article' : `✏️ Edit: ${editingBlog.title || 'Untitled'}`}
                       </h4>
                       <p style={{ margin: '2px 0 0', color: 'var(--text-light)', fontSize: '0.76rem' }}>
-                        Configure Title, Cover Image URL, Summary, and structured Headings/Paragraphs/Images
+                        Configure Title, Cover Image Upload / URL, Summary, and structured Headings/Paragraphs/Images
                       </p>
                     </div>
                     <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)', background: 'rgba(212, 175, 55, 0.12)', padding: '2px 8px', borderRadius: '8px' }}>
@@ -2340,42 +2354,30 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     />
                   </div>
 
-                  {/* 2. PRIMARY COVER IMAGE URL OPTION WITH LIVE PREVIEW */}
-                  <div style={{ marginBottom: '1rem', background: '#0a0a0a', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ fontSize: '0.82rem', color: 'var(--primary-color)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <ImageIcon size={15} /> Primary Cover Image URL *
-                      </label>
-                      <span style={{ fontSize: '0.72rem', color: '#a3a3a3' }}>
-                        Main featured banner image for article header
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        value={editingBlog.imageUrl || ''}
-                        placeholder="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
-                        onChange={(e) => setEditingBlog({ ...editingBlog, imageUrl: e.target.value })}
-                        style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.85rem' }}
-                      />
-                      {editingBlog.imageUrl ? (
-                        <div style={{ position: 'relative', width: '56px', height: '42px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--primary-color)', flexShrink: 0, background: '#1c1c1c' }}>
-                          <img
-                            src={editingBlog.imageUrl}
-                            alt="Cover Preview"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            onError={(e) => {
-                              (e.currentTarget as HTMLElement).style.opacity = '0.3';
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div style={{ width: '56px', height: '42px', borderRadius: '4px', background: '#1c1c1c', border: '1px dashed #404040', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a3a3a3', fontSize: '0.68rem', flexShrink: 0 }}>
-                          No image
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* 2. PRIMARY COVER IMAGE UPLOAD & URL WITH LIVE PREVIEW */}
+                  <ImageUploadField
+                    id="blog-cover-image"
+                    label="Primary Cover Image *"
+                    value={editingBlog.imageUrl || ''}
+                    onChange={(nextUrl) => {
+                      const candidate = { ...editingBlog, imageUrl: nextUrl };
+                      const nextBlogs = isCreatingBlog
+                        ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
+                        : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
+                      if (nextUrl.startsWith('data:image/') && !isWithinFirestoreDocBudget(nextBlogs)) {
+                        onShowToast('Adding this uploaded image exceeds the 850 KB cloud budget. Use an external image URL or smaller images.', 'error');
+                        return;
+                      }
+                      setEditingBlog(candidate);
+                    }}
+                    onError={(msg) => onShowToast(msg, 'error')}
+                    shape="rounded"
+                    previewFallbackText={deriveInitials(editingBlog.title || 'BL')}
+                    maxDimension={SERVICE_IMAGE_MAX_DIMENSION}
+                    urlPlaceholder="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+                    helperText="Drag & drop or upload PNG, JPG, or WebP from your device, or paste an image URL below."
+                    uploadButtonLabel="Upload Cover Image"
+                  />
 
                   {/* 3. SUMMARY / EXCERPT OPTION */}
                   <div style={{ marginBottom: '1rem' }}>
@@ -2620,31 +2622,86 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                             />
                           </div>
 
-                          {/* Section Image Option & Caption */}
+                          {/* Section Image Upload / URL & Caption */}
                           <div style={{ background: '#0a0a0a', padding: '10px', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
                               <label style={{ fontSize: '0.76rem', color: '#93c5fd', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <ImageIcon size={13} /> Section Image URL (Optional visual asset for this heading)
+                                <ImageIcon size={13} /> Section Image (Upload or URL)
                               </label>
-                              {sec.imageUrl && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updated = [...currentSections];
-                                    updated[sIdx] = { ...updated[sIdx], imageUrl: '', imageCaption: '' };
-                                    setEditingBlog({ ...editingBlog, sections: updated });
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <label
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '4px 10px',
+                                    borderRadius: '5px',
+                                    background: 'rgba(212, 175, 55, 0.16)',
+                                    border: '1px solid rgba(212, 175, 55, 0.45)',
+                                    color: 'var(--primary-color)',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 600,
+                                    cursor: uploadingBlogSectionIdx === sIdx ? 'wait' : 'pointer'
                                   }}
-                                  style={{ background: 'transparent', border: 'none', color: '#a3a3a3', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
                                 >
-                                  Clear Image
-                                </button>
-                              )}
+                                  <UploadCloud size={13} />
+                                  {uploadingBlogSectionIdx === sIdx ? 'Processing...' : sec.imageUrl ? 'Replace Image' : 'Upload Image'}
+                                  <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                                    aria-label={`Upload image for section ${sIdx + 1}`}
+                                    disabled={uploadingBlogSectionIdx === sIdx}
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      e.target.value = '';
+                                      if (!file || !editingBlog) return;
+                                      setUploadingBlogSectionIdx(sIdx);
+                                      try {
+                                        const dataUrl = await processImageFileToDataUrl(file, {
+                                          maxDimension: SERVICE_IMAGE_MAX_DIMENSION,
+                                          maxEncodedLength: 160_000
+                                        });
+                                        const updated = [...currentSections];
+                                        updated[sIdx] = { ...updated[sIdx], imageUrl: dataUrl };
+                                        const candidate = { ...editingBlog, sections: updated };
+                                        const nextBlogs = isCreatingBlog
+                                          ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
+                                          : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
+                                        if (!isWithinFirestoreDocBudget(nextBlogs)) {
+                                          onShowToast('Adding this section image exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
+                                          return;
+                                        }
+                                        setEditingBlog(candidate);
+                                        onShowToast('Section image uploaded!', 'success');
+                                      } catch (err) {
+                                        onShowToast(err instanceof Error ? err.message : 'Unable to upload section image.', 'error');
+                                      } finally {
+                                        setUploadingBlogSectionIdx(null);
+                                      }
+                                    }}
+                                    style={{ display: 'none' }}
+                                  />
+                                </label>
+                                {sec.imageUrl && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = [...currentSections];
+                                      updated[sIdx] = { ...updated[sIdx], imageUrl: '', imageCaption: '' };
+                                      setEditingBlog({ ...editingBlog, sections: updated });
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', color: '#a3a3a3', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
+                                  >
+                                    Clear Image
+                                  </button>
+                                )}
+                              </div>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: sec.imageUrl ? '1fr 1fr 60px' : '1fr 1fr', gap: '8px', alignItems: 'center' }}>
                               <input
                                 type="text"
-                                value={sec.imageUrl || ''}
-                                placeholder="Section Image URL (https://...)"
+                                value={isUploadedDataUrl(sec.imageUrl) ? '' : (sec.imageUrl || '')}
+                                placeholder={isUploadedDataUrl(sec.imageUrl) ? 'Uploaded image active (or paste URL to replace)' : 'Section Image URL (https://...)'}
                                 onChange={(e) => {
                                   const updated = [...currentSections];
                                   updated[sIdx] = { ...updated[sIdx], imageUrl: e.target.value };
@@ -2663,9 +2720,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                                 }}
                                 style={{ padding: '6px 9px', borderRadius: '5px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.8rem' }}
                               />
-                              {sec.imageUrl && (
+                              {sec.imageUrl && sanitizeDisplayImageUrl(sec.imageUrl) && (
                                 <div style={{ width: '60px', height: '36px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(59,130,246,0.5)', background: '#1c1c1c' }}>
-                                  <img src={sec.imageUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  <img src={sanitizeDisplayImageUrl(sec.imageUrl)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
                               )}
                             </div>
@@ -2732,13 +2789,62 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
 
                   {/* 5. ADDITIONAL GALLERY PHOTOS MANAGER */}
                   <div style={{ background: '#0a0a0a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '1.25rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                       <label style={{ fontSize: '0.85rem', color: 'var(--primary-color)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <ImageIcon size={15} /> Extra Article Showcase Photos ({editingBlog.images?.length || 0})
                       </label>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
-                        Add supplementary visuals to display in the article showcase
-                      </span>
+                      <label
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '5px 11px',
+                          borderRadius: '6px',
+                          background: 'rgba(212, 175, 55, 0.16)',
+                          border: '1px solid rgba(212, 175, 55, 0.45)',
+                          color: 'var(--primary-color)',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          cursor: isUploadingBlogGallery ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={14} />
+                        {isUploadingBlogGallery ? 'Processing...' : 'Upload Photo'}
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                          aria-label="Upload extra article gallery photo"
+                          disabled={isUploadingBlogGallery}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = '';
+                            if (!file || !editingBlog) return;
+                            setIsUploadingBlogGallery(true);
+                            try {
+                              const dataUrl = await processImageFileToDataUrl(file, {
+                                maxDimension: SERVICE_IMAGE_MAX_DIMENSION,
+                                maxEncodedLength: 160_000
+                              });
+                              const nextImages = [...(editingBlog.images || []), dataUrl];
+                              const candidate = { ...editingBlog, images: nextImages };
+                              const nextBlogs = isCreatingBlog
+                                ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
+                                : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
+                              if (!isWithinFirestoreDocBudget(nextBlogs)) {
+                                onShowToast('Adding this gallery photo exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
+                                return;
+                              }
+                              setEditingBlog(candidate);
+                              onShowToast('Photo uploaded to article gallery!', 'success');
+                            } catch (err) {
+                              onShowToast(err instanceof Error ? err.message : 'Unable to upload gallery photo.', 'error');
+                            } finally {
+                              setIsUploadingBlogGallery(false);
+                            }
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
                     </div>
 
                     {/* Existing gallery images list */}
@@ -2756,7 +2862,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                               background: '#1c1c1c'
                             }}
                           >
-                            <img src={imgUrl} alt={`gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={sanitizeDisplayImageUrl(imgUrl) || imgUrl} alt={`gallery ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <button
                               type="button"
                               onClick={() => {
@@ -2817,7 +2923,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         className="btn btn-outline"
                         style={{ padding: '6px 14px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                       >
-                        + Add Image
+                        + Add URL
                       </button>
                     </div>
                   </div>
@@ -2888,6 +2994,14 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           paragraphs: aggregatedParagraphs.length > 0 ? aggregatedParagraphs : [editingBlog.summary],
                           sections: cleanSections
                         };
+
+                        const nextBlogsPreview = isCreatingBlog
+                          ? [finalizedBlog, ...data.blogs.filter((b) => b.id !== finalizedBlog.id)]
+                          : data.blogs.map((b) => (b.id === finalizedBlog.id ? finalizedBlog : b));
+                        if (!isWithinFirestoreDocBudget(nextBlogsPreview)) {
+                          onShowToast('Total blogs data exceeds the 850 KB cloud sync budget. Replace some uploaded images with external URLs.', 'error');
+                          return;
+                        }
 
                         if (isCreatingBlog) {
                           onAddBlog(finalizedBlog);
@@ -4223,23 +4337,35 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         )}
 
         {/* TAB 9: FAQS */}
-        {activeTab === 'faqs' && (
+        {activeTab === 'faqs' && (() => {
+          const faqCategoryOptions = collectFaqCategories(data.faqs);
+          const filteredAdminFaqs = filterFaqs(data.faqs, {
+            category: faqCategoryFilter,
+            search: faqSearch
+          });
+          const editingFaqCategory = editingFaq ? resolveFaqCategory(editingFaq) : 'engineering';
+
+          return (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h3 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '1.15rem' }}>
-                  Frequently Asked Questions
+                  Frequently Asked Questions ({data.faqs.length})
                 </h3>
                 <p style={{ margin: 0, color: 'var(--text-light)', fontSize: '0.8rem' }}>
-                  Questions and expandable answers
+                  Organize questions and answers by category (synced to the public FAQ page)
                 </p>
               </div>
               {!isCreatingFaq && !editingFaq && (
                 <button
+                  type="button"
                   onClick={() => {
+                    const initialCategory = faqCategoryFilter !== 'all' ? faqCategoryFilter : 'engineering';
                     setIsCreatingFaq(true);
+                    setCustomFaqCategoryMode(!isBuiltinFaqCategory(initialCategory));
                     setEditingFaq({
                       id: `faq-${Date.now()}`,
+                      category: initialCategory,
                       question: '',
                       answer: ''
                     });
@@ -4259,10 +4385,55 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   {isCreatingFaq ? 'Add Question' : 'Edit Question'}
                 </h4>
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                  <label htmlFor="admin-faq-category" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px', fontWeight: 600 }}>
+                    Category
+                  </label>
+                  <select
+                    id="admin-faq-category"
+                    value={customFaqCategoryMode ? '__custom__' : (isBuiltinFaqCategory(editingFaqCategory) ? editingFaqCategory : '__custom__')}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '__custom__') {
+                        setCustomFaqCategoryMode(true);
+                        setEditingFaq(
+                          editingFaq
+                            ? {
+                                ...editingFaq,
+                                category: isBuiltinFaqCategory(editingFaq.category) ? '' : (editingFaq.category || '')
+                              }
+                            : null
+                        );
+                      } else {
+                        setCustomFaqCategoryMode(false);
+                        setEditingFaq(editingFaq ? { ...editingFaq, category: val } : null);
+                      }
+                    }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.88rem' }}
+                  >
+                    {BUILTIN_FAQ_CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </option>
+                    ))}
+                    <option value="__custom__">Custom Category...</option>
+                  </select>
+                  {customFaqCategoryMode && (
+                    <input
+                      id="admin-faq-custom-category"
+                      type="text"
+                      placeholder="Enter custom category name (e.g. Security & Compliance)"
+                      value={editingFaq?.category || ''}
+                      onChange={(e) => setEditingFaq(editingFaq ? { ...editingFaq, category: e.target.value } : null)}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid var(--primary-color)', color: '#fff', fontSize: '0.85rem', marginTop: '8px' }}
+                    />
+                  )}
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label htmlFor="admin-faq-question" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
                     Question
                   </label>
                   <input
+                    id="admin-faq-question"
                     type="text"
                     value={editingFaq?.question || ''}
                     onChange={(e) => setEditingFaq(editingFaq ? { ...editingFaq, question: e.target.value } : null)}
@@ -4270,10 +4441,11 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   />
                 </div>
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                  <label htmlFor="admin-faq-answer" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
                     Answer
                   </label>
                   <textarea
+                    id="admin-faq-answer"
                     rows={3}
                     value={editingFaq?.answer || ''}
                     onChange={(e) => setEditingFaq(editingFaq ? { ...editingFaq, answer: e.target.value } : null)}
@@ -4286,6 +4458,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     onClick={() => {
                       setEditingFaq(null);
                       setIsCreatingFaq(false);
+                      setCustomFaqCategoryMode(false);
                     }}
                     className="btn btn-outline"
                     style={{ padding: '6px 14px', fontSize: '0.85rem' }}
@@ -4299,15 +4472,27 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         onShowToast('Please fill question and answer', 'error');
                         return;
                       }
+                      const cleanCategory = (editingFaq.category || '').trim();
+                      if (customFaqCategoryMode && !cleanCategory) {
+                        onShowToast('Please enter a custom category name or select a preset category', 'error');
+                        return;
+                      }
+                      const finalizedFaq: FaqItem = {
+                        ...editingFaq,
+                        question: editingFaq.question.trim(),
+                        answer: editingFaq.answer.trim(),
+                        category: cleanCategory || resolveFaqCategory(editingFaq)
+                      };
                       if (isCreatingFaq) {
-                        onAddFaq(editingFaq);
+                        onAddFaq(finalizedFaq);
                         onShowToast('FAQ added!', 'success');
                       } else {
-                        onUpdateFaq(editingFaq);
+                        onUpdateFaq(finalizedFaq);
                         onShowToast('FAQ updated!', 'success');
                       }
                       setEditingFaq(null);
                       setIsCreatingFaq(false);
+                      setCustomFaqCategoryMode(false);
                     }}
                     className="btn btn-primary"
                     style={{ padding: '6px 16px', fontSize: '0.85rem' }}
@@ -4318,62 +4503,157 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               </div>
             )}
 
+            {/* Category Filter Pills & Search */}
+            <div style={{ marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '6px', fontWeight: 600 }}>
+                Filter by Category:
+              </div>
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', marginBottom: '10px' }}>
+                {faqCategoryOptions.map((cat) => {
+                  const isSelected = faqCategoryFilter === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setFaqCategoryFilter(cat.id)}
+                      style={{
+                        padding: '5px 11px',
+                        borderRadius: '12px',
+                        border: '1px solid',
+                        borderColor: isSelected ? 'var(--primary-color)' : '#2e2e2e',
+                        background: isSelected ? 'rgba(212, 175, 55, 0.2)' : '#1c1c1c',
+                        color: isSelected ? 'var(--primary-color)' : '#a3a3a3',
+                        fontSize: '0.75rem',
+                        fontWeight: isSelected ? 600 : 500,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {cat.label} ({cat.count})
+                    </button>
+                  );
+                })}
+              </div>
+              <input
+                type="text"
+                aria-label="Search FAQs"
+                placeholder="Search FAQs by question, answer, or category..."
+                value={faqSearch}
+                onChange={(e) => setFaqSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  background: '#141414',
+                  border: '1px solid #2e2e2e',
+                  color: '#fff',
+                  fontSize: '0.85rem'
+                }}
+              />
+            </div>
+
             {/* List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {data.faqs.map((faq, index) => (
-                <div
-                  key={faq.id || index}
-                  style={{
-                    background: '#141414',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
+            {filteredAdminFaqs.length === 0 ? (
+              <div style={{ background: '#141414', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 10px', color: 'var(--text-light)', fontSize: '0.85rem' }}>
+                  No FAQs match the selected category or search query.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  style={{ padding: '5px 12px', fontSize: '0.8rem' }}
+                  onClick={() => {
+                    setFaqCategoryFilter('all');
+                    setFaqSearch('');
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                    <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{faq.question}</h4>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <button
-                        onClick={() => {
-                          setEditingFaq(faq);
-                          setIsCreatingFaq(false);
-                        }}
-                        style={{
-                          background: 'rgba(212, 175, 55, 0.15)',
-                          border: '1px solid rgba(212, 175, 55, 0.3)',
-                          color: 'var(--primary-color)',
-                          padding: '6px',
-                          borderRadius: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title="Edit"
-                      >
-                        <Edit2 size={15} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirmTarget({ type: 'faq', id: faq.id || faq.question, title: faq.question })}
-                        style={{
-                          background: 'rgba(239, 68, 68, 0.15)',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                          color: '#f87171',
-                          padding: '6px',
-                          borderRadius: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title="Delete"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                  Show All FAQs
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {filteredAdminFaqs.map((faq) => {
+                  const categoryLabel = getFaqCategoryLabel(faq.resolvedCategory);
+                  return (
+                  <div
+                    key={faq.id || faq.index}
+                    style={{
+                      background: '#141414',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '6px' }}>
+                      <div>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            fontSize: '0.72rem',
+                            color: 'var(--primary-color)',
+                            background: 'rgba(212, 175, 55, 0.12)',
+                            border: '1px solid rgba(212, 175, 55, 0.25)',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                            fontWeight: 600,
+                            marginBottom: '6px'
+                          }}
+                        >
+                          {categoryLabel}
+                        </span>
+                        <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>{faq.question}</h4>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const resolvedCat = resolveFaqCategory(faq);
+                            setEditingFaq({ ...faq, category: resolvedCat });
+                            setIsCreatingFaq(false);
+                            setCustomFaqCategoryMode(!isBuiltinFaqCategory(resolvedCat));
+                          }}
+                          style={{
+                            background: 'rgba(212, 175, 55, 0.15)',
+                            border: '1px solid rgba(212, 175, 55, 0.3)',
+                            color: 'var(--primary-color)',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            cursor: 'pointer'
+                          }}
+                          title="Edit"
+                          aria-label={`Edit "${faq.question}"`}
+                        >
+                          <Edit2 size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirmTarget({ type: 'faq', id: faq.id || faq.question, title: faq.question })}
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.15)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            color: '#f87171',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            cursor: 'pointer'
+                          }}
+                          title="Delete"
+                          aria-label={`Delete "${faq.question}"`}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-light)', lineHeight: 1.5 }}>
+                      {faq.answer}
+                    </p>
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-light)', lineHeight: 1.5 }}>
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
+          );
+        })()}
 
         {/* TAB 10: BACKUP & RESTORE */}
         {activeTab === 'backup' && (

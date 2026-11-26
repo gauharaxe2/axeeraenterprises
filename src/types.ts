@@ -95,10 +95,13 @@ export interface Testimonial {
   rating: number;
 }
 
+export type FaqCategoryId = 'engineering' | 'ownership' | 'billing' | 'support';
+
 export interface FaqItem {
   id?: string;
   question: string;
   answer: string;
+  category?: FaqCategoryId | string;
 }
 
 export interface PartnershipItem {
