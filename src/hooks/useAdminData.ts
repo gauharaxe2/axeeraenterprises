@@ -61,11 +61,16 @@ export const useAdminData = (onSyncError?: (message: string) => void) => {
   const onSyncErrorRef = useRef(onSyncError);
   onSyncErrorRef.current = onSyncError;
 
-  const syncSection = (sectionId: string, value: unknown) => {
-    saveSectionToFirestore(sectionId, value).catch((err) => {
+  const syncSection = async (sectionId: string, value: unknown): Promise<boolean> => {
+    try {
+      await saveSectionToFirestore(sectionId, value);
+      setSyncStatus('connected');
+      return true;
+    } catch (err) {
       console.warn(`Firestore sync failed for ${sectionId}:`, err);
       onSyncErrorRef.current?.(formatSyncErrorMessage(sectionId, err));
-    });
+      return false;
+    }
   };
   const [data, setData] = useState<AdminStoreData>(() => {
     try {
@@ -283,25 +288,46 @@ export const useAdminData = (onSyncError?: (message: string) => void) => {
   };
 
   // Blogs
-  const addBlog = (blog: BlogPost) => {
-    const currentBlogs = dataRef.current.blogs;
-    const nextBlogs = [blog, ...currentBlogs.filter((b) => b.id !== blog.id)];
+  const addBlog = async (blog: BlogPost): Promise<boolean> => {
+    const previousBlogs = dataRef.current.blogs;
+    const nextBlogs = [blog, ...previousBlogs.filter((b) => b.id !== blog.id)];
+    dataRef.current = { ...dataRef.current, blogs: nextBlogs };
     setData((prev) => ({ ...prev, blogs: nextBlogs }));
-    syncSection('blogs', nextBlogs);
+    const ok = await syncSection('blogs', nextBlogs);
+    if (!ok) {
+      dataRef.current = { ...dataRef.current, blogs: previousBlogs };
+      setData((prev) => ({ ...prev, blogs: previousBlogs }));
+      return false;
+    }
+    return true;
   };
 
-  const updateBlog = (blog: BlogPost) => {
-    const currentBlogs = dataRef.current.blogs;
-    const nextBlogs = currentBlogs.map((b) => (b.id === blog.id ? blog : b));
+  const updateBlog = async (blog: BlogPost): Promise<boolean> => {
+    const previousBlogs = dataRef.current.blogs;
+    const nextBlogs = previousBlogs.map((b) => (b.id === blog.id ? blog : b));
+    dataRef.current = { ...dataRef.current, blogs: nextBlogs };
     setData((prev) => ({ ...prev, blogs: nextBlogs }));
-    syncSection('blogs', nextBlogs);
+    const ok = await syncSection('blogs', nextBlogs);
+    if (!ok) {
+      dataRef.current = { ...dataRef.current, blogs: previousBlogs };
+      setData((prev) => ({ ...prev, blogs: previousBlogs }));
+      return false;
+    }
+    return true;
   };
 
-  const deleteBlog = (id: string) => {
-    const currentBlogs = dataRef.current.blogs;
-    const nextBlogs = currentBlogs.filter((b) => b.id !== id);
+  const deleteBlog = async (id: string): Promise<boolean> => {
+    const previousBlogs = dataRef.current.blogs;
+    const nextBlogs = previousBlogs.filter((b) => b.id !== id);
+    dataRef.current = { ...dataRef.current, blogs: nextBlogs };
     setData((prev) => ({ ...prev, blogs: nextBlogs }));
-    syncSection('blogs', nextBlogs);
+    const ok = await syncSection('blogs', nextBlogs);
+    if (!ok) {
+      dataRef.current = { ...dataRef.current, blogs: previousBlogs };
+      setData((prev) => ({ ...prev, blogs: previousBlogs }));
+      return false;
+    }
+    return true;
   };
 
   // Team Members

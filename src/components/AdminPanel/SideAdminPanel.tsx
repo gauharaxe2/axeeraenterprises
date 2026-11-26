@@ -48,7 +48,12 @@ import {
   FaqItem,
   BLOG_CATEGORIES
 } from '../../types';
-import { normalizeBlogSections, aggregateParagraphs, collectArticleImages } from '../../utils/blogUtils';
+import {
+  normalizeBlogSections,
+  collectArticleImages,
+  extractExtraArticleImages,
+  prepareBlogForPublish
+} from '../../utils/blogUtils';
 import {
   ACCOUNT_LINK_PRESETS,
   type AccountLinkPreset,
@@ -131,9 +136,9 @@ interface SideAdminPanelProps {
   onDeleteProject: (id: string) => void;
   onReorderProjects?: (projects: Project[]) => void;
   onPreviewProject?: (project: Project) => void;
-  onAddBlog: (blog: BlogPost) => void;
-  onUpdateBlog: (blog: BlogPost) => void;
-  onDeleteBlog: (id: string) => void;
+  onAddBlog: (blog: BlogPost) => Promise<boolean> | void;
+  onUpdateBlog: (blog: BlogPost) => Promise<boolean> | void;
+  onDeleteBlog: (id: string) => Promise<boolean> | void;
   onAddTeamMember: (member: TeamMemberData) => void;
   onUpdateTeamMember: (member: TeamMemberData) => void;
   onDeleteTeamMember: (id: string) => void;
@@ -227,6 +232,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
   const [draggingBlogSectionIdx, setDraggingBlogSectionIdx] = useState<number | null>(null);
   const [isUploadingBlogGallery, setIsUploadingBlogGallery] = useState(false);
   const [isDraggingBlogGallery, setIsDraggingBlogGallery] = useState(false);
+  const [isPublishingBlog, setIsPublishingBlog] = useState(false);
+  const [blogFormError, setBlogFormError] = useState('');
 
   // Team state for multiple team members
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMemberData | null>(null);
@@ -397,8 +404,12 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         onShowToast(`Deleted project: ${target.title}`, 'info');
         break;
       case 'blog':
-        onDeleteBlog(target.id);
-        onShowToast(`Deleted article: ${target.title}`, 'info');
+        void (async () => {
+          const ok = await onDeleteBlog(target.id);
+          if (ok !== false) {
+            onShowToast(`Deleted article: ${target.title}`, 'info');
+          }
+        })();
         break;
       case 'team':
         onDeleteTeamMember(target.id);
@@ -2352,15 +2363,19 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h3 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '1.15rem' }}>
-                  Manage Blog Articles & Knowledge Hub
+                  Manage Blog Articles & Knowledge Hub ({data.blogs.length})
                 </h3>
-                <p style={{ margin: 0, color: 'var(--text-light)', fontSize: '0.8rem' }}>
-                  Full blog creation with 9 official categories and multiple image gallery support
+                <p style={{ margin: '2px 0 0', color: 'var(--text-light)', fontSize: '0.8rem' }}>
+                  Full blog creation with 9 official categories and multiple image gallery support • Cloud storage:{' '}
+                  <strong style={{ color: isWithinFirestoreDocBudget(data.blogs) ? '#34d399' : '#f87171' }}>
+                    {Math.round(estimateJsonSectionBytes(data.blogs) / 1024)} KB / {Math.round(FIRESTORE_SAFE_SECTION_BYTES / 1024)} KB
+                  </strong>
                 </p>
               </div>
               {!isCreatingBlog && !editingBlog && (
                 <button
                   onClick={() => {
+                    setBlogFormError('');
                     setIsCreatingBlog(true);
                     setEditingBlog({
                       id: `blog-${Date.now()}`,
@@ -2374,10 +2389,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       author: 'Gauhar Axe',
                       tags: ['Web Dev', 'Tech'],
                       paragraphs: [],
-                      images: [
-                        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
-                        'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80'
-                      ],
+                      images: [],
                       sections: [
                         {
                           id: `sec-${Date.now()}-1`,
@@ -2442,6 +2454,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           .toLowerCase()
                           .replace(/[^\w\s-]/g, '')
                           .replace(/\s+/g, '-');
+                        if (blogFormError) setBlogFormError('');
                         setEditingBlog({ ...editingBlog, title, slug: isCreatingBlog ? slug : editingBlog.slug });
                       }}
                       style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.95rem' }}
@@ -2487,7 +2500,10 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       rows={2}
                       value={editingBlog.summary || ''}
                       placeholder="Brief 2-3 sentence overview explaining what this article covers and why it matters..."
-                      onChange={(e) => setEditingBlog({ ...editingBlog, summary: e.target.value })}
+                      onChange={(e) => {
+                        if (blogFormError) setBlogFormError('');
+                        setEditingBlog({ ...editingBlog, summary: e.target.value });
+                      }}
                       style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: '#1c1c1c', border: '1px solid #2e2e2e', color: '#fff', fontSize: '0.88rem', lineHeight: 1.5 }}
                     />
                   </div>
@@ -3073,11 +3089,33 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     </div>
                   </div>
 
+                  {/* Inline Validation / Cloud Sync Error Banner */}
+                  {blogFormError && (
+                    <div
+                      role="alert"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.14)',
+                        border: '1px solid rgba(239, 68, 68, 0.55)',
+                        color: '#fecaca',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        marginBottom: '12px',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        lineHeight: 1.45
+                      }}
+                    >
+                      {blogFormError}
+                    </div>
+                  )}
+
                   {/* Form Action Buttons */}
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                     <button
                       type="button"
+                      disabled={isPublishingBlog}
                       onClick={() => {
+                        setBlogFormError('');
                         setEditingBlog(null);
                         setIsCreatingBlog(false);
                         setNewGalleryImageUrl('');
@@ -3089,80 +3127,66 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                     </button>
                     <button
                       type="button"
+                      disabled={isPublishingBlog}
                       onClick={() => {
-                        if (!editingBlog.title?.trim()) {
-                          onShowToast('Please enter an article title', 'error');
-                          return;
-                        }
-                        if (!editingBlog.summary?.trim()) {
-                          onShowToast('Please enter an article summary', 'error');
-                          return;
-                        }
+                        void (async () => {
+                          const prep = prepareBlogForPublish({
+                            editingBlog,
+                            currentSections,
+                            existingBlogs: data.blogs,
+                            isCreating: isCreatingBlog
+                          });
 
-                        // Validate sections
-                        const cleanSections = currentSections.map((sec, idx) => ({
-                          ...sec,
-                          id: sec.id || `sec-${idx + 1}`,
-                          heading: sec.heading.trim() || `Section ${idx + 1}`,
-                          paragraphs: sec.paragraphs.map(p => p.trim()).filter(Boolean)
-                        }));
+                          if (!prep.ok) {
+                            setBlogFormError(prep.error);
+                            onShowToast(prep.error, 'error');
+                            return;
+                          }
 
-                        if (cleanSections.length === 0 || cleanSections.every(s => s.paragraphs.length === 0)) {
-                          onShowToast('Please write content in at least one section', 'error');
-                          return;
-                        }
+                          setBlogFormError('');
+                          setIsPublishingBlog(true);
+                          try {
+                            const saved = isCreatingBlog
+                              ? await onAddBlog(prep.finalizedBlog)
+                              : await onUpdateBlog(prep.finalizedBlog);
 
-                        // Aggregate all paragraphs for flat compatibility
-                        const aggregatedParagraphs = aggregateParagraphs(cleanSections);
+                            if (saved === false) {
+                              setBlogFormError(
+                                'Cloud save failed — your article draft is still open above. Check your authorized admin login or image budget and try publishing again.'
+                              );
+                              return;
+                            }
 
-                        // Ensure cover image and section images are collected
-                        const combinedImages = collectArticleImages(
-                          editingBlog.imageUrl?.trim() || '',
-                          cleanSections,
-                          editingBlog.images || []
-                        );
-
-                        const fallbackSlug = editingBlog.title
-                          .trim()
-                          .toLowerCase()
-                          .replace(/[^\w\s-]/g, '')
-                          .replace(/\s+/g, '-') || editingBlog.id || `article-${Date.now()}`;
-
-                        const finalizedBlog: BlogPost = {
-                          ...editingBlog,
-                          slug: (editingBlog.slug || '').trim() || fallbackSlug,
-                          title: editingBlog.title.trim(),
-                          summary: editingBlog.summary.trim(),
-                          imageUrl: editingBlog.imageUrl?.trim() || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
-                          images: combinedImages,
-                          category: editingBlog.category || '🌐 Web Development',
-                          paragraphs: aggregatedParagraphs.length > 0 ? aggregatedParagraphs : [editingBlog.summary],
-                          sections: cleanSections
-                        };
-
-                        const nextBlogsPreview = isCreatingBlog
-                          ? [finalizedBlog, ...data.blogs.filter((b) => b.id !== finalizedBlog.id)]
-                          : data.blogs.map((b) => (b.id === finalizedBlog.id ? finalizedBlog : b));
-                        if (!isWithinFirestoreDocBudget(nextBlogsPreview)) {
-                          onShowToast('Total blogs data exceeds the 850 KB cloud sync budget. Replace some uploaded images with external URLs.', 'error');
-                          return;
-                        }
-
-                        if (isCreatingBlog) {
-                          onAddBlog(finalizedBlog);
-                          onShowToast('🎉 Complete blog article with headings & images published successfully!', 'success');
-                        } else {
-                          onUpdateBlog(finalizedBlog);
-                          onShowToast('Article updated with multiple headings, paragraphs & images!', 'success');
-                        }
-                        setEditingBlog(null);
-                        setIsCreatingBlog(false);
-                        setNewGalleryImageUrl('');
+                            setBlogCategoryFilter('All');
+                            setBlogSearch('');
+                            setEditingBlog(null);
+                            setIsCreatingBlog(false);
+                            setNewGalleryImageUrl('');
+                            onShowToast(
+                              isCreatingBlog
+                                ? '🎉 Complete blog article published live to cloud!'
+                                : 'Article changes published live to cloud!',
+                              'success'
+                            );
+                          } finally {
+                            setIsPublishingBlog(false);
+                          }
+                        })();
                       }}
                       className="btn btn-primary"
-                      style={{ padding: '7px 18px', fontSize: '0.85rem' }}
+                      style={{
+                        padding: '7px 18px',
+                        fontSize: '0.85rem',
+                        opacity: isPublishingBlog ? 0.75 : 1,
+                        cursor: isPublishingBlog ? 'wait' : 'pointer'
+                      }}
                     >
-                      <Save size={14} /> {isCreatingBlog ? 'Publish Complete Blog' : 'Save Changes'}
+                      <Save size={14} />{' '}
+                      {isPublishingBlog
+                        ? 'Publishing...'
+                        : isCreatingBlog
+                          ? 'Publish Complete Blog'
+                          : 'Save Changes'}
                     </button>
                   </div>
                 </div>
@@ -3230,7 +3254,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                   return matchesSearch && matchesCategory;
                 })
                 .map((blog) => {
-                  const imageCount = blog.images?.length || 1;
+                  const imageCount = collectArticleImages(blog.imageUrl, blog.sections, blog.images).length || 1;
                   return (
                     <div
                       key={blog.id}
@@ -3270,9 +3294,12 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           onClick={() => {
+                            const normalizedSections = ensureBlogSections(blog);
+                            setBlogFormError('');
                             setEditingBlog({
                               ...blog,
-                              sections: ensureBlogSections(blog)
+                              sections: normalizedSections,
+                              images: extractExtraArticleImages(blog.imageUrl, normalizedSections, blog.images || [])
                             });
                             setIsCreatingBlog(false);
                             setNewGalleryImageUrl('');

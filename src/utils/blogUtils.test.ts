@@ -4,12 +4,14 @@ import {
   normalizeBlogSections,
   aggregateParagraphs,
   collectArticleImages,
+  extractExtraArticleImages,
+  prepareBlogForPublish,
   countWords,
   getArticleWordCount,
   estimateReadingTime,
   calculateReadingProgress
-} from './blogUtils';
-import { BlogPost, BlogSection } from '../types';
+} from './blogUtils.ts';
+import type { BlogPost, BlogSection } from '../types.ts';
 
 test('normalizeBlogSections preserves existing structured sections', () => {
   const existingSections: BlogSection[] = [
@@ -109,6 +111,164 @@ test('collectArticleImages collects unique cover, section, and gallery images wi
     'https://example.com/image-2.jpg',
     'https://example.com/gallery.jpg'
   ]);
+});
+
+test('extractExtraArticleImages removes cover and section images to prevent payload duplication', () => {
+  const coverDataUrl = 'data:image/webp;base64,COVERDATA';
+  const sectionDataUrl = 'data:image/webp;base64,SECTIONDATA';
+  const extraDataUrl = 'data:image/webp;base64,EXTRADATA';
+
+  const extras = extractExtraArticleImages(
+    coverDataUrl,
+    [
+      {
+        id: 's1',
+        heading: 'Section 1',
+        paragraphs: ['Body'],
+        imageUrl: sectionDataUrl
+      }
+    ],
+    [coverDataUrl, sectionDataUrl, extraDataUrl, extraDataUrl, '   ']
+  );
+
+  assert.deepEqual(extras, [extraDataUrl]);
+});
+
+test('prepareBlogForPublish validates required title, summary, and section content', () => {
+  const baseSections: BlogSection[] = [
+    {
+      id: 's1',
+      heading: '1. Architecture',
+      paragraphs: ['Detailed engineering insight paragraph.']
+    }
+  ];
+
+  const missingTitle = prepareBlogForPublish({
+    editingBlog: {
+      id: 'b1',
+      title: '   ',
+      slug: '',
+      imageUrl: '',
+      summary: 'Valid summary',
+      paragraphs: []
+    },
+    currentSections: baseSections,
+    existingBlogs: [],
+    isCreating: true
+  });
+  assert.equal(missingTitle.ok, false);
+  if (!missingTitle.ok) {
+    assert.match(missingTitle.error, /title/i);
+  }
+
+  const missingSummary = prepareBlogForPublish({
+    editingBlog: {
+      id: 'b1',
+      title: 'Valid Title',
+      slug: '',
+      imageUrl: '',
+      summary: '',
+      paragraphs: []
+    },
+    currentSections: baseSections,
+    existingBlogs: [],
+    isCreating: true
+  });
+  assert.equal(missingSummary.ok, false);
+  if (!missingSummary.ok) {
+    assert.match(missingSummary.error, /summary/i);
+  }
+
+  const emptySections = prepareBlogForPublish({
+    editingBlog: {
+      id: 'b1',
+      title: 'Valid Title',
+      slug: '',
+      imageUrl: '',
+      summary: 'Valid summary',
+      paragraphs: []
+    },
+    currentSections: [{ id: 's1', heading: 'Empty', paragraphs: ['   '] }],
+    existingBlogs: [],
+    isCreating: true
+  });
+  assert.equal(emptySections.ok, false);
+  if (!emptySections.ok) {
+    assert.match(emptySections.error, /section/i);
+  }
+});
+
+test('prepareBlogForPublish stores cover and section images once instead of duplicating data URLs inside images[]', () => {
+  const coverDataUrl = `data:image/webp;base64,${'A'.repeat(220_000)}`;
+  const sectionDataUrl = `data:image/webp;base64,${'B'.repeat(220_000)}`;
+  const extraDataUrl = `data:image/webp;base64,${'C'.repeat(120_000)}`;
+
+  const result = prepareBlogForPublish({
+    editingBlog: {
+      id: 'blog-uploaded',
+      title: 'Enterprise Performance Guide',
+      slug: '',
+      imageUrl: coverDataUrl,
+      summary: 'How to structure fast React and Firestore platforms without hitting document limits.',
+      paragraphs: [],
+      images: [coverDataUrl, sectionDataUrl, extraDataUrl],
+      category: '⚡ Performance & Security'
+    },
+    currentSections: [
+      {
+        id: 'sec-1',
+        heading: '1. Performance Blueprint',
+        paragraphs: ['First technical paragraph.', 'Second technical paragraph.'],
+        imageUrl: sectionDataUrl
+      }
+    ],
+    existingBlogs: [],
+    isCreating: true
+  });
+
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.equal(result.finalizedBlog.slug, 'enterprise-performance-guide');
+    assert.deepEqual(result.finalizedBlog.images, [extraDataUrl]);
+    assert.deepEqual(
+      collectArticleImages(
+        result.finalizedBlog.imageUrl,
+        result.finalizedBlog.sections,
+        result.finalizedBlog.images
+      ),
+      [coverDataUrl, sectionDataUrl, extraDataUrl]
+    );
+    assert.ok(result.bytes < 600_000, `Expected non-duplicated payload < 600KB, got ${result.bytes}`);
+  }
+});
+
+test('prepareBlogForPublish rejects payloads that exceed the cloud document budget', () => {
+  const bigImage = `data:image/webp;base64,${'Z'.repeat(20_000)}`;
+  const res = prepareBlogForPublish({
+    editingBlog: {
+      id: 'b-over',
+      title: 'Oversized Article',
+      slug: 'oversized-article',
+      imageUrl: bigImage,
+      summary: 'Summary text',
+      paragraphs: []
+    },
+    currentSections: [
+      {
+        id: 's1',
+        heading: 'Section',
+        paragraphs: ['Paragraph content']
+      }
+    ],
+    existingBlogs: [],
+    isCreating: true,
+    budgetBytes: 10_000
+  });
+
+  assert.equal(res.ok, false);
+  if (!res.ok) {
+    assert.match(res.error, /exceeds the/i);
+  }
 });
 
 test('countWords handles empty strings, punctuation, and irregular whitespace', () => {

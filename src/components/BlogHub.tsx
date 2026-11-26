@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, ArrowRight, Search, Clock, Calendar, User, Images, Sparkles, Tag, BookOpen, Layers } from 'lucide-react';
 import { BlogPost, BLOG_CATEGORIES } from '../types';
 import { BLOG_CATEGORY_METAS } from '../data/blogs';
+import { collectArticleImages } from '../utils/blogUtils';
 
 interface BlogHubProps {
   blogs: BlogPost[];
@@ -70,7 +71,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
         blog.summary.toLowerCase().includes(q) ||
         (blog.author && blog.author.toLowerCase().includes(q)) ||
         (blog.category && blog.category.toLowerCase().includes(q)) ||
-        blog.paragraphs.some((p) => p.toLowerCase().includes(q)) ||
+        (blog.paragraphs || []).some((p) => p.toLowerCase().includes(q)) ||
         (blog.tags && blog.tags.some((t) => t.toLowerCase().includes(q)));
 
       const matchesCategory =
@@ -452,7 +453,7 @@ export const BlogHub: React.FC<BlogHubProps> = ({ blogs, onBackToHome, onSelectA
             }}
           >
             {filteredBlogs.map((blog) => {
-              const imageCount = blog.images && blog.images.length > 0 ? blog.images.length : 1;
+              const imageCount = collectArticleImages(blog.imageUrl, blog.sections, blog.images).length || 1;
               const hasMultipleImages = imageCount > 1;
 
               return (

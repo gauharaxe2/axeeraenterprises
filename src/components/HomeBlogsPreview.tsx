@@ -2,7 +2,7 @@ import React from 'react';
 import { BookOpen, ArrowRight, Images, Clock } from 'lucide-react';
 import { BlogPost } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { estimateReadingTime } from '../utils/blogUtils';
+import { estimateReadingTime, collectArticleImages } from '../utils/blogUtils';
 
 interface HomeBlogsPreviewProps {
   blogs: BlogPost[];
@@ -29,10 +29,7 @@ export const HomeBlogsPreview: React.FC<HomeBlogsPreviewProps> = ({
         <div className="services-grid">
           {featured.map((blog) => {
             const { minutes } = estimateReadingTime(blog);
-            const photoCount =
-              1 +
-              (blog.images ? blog.images.length : 0) +
-              (blog.sections ? blog.sections.filter((s) => s.imageUrl).length : 0);
+            const photoCount = collectArticleImages(blog.imageUrl, blog.sections, blog.images).length;
 
             return (
               <div

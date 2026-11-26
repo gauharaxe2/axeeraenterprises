@@ -20,7 +20,7 @@ import {
 import { BlogPost } from '../types';
 import { SITE_LOGO_SRC } from '../brand';
 import { WhatsAppIcon } from './WhatsAppIcon';
-import { calculateReadingProgress, estimateReadingTime } from '../utils/blogUtils';
+import { calculateReadingProgress, estimateReadingTime, collectArticleImages } from '../utils/blogUtils';
 
 interface BlogArticleDetailProps {
   blog: BlogPost;
@@ -94,25 +94,10 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
   }, [blog.id, blog.slug, updateReadingProgress]);
 
   // Combine primary cover image, section images, and additional gallery images without duplicates
-  const allImages = useMemo(() => {
-    const list: string[] = [];
-    if (blog.imageUrl && !list.includes(blog.imageUrl)) list.push(blog.imageUrl);
-    if (blog.sections && Array.isArray(blog.sections)) {
-      blog.sections.forEach((sec) => {
-        if (sec.imageUrl && !list.includes(sec.imageUrl)) {
-          list.push(sec.imageUrl);
-        }
-      });
-    }
-    if (blog.images && Array.isArray(blog.images)) {
-      blog.images.forEach((img) => {
-        if (img && !list.includes(img)) {
-          list.push(img);
-        }
-      });
-    }
-    return list;
-  }, [blog.imageUrl, blog.sections, blog.images]);
+  const allImages = useMemo(
+    () => collectArticleImages(blog.imageUrl, blog.sections, blog.images),
+    [blog.imageUrl, blog.sections, blog.images]
+  );
 
   const handleCopyLink = () => {
     try {

@@ -1,4 +1,12 @@
-import { BlogPost, BlogSection } from '../types';
+import type { BlogPost, BlogSection } from '../types.ts';
+import {
+  FIRESTORE_SAFE_SECTION_BYTES,
+  estimateJsonSectionBytes,
+  isWithinFirestoreDocBudget
+} from './imageUpload.ts';
+
+const DEFAULT_BLOG_COVER_IMAGE =
+  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80';
 
 /**
  * Ensures a blog post has structured sections.
@@ -44,13 +52,13 @@ export function aggregateParagraphs(sections: BlogSection[]): string[] {
  * cover image, section images, and additional gallery images.
  */
 export function collectArticleImages(
-  coverUrl: string,
-  sections: BlogSection[],
+  coverUrl?: string | null,
+  sections: BlogSection[] = [],
   extraImages: string[] = []
 ): string[] {
   const list: string[] = [];
 
-  const addIfUnique = (url?: string) => {
+  const addIfUnique = (url?: string | null) => {
     if (url && url.trim() && !list.includes(url.trim())) {
       list.push(url.trim());
     }
@@ -67,6 +75,137 @@ export function collectArticleImages(
   });
 
   return list;
+}
+
+/**
+ * Returns only unique extra showcase images that are not already stored as the
+ * cover image or as any section image, preventing large base64 Data URL duplication.
+ */
+export function extractExtraArticleImages(
+  coverUrl?: string | null,
+  sections: BlogSection[] = [],
+  extraImages: string[] = []
+): string[] {
+  const primarySet = new Set<string>();
+  if (coverUrl && coverUrl.trim()) {
+    primarySet.add(coverUrl.trim());
+  }
+  sections.forEach((sec) => {
+    if (sec.imageUrl && sec.imageUrl.trim()) {
+      primarySet.add(sec.imageUrl.trim());
+    }
+  });
+
+  const extras: string[] = [];
+  extraImages.forEach((url) => {
+    const trimmed = typeof url === 'string' ? url.trim() : '';
+    if (trimmed && !primarySet.has(trimmed) && !extras.includes(trimmed)) {
+      extras.push(trimmed);
+    }
+  });
+
+  return extras;
+}
+
+export type PrepareBlogPublishResult =
+  | {
+      ok: true;
+      finalizedBlog: BlogPost;
+      nextBlogs: BlogPost[];
+      bytes: number;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+/**
+ * Validates and builds a publish-ready BlogPost and updated blogs array while
+ * deduplicating image storage and verifying the Firestore 850 KB safe budget.
+ */
+export function prepareBlogForPublish(params: {
+  editingBlog: BlogPost;
+  currentSections: BlogSection[];
+  existingBlogs: BlogPost[];
+  isCreating: boolean;
+  budgetBytes?: number;
+}): PrepareBlogPublishResult {
+  const {
+    editingBlog,
+    currentSections,
+    existingBlogs,
+    isCreating,
+    budgetBytes = FIRESTORE_SAFE_SECTION_BYTES
+  } = params;
+
+  const trimmedTitle = editingBlog.title?.trim() || '';
+  if (!trimmedTitle) {
+    return { ok: false, error: 'Please enter an article title before publishing.' };
+  }
+
+  const trimmedSummary = editingBlog.summary?.trim() || '';
+  if (!trimmedSummary) {
+    return { ok: false, error: 'Please enter an article summary / excerpt before publishing.' };
+  }
+
+  const cleanSections: BlogSection[] = currentSections.map((sec, idx) => ({
+    ...sec,
+    id: sec.id || `sec-${idx + 1}`,
+    heading: sec.heading.trim() || `Section ${idx + 1}`,
+    paragraphs: sec.paragraphs.map((p) => p.trim()).filter(Boolean),
+    imageUrl: sec.imageUrl?.trim() || '',
+    imageCaption: sec.imageCaption?.trim() || ''
+  }));
+
+  if (cleanSections.length === 0 || cleanSections.every((s) => s.paragraphs.length === 0)) {
+    return { ok: false, error: 'Please write content in at least one article section.' };
+  }
+
+  const aggregatedParagraphs = aggregateParagraphs(cleanSections);
+  const coverImage = editingBlog.imageUrl?.trim() || DEFAULT_BLOG_COVER_IMAGE;
+  const extraImages = extractExtraArticleImages(coverImage, cleanSections, editingBlog.images || []);
+
+  const fallbackSlug =
+    trimmedTitle
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-') ||
+    editingBlog.id ||
+    `article-${Date.now()}`;
+
+  const finalizedBlog: BlogPost = {
+    ...editingBlog,
+    id: editingBlog.id || `blog-${Date.now()}`,
+    slug: (editingBlog.slug || '').trim() || fallbackSlug,
+    title: trimmedTitle,
+    summary: trimmedSummary,
+    imageUrl: coverImage,
+    images: extraImages,
+    category: editingBlog.category || '🌐 Web Development',
+    paragraphs: aggregatedParagraphs.length > 0 ? aggregatedParagraphs : [trimmedSummary],
+    sections: cleanSections
+  };
+
+  const nextBlogs = isCreating
+    ? [finalizedBlog, ...existingBlogs.filter((b) => b.id !== finalizedBlog.id)]
+    : existingBlogs.map((b) => (b.id === finalizedBlog.id ? finalizedBlog : b));
+
+  const bytes = estimateJsonSectionBytes(nextBlogs);
+  if (!isWithinFirestoreDocBudget(nextBlogs, budgetBytes)) {
+    const usedKb = Math.round(bytes / 1024);
+    const limitKb = Math.round(budgetBytes / 1024);
+    return {
+      ok: false,
+      error: `Total blogs data (${usedKb} KB) exceeds the ${limitKb} KB cloud sync budget. Replace some uploaded images with external URLs or remove unused screenshots.`
+    };
+  }
+
+  return {
+    ok: true,
+    finalizedBlog,
+    nextBlogs,
+    bytes
+  };
 }
 
 export const DEFAULT_WORDS_PER_MINUTE = 200;

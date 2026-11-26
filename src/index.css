@@ -1642,7 +1642,7 @@ section {
   padding: 1rem 1.25rem;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  z-index: 10000;
+  z-index: 100050;
   max-width: 420px;
   display: flex;
   align-items: center;
