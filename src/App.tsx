@@ -92,6 +92,15 @@ function pushUrl(url: string) {
 }
 
 const AppContent: React.FC = () => {
+  const [notification, setNotification] = useState<NotificationState | null>(null);
+  const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    setNotification({
+      id: Date.now().toString(),
+      message,
+      type
+    });
+  }, []);
+
   const {
     data,
     syncStatus,
@@ -125,7 +134,9 @@ const AppContent: React.FC = () => {
     resetToDefaults,
     exportDataJson,
     importDataJson
-  } = useAdminData();
+  } = useAdminData((errorMessage) => {
+    showNotification(errorMessage, 'error');
+  });
 
   const {
     translateGeneralInfo,
@@ -186,7 +197,6 @@ const AppContent: React.FC = () => {
     }
     return null;
   });
-  const [notification, setNotification] = useState<NotificationState | null>(null);
   const [preloaderPhase, setPreloaderPhase] = useState<'on' | 'out' | 'off'>('on');
 
   // Keep selectedBlog, selectedService, and selectedProject synchronized when live data updates from Firestore
@@ -219,14 +229,6 @@ const AppContent: React.FC = () => {
       }
     }
   }, [data.projects, selectedProject]);
-
-  const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info') => {
-    setNotification({
-      id: Date.now().toString(),
-      message,
-      type
-    });
-  }, []);
 
   const applyLocation = useCallback(() => {
     if (isAdminLocation(window.location.pathname, window.location.hash)) {

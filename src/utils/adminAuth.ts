@@ -7,11 +7,7 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
-/** Google accounts allowed into the admin panel. Override with VITE_ADMIN_EMAILS. */
-const DEFAULT_ADMIN_EMAILS = [
-  'gauharaxe@outlook.com',
-  'gauhar426622@gmail.com'
-];
+import { DEFAULT_ADMIN_EMAILS, isAuthorizedAdminEmail } from './firestoreSyncGuard';
 
 function adminEmailAllowlist(): string[] {
   const fromEnv =
@@ -25,12 +21,11 @@ function adminEmailAllowlist(): string[] {
 }
 
 export function isAllowedAdminEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return adminEmailAllowlist().includes(email.trim().toLowerCase());
+  return isAuthorizedAdminEmail(email, adminEmailAllowlist());
 }
 
 export function isAdminUser(user: User | null | undefined): boolean {
-  return Boolean(user && isAllowedAdminEmail(user.email));
+  return Boolean(user && user.emailVerified !== false && isAllowedAdminEmail(user.email));
 }
 
 /** Synchronous check after Firebase Auth has restored persistence. */

@@ -2871,8 +2871,15 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           editingBlog.images || []
                         );
 
+                        const fallbackSlug = editingBlog.title
+                          .trim()
+                          .toLowerCase()
+                          .replace(/[^\w\s-]/g, '')
+                          .replace(/\s+/g, '-') || editingBlog.id || `article-${Date.now()}`;
+
                         const finalizedBlog: BlogPost = {
                           ...editingBlog,
+                          slug: (editingBlog.slug || '').trim() || fallbackSlug,
                           title: editingBlog.title.trim(),
                           summary: editingBlog.summary.trim(),
                           imageUrl: editingBlog.imageUrl?.trim() || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',

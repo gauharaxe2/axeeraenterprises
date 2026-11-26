@@ -7,41 +7,94 @@ service cloud.firestore {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Health check collection for connection testing
-    match /test/{docId} {
-      allow get: if isValidId(docId);
-      allow list: if true;
-      allow write: if isValidId(docId);
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    // Site content sections synced between admin panel and public UI
+    function isAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.email_verified == true &&
+        request.auth.token.email in [
+          'axe426622@gmail.com',
+          'gauharaxe@outlook.com',
+          'gauhar426622@gmail.com'
+        ];
+    }
+
+    function isValidSiteSection(data, sectionId) {
+      return data.keys().hasAll(['id', 'data']) &&
+        data.keys().hasOnly(['id', 'data', 'updatedAt', 'updatedBy']) &&
+        data.id == sectionId &&
+        data.data is string &&
+        data.data.size() <= 1000000 &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64)) &&
+        (!('updatedBy' in data) || (data.updatedBy is string && data.updatedBy.size() <= 150));
+    }
+
+    function isValidSubmissionCreate(data) {
+      return data.keys().hasAll(['fullName', 'email', 'message']) &&
+        data.keys().hasOnly(['fullName', 'email', 'message', 'service', 'company', 'phone', 'budget', 'read', 'createdAt']) &&
+        data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 150 &&
+        data.email is string && data.email.size() > 3 && data.email.size() <= 150 && data.email.matches('^[^@]+@[^@]+\\.[^@]+$') &&
+        data.message is string && data.message.size() > 0 && data.message.size() <= 3000 &&
+        (!('service' in data) || (data['service'] is string && data['service'].size() <= 100)) &&
+        (!('company' in data) || (data.company is string && data.company.size() <= 150)) &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 50)) &&
+        (!('budget' in data) || (data.budget is string && data.budget.size() <= 50)) &&
+        (!('read' in data) || data['read'] == false) &&
+        (!('createdAt' in data) || data.createdAt == request.time);
+    }
+
+    function isValidSubmissionUpdate(data) {
+      return data.keys().hasAll(['fullName', 'email', 'message']) &&
+        data.keys().hasOnly(['fullName', 'email', 'message', 'service', 'company', 'phone', 'budget', 'read', 'createdAt']) &&
+        data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 150 &&
+        data.email is string && data.email.size() > 3 && data.email.size() <= 150 && data.email.matches('^[^@]+@[^@]+\\.[^@]+$') &&
+        data.message is string && data.message.size() > 0 && data.message.size() <= 3000 &&
+        (!('service' in data) || (data['service'] is string && data['service'].size() <= 100)) &&
+        (!('company' in data) || (data.company is string && data.company.size() <= 150)) &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 50)) &&
+        (!('budget' in data) || (data.budget is string && data.budget.size() <= 50)) &&
+        (!('read' in data) || data['read'] is bool);
+    }
+
+    function isValidSubscriberCreate(data) {
+      return data.keys().hasAll(['email']) &&
+        data.keys().hasOnly(['email', 'source', 'status', 'createdAt']) &&
+        data.email is string && data.email.size() > 3 && data.email.size() <= 150 && data.email.matches('^[^@]+@[^@]+\\.[^@]+$') &&
+        (!('source' in data) || (data.source is string && data.source.size() <= 100)) &&
+        (!('status' in data) || (data.status is string && data.status.size() <= 50)) &&
+        (!('createdAt' in data) || data.createdAt == request.time);
+    }
+
+    // Health check collection for connection testing (public read only, admin write)
+    match /test/{docId} {
+      allow get: if isValidId(docId);
+      allow list: if isAdmin();
+      allow write: if isAdmin() && isValidId(docId);
+    }
+
+    // Site content sections: public read, strictly admin-only write/delete
     match /site_content/{sectionId} {
       allow get: if isValidId(sectionId);
       allow list: if true;
-      allow create, update: if isValidId(sectionId) && request.resource.data != null;
-      allow delete: if isValidId(sectionId);
+      allow create, update: if isAdmin() && isValidId(sectionId) && isValidSiteSection(request.resource.data, sectionId);
+      allow delete: if isAdmin() && isValidId(sectionId);
     }
 
-    // Prospective client inquiry submissions
+    // Prospective client inquiry submissions: public create, admin-only read/update/delete
     match /submissions/{submissionId} {
-      allow create: if isValidId(submissionId) &&
-        request.resource.data.keys().hasAll(['fullName', 'email', 'message']);
-      allow get: if isValidId(submissionId);
-      allow list: if true;
-      allow update, delete: if isValidId(submissionId);
+      allow create: if isValidId(submissionId) && isValidSubmissionCreate(request.resource.data);
+      allow get, list: if isAdmin();
+      allow update: if isAdmin() && isValidId(submissionId) && isValidSubmissionUpdate(request.resource.data);
+      allow delete: if isAdmin() && isValidId(submissionId);
     }
 
-    // Newsletter email subscribers collection
+    // Newsletter email subscribers: public create, admin-only read/update/delete
     match /newsletter_subscribers/{subscriberId} {
-      allow create: if isValidId(subscriberId) &&
-        request.resource.data.keys().hasAll(['email']) &&
-        request.resource.data.email is string &&
-        request.resource.data.email.size() > 3 &&
-        request.resource.data.email.size() <= 150 &&
-        request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$');
-      allow get: if isValidId(subscriberId);
-      allow list: if true;
-      allow update, delete: if isValidId(subscriberId);
+      allow create: if isValidId(subscriberId) && isValidSubscriberCreate(request.resource.data);
+      allow get, list: if isAdmin();
+      allow update, delete: if isAdmin() && isValidId(subscriberId);
     }
 
     // Default deny catch-all

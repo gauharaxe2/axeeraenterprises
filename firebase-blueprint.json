@@ -44,6 +44,11 @@
           "maxLength": 100,
           "description": "Requested agency service"
         },
+        "company": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Optional client company or organization name"
+        },
         "budget": {
           "type": "string",
           "maxLength": 50,
@@ -58,6 +63,10 @@
           "type": "string",
           "maxLength": 3000,
           "description": "Project brief and requirements"
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether the admin has reviewed the inquiry"
         },
         "createdAt": {
           "type": "string",

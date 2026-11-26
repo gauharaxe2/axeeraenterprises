@@ -92,16 +92,31 @@ export async function testConnection(): Promise<boolean> {
   }
 }
 
-// Sync section to Firestore
+// Sync section to Firestore (admin-only per firestore.rules)
 export async function saveSectionToFirestore(sectionId: string, data: unknown): Promise<void> {
   const docPath = `site_content/${sectionId}`;
   try {
+    const serialized = JSON.stringify(data);
+    const { validateSectionPayloadSize } = await import('./firestoreSyncGuard');
+    const sizeCheck = validateSectionPayloadSize(serialized);
+    if (!sizeCheck.ok) {
+      throw new Error(sizeCheck.error);
+    }
     const docRef = doc(db, 'site_content', sectionId);
-    await setDoc(docRef, {
+    const payload: {
+      id: string;
+      data: string;
+      updatedAt: string;
+      updatedBy?: string;
+    } = {
       id: sectionId,
-      data: JSON.stringify(data),
+      data: serialized,
       updatedAt: new Date().toISOString()
-    });
+    };
+    if (auth.currentUser?.email) {
+      payload.updatedBy = auth.currentUser.email;
+    }
+    await setDoc(docRef, payload);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, docPath);
   }

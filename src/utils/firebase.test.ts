@@ -35,5 +35,9 @@ test('firestore.rules is valid rules_version 2 with site_content, submissions, a
   assert.match(rules, /match \/site_content\/\{sectionId\}/);
   assert.match(rules, /match \/submissions\/\{submissionId\}/);
   assert.match(rules, /match \/newsletter_subscribers\/\{subscriberId\}/);
+  assert.match(rules, /function isAdmin\(\)/);
+  assert.match(rules, /axe426622@gmail\.com/);
+  assert.match(rules, /allow create, update: if isAdmin\(\)/);
+  assert.match(rules, /allow get, list: if isAdmin\(\)/);
 });
 
