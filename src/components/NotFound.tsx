@@ -12,8 +12,8 @@ export const NotFound: React.FC<NotFoundProps> = ({ onHome, onContact }) => {
         paddingTop: '130px',
         paddingBottom: '90px',
         minHeight: '72vh',
-        background: '#ffffff',
-        color: '#0a0a0a'
+        background: 'var(--bg-white)',
+        color: 'var(--text-dark)'
       }}
     >
       <div className="container" style={{ maxWidth: '760px', textAlign: 'center' }}>
@@ -28,8 +28,8 @@ export const NotFound: React.FC<NotFoundProps> = ({ onHome, onContact }) => {
         >
           404
         </p>
-        <h1 style={{ fontSize: '2.6rem', marginBottom: '1rem', color: '#0a0a0a' }}>Page not found</h1>
-        <p style={{ fontSize: '1.05rem', marginBottom: '2rem', color: '#44403c' }}>
+        <h1 style={{ fontSize: '2.6rem', marginBottom: '1rem', color: 'var(--text-dark)' }}>Page not found</h1>
+        <p style={{ fontSize: '1.05rem', marginBottom: '2rem', color: 'var(--text-light)' }}>
           That address is not part of this site. The page may have moved, or the link may be mistyped.
         </p>
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>

@@ -136,7 +136,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
   };
 
   return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: '#ffffff', color: '#0a0a0a' }}>
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-white)', color: 'var(--text-dark)' }}>
       {/* Service Hero */}
       <section
         className="dark-surface"
@@ -258,7 +258,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
               <div
                 key={idx}
                 style={{
-                  background: '#ffffff',
+                  background: 'var(--bg-white)',
                   border: '1px solid var(--border-color)',
                   borderTop: '3px solid var(--primary-color)',
                   borderRadius: '12px',
@@ -276,9 +276,9 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                   }}
                 >
                   <Check size={22} />
-                  <h3 style={{ margin: 0, color: '#0a0a0a', fontSize: '1.25rem' }}>{item.title}</h3>
+                  <h3 style={{ margin: 0, color: 'var(--text-dark)', fontSize: '1.25rem' }}>{item.title}</h3>
                 </div>
-                <p style={{ color: '#44403c', margin: 0, lineHeight: 1.6 }}>{item.desc}</p>
+                <p style={{ color: 'var(--text-light)', margin: 0, lineHeight: 1.6 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -286,7 +286,7 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
       </section>
 
       {/* Technologies & Standards */}
-      <section style={{ padding: '60px 0 100px', background: '#ffffff' }}>
+      <section style={{ padding: '60px 0 100px', background: 'var(--bg-white)' }}>
         <div className="container">
           <div className="section-header">
             <h2>Our Standards & Technologies</h2>
@@ -302,10 +302,10 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                 border: '1px solid var(--border-color)'
               }}
             >
-              <h3 style={{ color: '#0a0a0a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ color: 'var(--text-dark)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Zap size={22} color="var(--gold-ink)" /> Performance-First
               </h3>
-              <p style={{ color: '#44403c', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-light)', lineHeight: 1.6 }}>
                 Every solution is audited against strict speed benchmarks, achieving sub-second load times and 90+ Core Web Vitals scores.
               </p>
             </div>
@@ -318,10 +318,10 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                 border: '1px solid var(--border-color)'
               }}
             >
-              <h3 style={{ color: '#0a0a0a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ color: 'var(--text-dark)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ShieldCheck size={22} color="var(--gold-ink)" /> Enterprise Security
               </h3>
-              <p style={{ color: '#44403c', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-light)', lineHeight: 1.6 }}>
                 SSL enforcement, sanitized database queries, encrypted communications, and adherence to modern privacy regulations.
               </p>
             </div>
@@ -334,10 +334,10 @@ export const ServiceDetailView: React.FC<ServiceDetailViewProps> = ({
                 border: '1px solid var(--border-color)'
               }}
             >
-              <h3 style={{ color: '#0a0a0a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ color: 'var(--text-dark)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Laptop size={22} color="var(--gold-ink)" /> Modern Tech Stacks
               </h3>
-              <p style={{ color: '#44403c', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-light)', lineHeight: 1.6 }}>
                 TypeScript, React, Node.js, Next.js, Kotlin, Swift, PostgreSQL, Tailwind, and AWS cloud infrastructure.
               </p>
             </div>

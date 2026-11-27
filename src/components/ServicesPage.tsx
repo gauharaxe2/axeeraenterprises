@@ -267,12 +267,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   ];
 
   return (
-    <div className="services-page-view" style={{ paddingTop: '70px', minHeight: '100vh', background: '#ffffff', color: '#0a0a0a' }}>
+    <div className="services-page-view" style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-white)', color: 'var(--text-dark)' }}>
       {/* Top Breadcrumb & Return Nav */}
       <div
         style={{
           borderBottom: '1px solid var(--border-color)',
-          background: 'rgba(255, 255, 255, 0.97)',
+          background: 'var(--navbar-bg)',
           backdropFilter: 'blur(12px)',
           position: 'sticky',
           top: '70px',
@@ -305,10 +305,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <ArrowLeft size={18} /> Return to Home
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#57534e' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             <span>Home</span>
             <span>/</span>
-            <span style={{ color: '#0a0a0a', fontWeight: 600 }}>Enterprise Services</span>
+            <span style={{ color: 'var(--text-dark)', fontWeight: 600 }}>Enterprise Services</span>
           </div>
 
           <button
@@ -444,12 +444,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                       border: isActive
-                        ? '1px solid #0a0a0a'
+                        ? '1px solid var(--pill-active-border)'
                         : '1px solid var(--border-color)',
                       background: isActive
-                        ? '#0a0a0a'
-                        : '#ffffff',
-                      color: isActive ? '#d4af37' : '#292524'
+                        ? 'var(--pill-active-bg)'
+                        : 'var(--bg-white)',
+                      color: isActive ? 'var(--pill-active-text)' : 'var(--text-body)'
                     }}
                   >
                     {cat}
@@ -467,7 +467,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   left: '14px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#57534e'
+                  color: 'var(--text-muted)'
                 }}
               />
               <input
@@ -479,9 +479,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   width: '100%',
                   padding: '10px 14px 10px 42px',
                   borderRadius: '8px',
-                  background: '#ffffff',
+                  background: 'var(--bg-white)',
                   border: '1px solid var(--border-color)',
-                  color: '#0a0a0a',
+                  color: 'var(--text-dark)',
                   fontSize: '0.9rem'
                 }}
               />
@@ -495,7 +495,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     transform: 'translateY(-50%)',
                     background: 'transparent',
                     border: 'none',
-                    color: '#57534e',
+                    color: 'var(--text-muted)',
                     fontSize: '0.8rem',
                     cursor: 'pointer'
                   }}
@@ -509,14 +509,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       </section>
 
       {/* Main Services List */}
-      <section style={{ padding: '4rem 0', background: '#ffffff' }}>
+      <section style={{ padding: '4rem 0', background: 'var(--bg-white)' }}>
         <div className="container">
           <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0a0a0a', margin: '0 0 6px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 6px' }}>
                 Enterprise Service Catalog ({filteredServices.length})
               </h2>
-              <p style={{ margin: 0, color: '#44403c', fontSize: '0.95rem' }}>
+              <p style={{ margin: 0, color: 'var(--text-light)', fontSize: '0.95rem' }}>
                 Showing full technical deliverables, timelines, and architectural specs.
               </p>
             </div>
@@ -532,12 +532,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 padding: '4rem 2rem',
                 background: 'var(--bg-light)',
                 borderRadius: '12px',
-                border: '1px dashed #c8bfa8'
+                border: '1px dashed var(--border-dashed)'
               }}
             >
               <HelpCircle size={40} style={{ color: 'var(--gold-ink)', margin: '0 auto 1rem' }} />
-              <h3 style={{ color: '#0a0a0a', margin: '0 0 8px' }}>No services match your search</h3>
-              <p style={{ color: '#44403c', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ color: 'var(--text-dark)', margin: '0 0 8px' }}>No services match your search</h3>
+              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
                 Try adjusting your search terms or selecting a different category.
               </p>
               <button
@@ -565,7 +565,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     key={service.id}
                     id={`service-card-${service.id}`}
                     style={{
-                      background: '#ffffff',
+                      background: 'var(--bg-white)',
                       border: '1px solid var(--border-color)',
                       borderRadius: '16px',
                       padding: '2.5rem',
@@ -588,7 +588,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         background:
                           index % 2 === 0
                             ? 'linear-gradient(90deg, var(--primary-color), var(--primary-dark))'
-                            : 'linear-gradient(90deg, #0a0a0a, var(--primary-color))'
+                            : 'linear-gradient(90deg, var(--border-strong), var(--primary-color))'
                       }}
                     />
 
@@ -601,8 +601,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                             style={{
                               padding: '4px 10px',
                               borderRadius: '6px',
-                              background: '#fdf8e6',
-                              border: '1px solid rgba(184, 134, 11, 0.35)',
+                              background: 'var(--chip-bg)',
+                              border: '1px solid var(--chip-border)',
                               color: 'var(--gold-ink)',
                               fontSize: '0.75rem',
                               fontWeight: 700,
@@ -618,7 +618,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                               borderRadius: '6px',
                               background: 'var(--bg-light)',
                               border: '1px solid var(--border-color)',
-                              color: '#44403c',
+                              color: 'var(--text-light)',
                               fontSize: '0.75rem',
                               fontWeight: 600,
                               display: 'inline-flex',
@@ -649,10 +649,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                             {getIcon(service.icon)}
                           </div>
                           <div>
-                            <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#0a0a0a' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>
                               {service.title}
                             </h3>
-                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#57534e' }}>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                               Pillar ID: <code style={{ color: 'var(--gold-ink)', fontWeight: 600 }}>{service.id}</code>
                             </p>
                           </div>
@@ -662,11 +662,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         <ServiceCatalogCover imageUrl={service.imageUrl} title={service.title} />
 
                         {/* Short & Full Descriptions */}
-                        <p style={{ fontSize: '1rem', color: '#1c1917', lineHeight: 1.6, marginBottom: '1rem', fontWeight: 500 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-strong)', lineHeight: 1.6, marginBottom: '1rem', fontWeight: 500 }}>
                           {service.shortDesc}
                         </p>
                         {service.fullDesc && (
-                          <p style={{ fontSize: '0.9rem', color: '#44403c', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                          <p style={{ fontSize: '0.9rem', color: 'var(--text-light)', lineHeight: 1.6, marginBottom: '1.5rem' }}>
                             {service.fullDesc}
                           </p>
                         )}
@@ -674,12 +674,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         {/* Architectural Highlight */}
                         <div
                           style={{
-                            background: '#fdf8e6',
+                            background: 'var(--callout-warning-bg)',
                             borderLeft: '3px solid var(--primary-color)',
                             padding: '10px 14px',
                             borderRadius: '0 8px 8px 0',
                             fontSize: '0.85rem',
-                            color: '#4a3500',
+                            color: 'var(--callout-warning-text)',
                             marginBottom: '1.5rem',
                             fontWeight: 500
                           }}
@@ -735,7 +735,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                           style={{
                             margin: '0 0 1rem',
                             fontSize: '0.9rem',
-                            color: '#0a0a0a',
+                            color: 'var(--text-dark)',
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px',
                             display: 'flex',
@@ -750,7 +750,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                           {features.map((feat, idx) => (
                             <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                               <CheckCircle2 size={16} style={{ color: 'var(--gold-ink)', flexShrink: 0, marginTop: '3px' }} />
-                              <span style={{ fontSize: '0.85rem', color: '#292524', lineHeight: 1.5 }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--text-body)', lineHeight: 1.5 }}>
                                 {feat}
                               </span>
                             </div>
@@ -765,7 +765,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                             fontSize: '0.75rem',
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px',
-                            color: '#57534e',
+                            color: 'var(--text-muted)',
                             marginBottom: '8px',
                             display: 'flex',
                             alignItems: 'center',
@@ -782,9 +782,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                                 fontSize: '0.75rem',
                                 padding: '3px 8px',
                                 borderRadius: '4px',
-                                background: '#ffffff',
+                                background: 'var(--bg-white)',
                                 border: '1px solid var(--border-color)',
-                                color: '#1c1917',
+                                color: 'var(--text-strong)',
                                 fontWeight: 500
                               }}
                             >
@@ -809,10 +809,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <span style={{ color: 'var(--gold-ink)', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
               Our Execution Framework
             </span>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#0a0a0a', margin: '6px 0 12px' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '6px 0 12px' }}>
               How We Deliver Enterprise Digital Systems
             </h2>
-            <p style={{ color: '#44403c', fontSize: '0.95rem', margin: 0, lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', margin: 0, lineHeight: 1.6 }}>
               A battle-tested 4-phase agile methodology designed to maximize velocity while eliminating technical debt and security risks.
             </p>
           </div>
@@ -849,7 +849,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               <div
                 key={i}
                 style={{
-                  background: '#ffffff',
+                  background: 'var(--bg-white)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '12px',
                   padding: '1.75rem',
@@ -869,10 +869,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 >
                   {st.step}
                 </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0a0a0a', margin: '0 0 8px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-dark)', margin: '0 0 8px' }}>
                   {st.title}
                 </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#44403c', lineHeight: 1.6 }}>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-light)', lineHeight: 1.6 }}>
                   {st.desc}
                 </p>
               </div>
@@ -882,13 +882,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       </section>
 
       {/* Services FAQ Accordion */}
-      <section style={{ padding: '4rem 0', background: '#ffffff', borderTop: '1px solid var(--border-color)' }}>
+      <section style={{ padding: '4rem 0', background: 'var(--bg-white)', borderTop: '1px solid var(--border-color)' }}>
         <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0a0a0a', margin: '0 0 8px' }}>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 8px' }}>
               Frequently Asked Engagement Questions
             </h2>
-            <p style={{ color: '#44403c', fontSize: '0.9rem', margin: 0 }}>
+            <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', margin: 0 }}>
               Direct answers about how we collaborate, bill, deliver, and support your systems.
             </p>
           </div>
@@ -916,7 +916,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       alignItems: 'center',
                       background: 'transparent',
                       border: 'none',
-                      color: '#0a0a0a',
+                      color: 'var(--text-dark)',
                       fontSize: '0.95rem',
                       fontWeight: 600,
                       textAlign: 'left',
@@ -933,7 +933,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       style={{
                         padding: '0 1.25rem 1.25rem',
                         fontSize: '0.88rem',
-                        color: '#44403c',
+                        color: 'var(--text-light)',
                         lineHeight: 1.6,
                         borderTop: '1px solid var(--border-color)',
                         paddingTop: '0.9rem'

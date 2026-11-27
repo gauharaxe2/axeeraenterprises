@@ -23,6 +23,7 @@ export const REVIEW_AVATAR_MAX_DIMENSION = 240;
 export const SERVICE_IMAGE_MAX_DIMENSION = 800;
 export const PROJECT_IMAGE_MAX_DIMENSION = 960;
 export const FIRESTORE_SAFE_SECTION_BYTES = 850_000;
+export const CLOUD_STORAGE_MAX_BYTES = 10 * 1024 * 1024; // 10 MB across auto-sharded cloud documents
 
 export interface ImageValidationInput {
   type?: string;
@@ -155,6 +156,22 @@ export function isWithinFirestoreDocBudget(
   budgetBytes: number = FIRESTORE_SAFE_SECTION_BYTES
 ): boolean {
   return estimateJsonSectionBytes(value) <= budgetBytes;
+}
+
+export function isWithinCloudStorageBudget(
+  value: unknown,
+  budgetBytes: number = CLOUD_STORAGE_MAX_BYTES
+): boolean {
+  return estimateJsonSectionBytes(value) <= budgetBytes;
+}
+
+export function formatStorageSize(bytes: number): string {
+  const safeBytes = Math.max(0, bytes);
+  if (safeBytes < 1024 * 1024) {
+    return `${Math.round(safeBytes / 1024)} KB`;
+  }
+  const mb = safeBytes / (1024 * 1024);
+  return `${mb.toFixed(2).replace(/\.?0+$/, '')} MB`;
 }
 
 export function deriveInitials(name: string, explicitInitials?: string): string {

@@ -167,10 +167,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({
         <div className="editorial-split contact-layout">
           <div className="editorial-stack">
             <div className="urgent-note">
-              <p style={{ margin: '0 0 0.35rem', color: '#4a3500', fontWeight: 700 }}>
-                <WhatsAppIcon size={16} color="#15803d" /> Immediate WhatsApp Response
+              <p style={{ margin: '0 0 0.35rem', color: 'var(--callout-warning-text)', fontWeight: 700 }}>
+                <WhatsAppIcon size={16} color="var(--whatsapp-ink)" /> Immediate WhatsApp Response
               </p>
-              <p style={{ margin: 0, color: '#4a3500' }}>{urgentNotice}</p>
+              <p style={{ margin: 0, color: 'var(--callout-warning-text)' }}>{urgentNotice}</p>
             </div>
 
             <div className="editorial-panel padded">

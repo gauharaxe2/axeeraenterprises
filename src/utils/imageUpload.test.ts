@@ -1,10 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  CLOUD_STORAGE_MAX_BYTES,
   computeScaledDimensions,
   deriveInitials,
   filterSupportedImageFiles,
+  formatStorageSize,
   isUploadedDataUrl,
+  isWithinCloudStorageBudget,
   isWithinFirestoreDocBudget,
   sanitizeDisplayImageUrl,
   validateImageFile
@@ -56,4 +59,13 @@ test('isWithinFirestoreDocBudget enforces the 850 KB safe ceiling and deriveInit
   assert.equal(isWithinFirestoreDocBudget({ small: 'payload' }, 1024), true);
   assert.equal(isWithinFirestoreDocBudget({ huge: 'x'.repeat(2000) }, 1024), false);
   assert.equal(deriveInitials("Axe's Era"), 'AE');
+});
+
+test('isWithinCloudStorageBudget supports 10 MB multi-doc budgets and formatStorageSize formats KB/MB cleanly', () => {
+  assert.equal(CLOUD_STORAGE_MAX_BYTES, 10 * 1024 * 1024);
+  assert.equal(isWithinCloudStorageBudget({ blob: 'a'.repeat(1_200_000) }), true);
+  assert.equal(isWithinCloudStorageBudget({ blob: 'a'.repeat(11_000_000) }), false);
+  assert.equal(formatStorageSize(776 * 1024), '776 KB');
+  assert.equal(formatStorageSize(10 * 1024 * 1024), '10 MB');
+  assert.equal(formatStorageSize(1.5 * 1024 * 1024), '1.5 MB');
 });

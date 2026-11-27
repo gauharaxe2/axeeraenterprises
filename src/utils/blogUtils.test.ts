@@ -16,7 +16,13 @@ import {
   blogsData,
   CURATED_WEB_DEV_BLOG_IDS,
   CURATED_MOBILE_APP_BLOG_IDS,
-  CURATED_BRANDING_BLOG_IDS
+  CURATED_BRANDING_BLOG_IDS,
+  CURATED_SEO_BLOG_IDS,
+  CURATED_DIGITAL_MARKETING_BLOG_IDS,
+  CURATED_SOCIAL_MEDIA_BLOG_IDS,
+  CURATED_DIGITAL_PRODUCTS_SAAS_BLOG_IDS,
+  CURATED_ECOMMERCE_BLOG_IDS,
+  CURATED_AUTHORITY_BLOG_IDS
 } from '../data/blogs.ts';
 import type { BlogPost, BlogSection } from '../types.ts';
 
@@ -509,5 +515,180 @@ test('blogsData includes all 12 curated Branding & Design articles ready for adm
         assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
       }
     }
+  }
+});
+
+test('blogsData includes all 12 curated SEO & Organic Traffic articles ready for admin section images', () => {
+  assert.equal(CURATED_SEO_BLOG_IDS.length, 12);
+
+  for (const id of CURATED_SEO_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in SEO blog ${id}`);
+    assert.equal(post.category, '🔍 SEO & Organic Traffic');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 12 curated Digital Marketing articles ready for admin section images', () => {
+  assert.equal(CURATED_DIGITAL_MARKETING_BLOG_IDS.length, 12);
+
+  for (const id of CURATED_DIGITAL_MARKETING_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in Digital Marketing blog ${id}`);
+    assert.equal(post.category, '📈 Digital Marketing');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 12 curated Social Media Management articles ready for admin section images', () => {
+  assert.equal(CURATED_SOCIAL_MEDIA_BLOG_IDS.length, 12);
+
+  for (const id of CURATED_SOCIAL_MEDIA_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in Social Media blog ${id}`);
+    assert.equal(post.category, '📲 Social Media Management');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 10 curated Digital Products & SaaS articles ready for admin section images', () => {
+  assert.equal(CURATED_DIGITAL_PRODUCTS_SAAS_BLOG_IDS.length, 10);
+
+  for (const id of CURATED_DIGITAL_PRODUCTS_SAAS_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in Digital Products & SaaS blog ${id}`);
+    assert.equal(post.category, '💻 Digital Products & SaaS');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 10 curated E-Commerce articles ready for admin section images', () => {
+  assert.equal(CURATED_ECOMMERCE_BLOG_IDS.length, 10);
+
+  for (const id of CURATED_ECOMMERCE_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in E-Commerce blog ${id}`);
+    assert.equal(post.category, '🛒 E-Commerce');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 10 curated Authority/Expertise Content articles ready for admin section images', () => {
+  assert.equal(CURATED_AUTHORITY_BLOG_IDS.length, 10);
+
+  for (const id of CURATED_AUTHORITY_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in Authority/Expertise blog ${id}`);
+    assert.equal(post.category, '🧠 Authority/Expertise Content');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('prepareBlogForPublish allows collections larger than 850 KB within the 10 MB sharded cloud budget', () => {
+  const bigImage = `data:image/webp;base64,${'W'.repeat(160_000)}`;
+  const res = prepareBlogForPublish({
+    editingBlog: {
+      id: 'blog-expanded-storage',
+      title: 'Expanded Cloud Storage Test',
+      slug: 'expanded-cloud-storage-test',
+      imageUrl: bigImage,
+      summary: 'Verifies publishing succeeds when total blogs data exceeds 850 KB under the 10 MB sharded budget.',
+      paragraphs: [],
+      sections: [
+        {
+          id: 's1',
+          heading: '1. Visual Walkthrough',
+          paragraphs: ['Detailed technical walkthrough with embedded screenshot.'],
+          imageUrl: `data:image/webp;base64,${'X'.repeat(160_000)}`
+        }
+      ]
+    },
+    currentSections: [
+      {
+        id: 's1',
+        heading: '1. Visual Walkthrough',
+        paragraphs: ['Detailed technical walkthrough with embedded screenshot.'],
+        imageUrl: `data:image/webp;base64,${'X'.repeat(160_000)}`
+      }
+    ],
+    existingBlogs: blogsData,
+    isCreating: true
+  });
+
+  assert.equal(res.ok, true);
+  if (res.ok) {
+    assert.ok(res.bytes > 850_000, `Expected combined payload > 850 KB, got ${res.bytes}`);
   }
 });

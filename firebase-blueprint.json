@@ -7,11 +7,11 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Section key identifier (generalInfo, services, projects, blogs, team, testimonials, partnerships, partnerLogos, faqs)"
+          "description": "Section key identifier (generalInfo, services, projects, blogs, team, testimonials, partnerships, partnerLogos, faqs) or sharded chunk/media key ({sectionId}__g{gen}_c{idx} / {sectionId}__g{gen}_m{idx})"
         },
         "data": {
           "type": "string",
-          "description": "JSON serialized payload or structured content for the section"
+          "description": "JSON serialized payload, sharded section manifest, or chunk/media slice for the section"
         },
         "updatedAt": {
           "type": "string",

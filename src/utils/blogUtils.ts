@@ -1,8 +1,9 @@
 import type { BlogPost, BlogSection } from '../types.ts';
 import {
-  FIRESTORE_SAFE_SECTION_BYTES,
+  CLOUD_STORAGE_MAX_BYTES,
   estimateJsonSectionBytes,
-  isWithinFirestoreDocBudget
+  formatStorageSize,
+  isWithinCloudStorageBudget
 } from './imageUpload.ts';
 
 const DEFAULT_BLOG_COVER_IMAGE =
@@ -121,7 +122,7 @@ export type PrepareBlogPublishResult =
 
 /**
  * Validates and builds a publish-ready BlogPost and updated blogs array while
- * deduplicating image storage and verifying the Firestore 850 KB safe budget.
+ * deduplicating image storage and verifying the 10 MB multi-document cloud storage budget.
  */
 export function prepareBlogForPublish(params: {
   editingBlog: BlogPost;
@@ -135,7 +136,7 @@ export function prepareBlogForPublish(params: {
     currentSections,
     existingBlogs,
     isCreating,
-    budgetBytes = FIRESTORE_SAFE_SECTION_BYTES
+    budgetBytes = CLOUD_STORAGE_MAX_BYTES
   } = params;
 
   const trimmedTitle = editingBlog.title?.trim() || '';
@@ -197,12 +198,12 @@ export function prepareBlogForPublish(params: {
     : existingBlogs.map((b) => (b.id === finalizedBlog.id ? finalizedBlog : b));
 
   const bytes = estimateJsonSectionBytes(nextBlogs);
-  if (!isWithinFirestoreDocBudget(nextBlogs, budgetBytes)) {
-    const usedKb = Math.round(bytes / 1024);
-    const limitKb = Math.round(budgetBytes / 1024);
+  if (!isWithinCloudStorageBudget(nextBlogs, budgetBytes)) {
+    const usedLabel = formatStorageSize(bytes);
+    const limitLabel = formatStorageSize(budgetBytes);
     return {
       ok: false,
-      error: `Total blogs data (${usedKb} KB) exceeds the ${limitKb} KB cloud sync budget. Replace some uploaded images with external URLs or remove unused screenshots.`
+      error: `Total blogs data (${usedLabel}) exceeds the ${limitLabel} cloud sync budget. Replace some uploaded images with external URLs or remove unused screenshots.`
     };
   }
 

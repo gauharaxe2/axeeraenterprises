@@ -12,10 +12,17 @@ import {
   serverTimestamp,
   Timestamp,
   onSnapshot,
+  writeBatch,
   type Unsubscribe
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
+import {
+  CLOUD_BATCH_MAX_BYTES,
+  buildFirestoreSectionWritePlan,
+  findStaleShardDocIds,
+  groupDocsForBatches
+} from './firestoreSharding';
 
 // Initialize Firebase App
 export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
@@ -92,31 +99,108 @@ export async function testConnection(): Promise<boolean> {
   }
 }
 
-// Sync section to Firestore (admin-only per firestore.rules)
+const observedShardDocIdsBySection = new Map<string, Set<string>>();
+
+export function registerObservedSiteContentDocs(shardMap: Record<string, string[]>): void {
+  for (const [sectionId, docIds] of Object.entries(shardMap)) {
+    observedShardDocIdsBySection.set(sectionId, new Set(docIds));
+  }
+}
+
+function createSiteSectionPayload(
+  id: string,
+  serialized: string,
+  updatedAt: string,
+  updatedBy?: string | null
+): { id: string; data: string; updatedAt: string; updatedBy?: string } {
+  const payload: {
+    id: string;
+    data: string;
+    updatedAt: string;
+    updatedBy?: string;
+  } = {
+    id,
+    data: serialized,
+    updatedAt
+  };
+  if (updatedBy) {
+    payload.updatedBy = updatedBy;
+  }
+  return payload;
+}
+
+// Sync section to Firestore (admin-only per firestore.rules), auto-sharding large arrays up to 10 MB
 export async function saveSectionToFirestore(sectionId: string, data: unknown): Promise<void> {
   const docPath = `site_content/${sectionId}`;
   try {
-    const serialized = JSON.stringify(data);
-    const { validateSectionPayloadSize } = await import('./firestoreSyncGuard');
-    const sizeCheck = validateSectionPayloadSize(serialized);
-    if (!sizeCheck.ok) {
-      throw new Error(sizeCheck.error);
+    const plan = buildFirestoreSectionWritePlan(sectionId, data);
+    const knownExistingShards = observedShardDocIdsBySection.get(sectionId) ?? [];
+    const staleIds = findStaleShardDocIds(sectionId, knownExistingShards, plan.activeShardIds);
+    const updatedAt = new Date().toISOString();
+    const updatedBy = auth.currentUser?.email || null;
+
+    if (!plan.sharded && staleIds.length === 0) {
+      const docRef = doc(db, 'site_content', sectionId);
+      await setDoc(
+        docRef,
+        createSiteSectionPayload(plan.manifestDoc.id, plan.manifestDoc.data, updatedAt, updatedBy)
+      );
+      observedShardDocIdsBySection.set(sectionId, new Set());
+      return;
     }
-    const docRef = doc(db, 'site_content', sectionId);
-    const payload: {
-      id: string;
-      data: string;
-      updatedAt: string;
-      updatedBy?: string;
-    } = {
-      id: sectionId,
-      data: serialized,
-      updatedAt: new Date().toISOString()
-    };
-    if (auth.currentUser?.email) {
-      payload.updatedBy = auth.currentUser.email;
+
+    const totalBatchBytes = plan.payloadDocs.reduce((sum, entry) => sum + entry.bytes, 0) + plan.manifestDoc.bytes;
+    const totalOps = plan.payloadDocs.length + 1 + staleIds.length;
+
+    if (totalBatchBytes <= CLOUD_BATCH_MAX_BYTES && totalOps <= 400) {
+      const batch = writeBatch(db);
+      for (const shard of plan.payloadDocs) {
+        batch.set(
+          doc(db, 'site_content', shard.id),
+          createSiteSectionPayload(shard.id, shard.data, updatedAt, updatedBy)
+        );
+      }
+      batch.set(
+        doc(db, 'site_content', plan.manifestDoc.id),
+        createSiteSectionPayload(plan.manifestDoc.id, plan.manifestDoc.data, updatedAt, updatedBy)
+      );
+      for (const staleId of staleIds) {
+        batch.delete(doc(db, 'site_content', staleId));
+      }
+      await batch.commit();
+    } else {
+      const payloadBatches = groupDocsForBatches(plan.payloadDocs);
+      for (const group of payloadBatches) {
+        const batch = writeBatch(db);
+        for (const shard of group) {
+          batch.set(
+            doc(db, 'site_content', shard.id),
+            createSiteSectionPayload(shard.id, shard.data, updatedAt, updatedBy)
+          );
+        }
+        await batch.commit();
+      }
+
+      const finalBatch = writeBatch(db);
+      finalBatch.set(
+        doc(db, 'site_content', plan.manifestDoc.id),
+        createSiteSectionPayload(plan.manifestDoc.id, plan.manifestDoc.data, updatedAt, updatedBy)
+      );
+      for (const staleId of staleIds.slice(0, 390)) {
+        finalBatch.delete(doc(db, 'site_content', staleId));
+      }
+      await finalBatch.commit();
+
+      for (let i = 390; i < staleIds.length; i += 400) {
+        const cleanupBatch = writeBatch(db);
+        for (const staleId of staleIds.slice(i, i + 400)) {
+          cleanupBatch.delete(doc(db, 'site_content', staleId));
+        }
+        await cleanupBatch.commit();
+      }
     }
-    await setDoc(docRef, payload);
+
+    observedShardDocIdsBySection.set(sectionId, new Set(plan.activeShardIds));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, docPath);
   }

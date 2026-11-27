@@ -76,7 +76,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
       style={{
         background: 'var(--bg-light)',
         minHeight: '100vh',
-        color: '#0a0a0a',
+        color: 'var(--text-dark)',
         paddingTop: '90px',
         paddingBottom: '80px'
       }}
@@ -245,7 +245,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
           {/* Document Header Card */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-white)',
               border: '1px solid var(--border-color)',
               borderTop: '4px solid var(--primary-color)',
               borderRadius: '16px',
@@ -285,7 +285,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   style={{
                     fontSize: '1.85rem',
                     fontWeight: 700,
-                    color: '#0a0a0a',
+                    color: 'var(--text-dark)',
                     margin: '0 0 0.5rem'
                   }}
                 >
@@ -296,7 +296,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    color: '#57534e',
+                    color: 'var(--text-muted)',
                     fontSize: '0.85rem'
                   }}
                 >
@@ -315,7 +315,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   style={{
                     background: 'var(--bg-light)',
                     border: '1px solid var(--border-color)',
-                    color: '#0a0a0a',
+                    color: 'var(--text-dark)',
                     padding: '8px 14px',
                     borderRadius: '8px',
                     fontSize: '0.82rem',
@@ -328,7 +328,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   }}
                   title="Copy direct link to this policy"
                 >
-                  {copiedLink ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
+                  {copiedLink ? <Check size={14} color="var(--success-ink)" /> : <Copy size={14} />}
                   {copiedLink ? 'Link Copied!' : 'Copy Link'}
                 </button>
 
@@ -337,7 +337,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                   style={{
                     background: 'var(--bg-light)',
                     border: '1px solid var(--border-color)',
-                    color: '#0a0a0a',
+                    color: 'var(--text-dark)',
                     padding: '8px 14px',
                     borderRadius: '8px',
                     fontSize: '0.82rem',
@@ -357,17 +357,17 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
             {/* Document Summary Box */}
             <div
               style={{
-                background: '#fdf8e6',
+                background: 'var(--callout-warning-bg)',
                 borderLeft: '4px solid var(--primary-color)',
                 padding: '1rem 1.25rem',
                 borderRadius: '0 8px 8px 0',
-                color: '#4a3500',
+                color: 'var(--callout-warning-text)',
                 fontSize: '0.95rem',
                 lineHeight: 1.6,
                 marginBottom: '2rem'
               }}
             >
-              <strong style={{ color: '#0a0a0a' }}>Summary of Purpose: </strong>
+              <strong style={{ color: 'var(--text-dark)' }}>Summary of Purpose: </strong>
               {doc.summary}
             </div>
 
@@ -413,7 +413,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                       }
                     }}
                     style={{
-                      color: activeSectionId === sec.id ? 'var(--gold-ink)' : '#44403c',
+                      color: activeSectionId === sec.id ? 'var(--gold-ink)' : 'var(--text-light)',
                       fontWeight: activeSectionId === sec.id ? 700 : 500,
                       fontSize: '0.85rem',
                       textDecoration: 'none',
@@ -442,7 +442,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     style={{
                       fontSize: '1.25rem',
                       fontWeight: 700,
-                      color: '#0a0a0a',
+                      color: 'var(--text-dark)',
                       marginBottom: '1rem',
                       display: 'flex',
                       alignItems: 'center',
@@ -465,7 +465,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                     <p
                       key={idx}
                       style={{
-                        color: '#292524',
+                        color: 'var(--text-body)',
                         fontSize: '0.96rem',
                         lineHeight: 1.7,
                         margin: '0 0 1rem',
@@ -490,7 +490,7 @@ export const PoliciesView: React.FC<PoliciesViewProps> = ({
                         <li
                           key={itemIdx}
                           style={{
-                            color: '#292524',
+                            color: 'var(--text-body)',
                             fontSize: '0.93rem',
                             lineHeight: 1.6
                           }}

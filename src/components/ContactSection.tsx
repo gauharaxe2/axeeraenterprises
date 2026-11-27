@@ -255,9 +255,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <div
                   role="alert"
                   style={{
-                    background: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    color: '#991b1b',
+                    background: 'var(--callout-error-bg)',
+                    border: '1px solid var(--callout-error-border)',
+                    color: 'var(--callout-error-text)',
                     borderRadius: '8px',
                     padding: '12px 14px',
                     marginBottom: '1rem',
@@ -265,24 +265,24 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     lineHeight: 1.55
                   }}
                 >
-                  <p style={{ margin: '0 0 0.5rem', color: '#991b1b', fontWeight: 600 }}>
+                  <p style={{ margin: '0 0 0.5rem', color: 'var(--callout-error-text)', fontWeight: 600 }}>
                     We couldn't send your message, so it was not delivered. Your text is still here.
                   </p>
-                  <p style={{ margin: 0, color: '#7f1d1d' }}>
+                  <p style={{ margin: 0, color: 'var(--callout-error-subtext)' }}>
                     Please try again, or reach us on{' '}
                     <a
                       href={WHATSAPP_URL}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        color: '#15803d',
+                        color: 'var(--whatsapp-ink)',
                         fontWeight: 700,
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '4px'
                       }}
                     >
-                      <WhatsAppIcon size={15} color="#16a34a" /> WhatsApp
+                      <WhatsAppIcon size={15} color="var(--whatsapp-ink)" /> WhatsApp
                     </a>
                     {phoneNumbers.length > 0 ? ' or call ' : '.'}
                     {phoneNumbers.map((number, index) => (

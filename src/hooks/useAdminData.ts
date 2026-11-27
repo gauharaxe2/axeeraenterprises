@@ -18,13 +18,26 @@ import { initialTeamMembers } from '../data/team';
 import { testimonialsData } from '../data/testimonials';
 import { initialPartnerships, initialPartnerLogos } from '../data/partnerships';
 import { faqsData } from '../data/faqs';
-import { db, testConnection, saveSectionToFirestore } from '../utils/firebase';
+import { db, testConnection, saveSectionToFirestore, registerObservedSiteContentDocs } from '../utils/firebase';
 import { mergeProjectsWithDefaults } from '../utils/mergeProjects';
 import { isValidMapPin, WAHDAT_COLONY_PIN } from '../utils/maps';
 import { shouldAcceptSnapshotData, formatSyncErrorMessage } from '../utils/firestoreSyncGuard';
+import { parseSiteContentSnapshotDocs, stripEmbeddedImagesForLocalBackup } from '../utils/firestoreSharding';
 import { mergeMissingBuiltinBlogs } from '../utils/blogUtils';
 import { isAdminSessionActive } from '../utils/adminAuth';
 import { collection, onSnapshot } from 'firebase/firestore';
+
+const KNOWN_SECTION_IDS = [
+  'generalInfo',
+  'services',
+  'projects',
+  'blogs',
+  'team',
+  'testimonials',
+  'partnerships',
+  'partnerLogos',
+  'faqs'
+] as const;
 
 const STORAGE_KEY = 'axes_era_admin_data_v3';
 
@@ -136,12 +149,16 @@ export const useAdminData = (onSyncError?: (message: string) => void) => {
   const dataRef = useRef(data);
   dataRef.current = data;
 
-  // Local storage backup persistence
+  // Local storage backup persistence (gracefully compacts embedded media if browser ~5 MB cap is hit)
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.error('Failed to persist admin data to localStorage:', e);
+    } catch {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stripEmbeddedImagesForLocalBackup(data)));
+      } catch (fallbackErr) {
+        console.warn('Skipped localStorage backup due to browser storage limit:', fallbackErr);
+      }
     }
   }, [data]);
 
@@ -174,48 +191,47 @@ export const useAdminData = (onSyncError?: (message: string) => void) => {
           return;
         }
 
-        const incomingUpdates: Partial<AdminStoreData> = {};
-
+        const docsMap: Record<string, string> = {};
         snapshot.docs.forEach((docSnap) => {
           const docData = docSnap.data();
-          const sectionId = docSnap.id;
-          if (!docData || typeof docData.data !== 'string') return;
-
-          try {
-            const parsed = JSON.parse(docData.data);
-            switch (sectionId) {
-              case 'generalInfo':
-                incomingUpdates.generalInfo = withOfficePin(parsed);
-                break;
-              case 'services':
-                incomingUpdates.services = parsed;
-                break;
-              case 'projects':
-                incomingUpdates.projects = mergeProjectsWithDefaults(parsed);
-                break;
-              case 'blogs':
-                incomingUpdates.blogs = parsed;
-                break;
-              case 'team':
-                incomingUpdates.team = parsed;
-                break;
-              case 'testimonials':
-                incomingUpdates.testimonials = parsed;
-                break;
-              case 'partnerships':
-                incomingUpdates.partnerships = parsed;
-                break;
-              case 'partnerLogos':
-                incomingUpdates.partnerLogos = parsed;
-                break;
-              case 'faqs':
-                incomingUpdates.faqs = parsed;
-                break;
-            }
-          } catch (err) {
-            console.warn(`Error parsing incoming Firestore data for ${sectionId}:`, err);
+          if (docData && typeof docData.data === 'string') {
+            docsMap[docSnap.id] = docData.data;
           }
         });
+
+        const parsedResult = parseSiteContentSnapshotDocs(docsMap, KNOWN_SECTION_IDS);
+        registerObservedSiteContentDocs(parsedResult.observedShardDocIdsBySection);
+
+        const incomingUpdates: Partial<AdminStoreData> = {};
+        const { sections } = parsedResult;
+
+        if (sections.generalInfo && typeof sections.generalInfo === 'object') {
+          incomingUpdates.generalInfo = withOfficePin(sections.generalInfo as AgencyGeneralInfo);
+        }
+        if (Array.isArray(sections.services)) {
+          incomingUpdates.services = sections.services as ServiceItem[];
+        }
+        if (Array.isArray(sections.projects)) {
+          incomingUpdates.projects = mergeProjectsWithDefaults(sections.projects as Project[]);
+        }
+        if (Array.isArray(sections.blogs)) {
+          incomingUpdates.blogs = sections.blogs as BlogPost[];
+        }
+        if (Array.isArray(sections.team)) {
+          incomingUpdates.team = sections.team as TeamMemberData[];
+        }
+        if (Array.isArray(sections.testimonials)) {
+          incomingUpdates.testimonials = sections.testimonials as Testimonial[];
+        }
+        if (Array.isArray(sections.partnerships)) {
+          incomingUpdates.partnerships = sections.partnerships as PartnershipItem[];
+        }
+        if (Array.isArray(sections.partnerLogos)) {
+          incomingUpdates.partnerLogos = sections.partnerLogos as PartnerLogo[];
+        }
+        if (Array.isArray(sections.faqs)) {
+          incomingUpdates.faqs = sections.faqs as FaqItem[];
+        }
 
         if (Object.keys(incomingUpdates).length > 0) {
           setData((prev) => ({ ...prev, ...incomingUpdates }));

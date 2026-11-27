@@ -25,8 +25,8 @@ export const HomePoliciesBlock: React.FC<HomePoliciesBlockProps> = ({ onOpenPoli
             style={{
               display: 'inline-block',
               color: 'var(--gold-ink)',
-              background: '#fdf8e6',
-              border: '1px solid rgba(184, 134, 11, 0.35)',
+              background: 'var(--chip-bg)',
+              border: '1px solid var(--chip-border)',
               borderRadius: '9999px',
               padding: '4px 14px',
               fontSize: '0.8rem',

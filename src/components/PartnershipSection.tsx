@@ -80,9 +80,9 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
         {partnerLogos.length > 0 && (
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-white)',
               borderRadius: '16px',
-              border: '1px solid rgba(184, 134, 11, 0.38)',
+              border: '1px solid var(--chip-border)',
               padding: '2.5rem 1.5rem',
               marginBottom: '2.5rem',
               boxShadow: 'var(--shadow-lg)',
@@ -299,7 +299,7 @@ export const PartnershipSection: React.FC<PartnershipSectionProps> = ({
                       height: '8px',
                       borderRadius: '4px',
                       border: 'none',
-                      background: currentIndex === idx ? 'var(--primary-dark)' : 'rgba(10, 10, 10, 0.18)',
+                      background: currentIndex === idx ? 'var(--primary-color)' : 'var(--dots-inactive)',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
                       padding: 0

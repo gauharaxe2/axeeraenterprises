@@ -59,7 +59,13 @@ import {
   blogsData,
   CURATED_WEB_DEV_BLOG_IDS,
   CURATED_MOBILE_APP_BLOG_IDS,
-  CURATED_BRANDING_BLOG_IDS
+  CURATED_BRANDING_BLOG_IDS,
+  CURATED_SEO_BLOG_IDS,
+  CURATED_DIGITAL_MARKETING_BLOG_IDS,
+  CURATED_SOCIAL_MEDIA_BLOG_IDS,
+  CURATED_DIGITAL_PRODUCTS_SAAS_BLOG_IDS,
+  CURATED_ECOMMERCE_BLOG_IDS,
+  CURATED_AUTHORITY_BLOG_IDS
 } from '../../data/blogs';
 import {
   ACCOUNT_LINK_PRESETS,
@@ -80,7 +86,7 @@ import {
   sanitizeMemberSkills
 } from '../../utils/teamProfile';
 import {
-  FIRESTORE_SAFE_SECTION_BYTES,
+  CLOUD_STORAGE_MAX_BYTES,
   PROJECT_IMAGE_MAX_DIMENSION,
   REVIEW_AVATAR_MAX_DIMENSION,
   SERVICE_IMAGE_MAX_DIMENSION,
@@ -88,8 +94,9 @@ import {
   deriveInitials,
   estimateJsonSectionBytes,
   filterSupportedImageFiles,
+  formatStorageSize,
   isUploadedDataUrl,
-  isWithinFirestoreDocBudget,
+  isWithinCloudStorageBudget,
   processImageFileToDataUrl,
   sanitizeDisplayImageUrl
 } from '../../utils/imageUpload';
@@ -318,8 +325,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
       const nextBlogs = isCreatingBlog
         ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
         : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
-      if (!isWithinFirestoreDocBudget(nextBlogs)) {
-        onShowToast('Adding this section image exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
+      if (!isWithinCloudStorageBudget(nextBlogs)) {
+        onShowToast('Adding this section image exceeds the 10 MB blogs cloud storage budget. Remove unused uploads or use external URLs.', 'error');
         return;
       }
       setEditingBlog(candidate);
@@ -354,11 +361,11 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         const nextBlogs = isCreatingBlog
           ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
           : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
-        if (!isWithinFirestoreDocBudget(nextBlogs)) {
+        if (!isWithinCloudStorageBudget(nextBlogs)) {
           onShowToast(
             addedCount > 0
-              ? `Uploaded ${addedCount} photo(s); remaining file(s) would exceed the 850 KB cloud budget.`
-              : 'Adding this gallery photo exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.',
+              ? `Uploaded ${addedCount} photo(s); remaining file(s) would exceed the 10 MB blogs cloud storage budget.`
+              : 'Adding this gallery photo exceeds the 10 MB blogs cloud storage budget. Remove unused uploads or use external URLs.',
             'error'
           );
           if (addedCount > 0) {
@@ -1082,8 +1089,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       const nextServicesPreview = isCreatingService
                         ? [...data.services.filter((s) => s.id !== sanitizedService.id), sanitizedService]
                         : data.services.map((s) => (s.id === sanitizedService.id ? sanitizedService : s));
-                      if (!isWithinFirestoreDocBudget(nextServicesPreview)) {
-                        onShowToast('Services storage limit reached. Please use smaller images or external URLs.', 'error');
+                      if (!isWithinCloudStorageBudget(nextServicesPreview)) {
+                        onShowToast('Services cloud storage limit (10 MB) reached. Please use smaller images or external URLs.', 'error');
                         return;
                       }
                       if (isCreatingService) {
@@ -1201,7 +1208,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
         {/* TAB 3: WEBSITES, CASE STUDIES & DIGITAL PRODUCTS */}
         {activeTab === 'projects' && (() => {
           const projectStorageBytes = estimateJsonSectionBytes(data.projects);
-          const storagePct = Math.min(100, Math.round((projectStorageBytes / FIRESTORE_SAFE_SECTION_BYTES) * 100));
+          const storagePct = Math.min(100, Math.round((projectStorageBytes / CLOUD_STORAGE_MAX_BYTES) * 100));
           const caseStudyTotal = data.projects.filter((p) => resolveProjectType(p) === 'case-study').length;
           const productTotal = data.projects.filter((p) => resolveProjectType(p) === 'digital-product').length;
           const filteredProjectsList = filterAdminProjects(data.projects, {
@@ -1297,8 +1304,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               const nextPreview = isCreatingProject
                 ? [candidateProject, ...data.projects.filter((p) => p.id !== candidateProject.id)]
                 : data.projects.map((p) => (p.id === candidateProject.id ? candidateProject : p));
-              if (!isWithinFirestoreDocBudget(nextPreview)) {
-                onShowToast('Adding this screenshot exceeds the 850 KB cloud budget. Use external URLs or fewer uploads.', 'error');
+              if (!isWithinCloudStorageBudget(nextPreview)) {
+                onShowToast('Adding this screenshot exceeds the 10 MB websites cloud storage budget. Use external URLs or remove unused uploads.', 'error');
                 return;
               }
               setEditingProject(candidateProject);
@@ -1344,9 +1351,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: '#a3a3a3', marginBottom: '5px' }}>
-                  <span>Cloud Document Budget (Websites & Media)</span>
+                  <span>Cloud Storage Budget (Websites & Media • Auto-Sharded)</span>
                   <span style={{ color: storagePct > 90 ? '#f87171' : storagePct > 75 ? '#fbbf24' : '#34d399', fontWeight: 700 }}>
-                    {Math.round(projectStorageBytes / 1024)} KB / {Math.round(FIRESTORE_SAFE_SECTION_BYTES / 1024)} KB ({storagePct}%)
+                    {formatStorageSize(projectStorageBytes)} / {formatStorageSize(CLOUD_STORAGE_MAX_BYTES)} ({storagePct}%)
                   </span>
                 </div>
                 <div style={{ height: '6px', borderRadius: '9999px', background: '#262626', overflow: 'hidden' }}>
@@ -2045,8 +2052,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                         const nextProjectsPreview = isCreatingProject
                           ? [sanitizedProject, ...data.projects.filter((p) => p.id !== sanitizedProject.id)]
                           : data.projects.map((p) => (p.id === sanitizedProject.id ? sanitizedProject : p));
-                        if (!isWithinFirestoreDocBudget(nextProjectsPreview)) {
-                          onShowToast('Websites storage limit reached (850 KB). Please use smaller images or external URLs.', 'error');
+                        if (!isWithinCloudStorageBudget(nextProjectsPreview)) {
+                          onShowToast('Websites cloud storage limit reached (10 MB). Please use smaller images or external URLs.', 'error');
                           return;
                         }
                         if (isCreatingProject) {
@@ -2306,8 +2313,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                             onClick={() => {
                               const duplicated = createDuplicatedProject(proj);
                               const nextPreview = [duplicated, ...data.projects];
-                              if (!isWithinFirestoreDocBudget(nextPreview)) {
-                                onShowToast('Cannot duplicate: cloud budget reached.', 'error');
+                              if (!isWithinCloudStorageBudget(nextPreview)) {
+                                onShowToast('Cannot duplicate: 10 MB websites cloud storage limit reached.', 'error');
                                 return;
                               }
                               onAddProject(duplicated);
@@ -2377,8 +2384,9 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 </h3>
                 <p style={{ margin: '2px 0 0', color: 'var(--text-light)', fontSize: '0.8rem' }}>
                   Full blog creation with 9 official categories and multiple image gallery support • Cloud storage:{' '}
-                  <strong style={{ color: isWithinFirestoreDocBudget(data.blogs) ? '#34d399' : '#f87171' }}>
-                    {Math.round(estimateJsonSectionBytes(data.blogs) / 1024)} KB / {Math.round(FIRESTORE_SAFE_SECTION_BYTES / 1024)} KB
+                  <strong style={{ color: isWithinCloudStorageBudget(data.blogs) ? '#34d399' : '#f87171' }}>
+                    {formatStorageSize(estimateJsonSectionBytes(data.blogs))} / {formatStorageSize(CLOUD_STORAGE_MAX_BYTES)} (
+                    {Math.min(100, Math.round((estimateJsonSectionBytes(data.blogs) / CLOUD_STORAGE_MAX_BYTES) * 100))}%)
                   </strong>
                 </p>
               </div>
@@ -2386,6 +2394,12 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 const { addedCount: missingWebDevCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_WEB_DEV_BLOG_IDS);
                 const { addedCount: missingMobileAppCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_MOBILE_APP_BLOG_IDS);
                 const { addedCount: missingBrandingCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_BRANDING_BLOG_IDS);
+                const { addedCount: missingSeoCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_SEO_BLOG_IDS);
+                const { addedCount: missingDigitalMarketingCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_DIGITAL_MARKETING_BLOG_IDS);
+                const { addedCount: missingSocialMediaCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_SOCIAL_MEDIA_BLOG_IDS);
+                const { addedCount: missingDigitalProductsSaasCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_DIGITAL_PRODUCTS_SAAS_BLOG_IDS);
+                const { addedCount: missingEcommerceCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_ECOMMERCE_BLOG_IDS);
+                const { addedCount: missingAuthorityCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_AUTHORITY_BLOG_IDS);
                 const { addedCount: missingBuiltinCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData);
                 return (
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -2500,7 +2514,229 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           : `Sync ${missingBrandingCount} New Branding Article${missingBrandingCount === 1 ? '' : 's'} to Cloud`}
                       </button>
                     )}
-                    {missingWebDevCount === 0 && missingMobileAppCount === 0 && missingBrandingCount === 0 && missingBuiltinCount > 0 && onImportBuiltinBlogs && (
+                    {missingSeoCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_SEO_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new SEO & Traffic articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new SEO & Organic Traffic article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New SEO & Traffic articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingSeoCount} New SEO Article${missingSeoCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingDigitalMarketingCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_DIGITAL_MARKETING_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Digital Marketing articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Digital Marketing article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Digital Marketing articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingDigitalMarketingCount} New Digital Marketing Article${missingDigitalMarketingCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingSocialMediaCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_SOCIAL_MEDIA_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Social Media articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Social Media Management article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Social Media Management articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingSocialMediaCount} New Social Media Article${missingSocialMediaCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingDigitalProductsSaasCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_DIGITAL_PRODUCTS_SAAS_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Digital Products & SaaS articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Digital Products & SaaS article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Digital Products & SaaS articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingDigitalProductsSaasCount} New Digital Products & SaaS Article${missingDigitalProductsSaasCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingEcommerceCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_ECOMMERCE_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new E-Commerce articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new E-Commerce article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New E-Commerce articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingEcommerceCount} New E-Commerce Article${missingEcommerceCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingAuthorityCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_AUTHORITY_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Authority & Expertise articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Authority/Expertise article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Authority/Expertise articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingAuthorityCount} New Authority/Expertise Article${missingAuthorityCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingWebDevCount === 0 && missingMobileAppCount === 0 && missingBrandingCount === 0 && missingSeoCount === 0 && missingDigitalMarketingCount === 0 && missingSocialMediaCount === 0 && missingDigitalProductsSaasCount === 0 && missingEcommerceCount === 0 && missingAuthorityCount === 0 && missingBuiltinCount > 0 && onImportBuiltinBlogs && (
                       <button
                         type="button"
                         disabled={isSyncingBuiltinBlogs}
@@ -2635,8 +2871,8 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                       const nextBlogs = isCreatingBlog
                         ? [candidate, ...data.blogs.filter((b) => b.id !== candidate.id)]
                         : data.blogs.map((b) => (b.id === candidate.id ? candidate : b));
-                      if (nextUrl.startsWith('data:image/') && !isWithinFirestoreDocBudget(nextBlogs)) {
-                        onShowToast('Adding this uploaded image exceeds the 850 KB cloud budget. Use an external image URL or smaller images.', 'error');
+                      if (nextUrl.startsWith('data:image/') && !isWithinCloudStorageBudget(nextBlogs)) {
+                        onShowToast('Adding this uploaded image exceeds the 10 MB blogs cloud storage budget. Use an external image URL or remove unused uploads.', 'error');
                         return;
                       }
                       setEditingBlog(candidate);
@@ -5033,8 +5269,32 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                 </span>
               </div>
               <p style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
-                All 9 site sections (services, case studies, blogs, team, testimonials, partnerships, partner logos, FAQs, and general info) are connected to Firestore. Click below to immediately push all current edits across the web to every visitor.
+                All 9 site sections (services, case studies, blogs, team, testimonials, partnerships, partner logos, FAQs, and general info) are connected to Firestore with automatic multi-document sharding (10 MB per section). Click below to immediately push all current edits across the web to every visitor.
               </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '0.85rem', fontSize: '0.76rem', color: '#d4d4d8' }}>
+                <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  Blogs: <strong style={{ color: '#34d399' }}>{formatStorageSize(estimateJsonSectionBytes(data.blogs))}</strong> / {formatStorageSize(CLOUD_STORAGE_MAX_BYTES)}
+                </span>
+                <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  Websites: <strong style={{ color: '#34d399' }}>{formatStorageSize(estimateJsonSectionBytes(data.projects))}</strong> / {formatStorageSize(CLOUD_STORAGE_MAX_BYTES)}
+                </span>
+                <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  Total Used:{' '}
+                  <strong style={{ color: 'var(--primary-color)' }}>
+                    {formatStorageSize(
+                      estimateJsonSectionBytes(data.generalInfo) +
+                        estimateJsonSectionBytes(data.services) +
+                        estimateJsonSectionBytes(data.projects) +
+                        estimateJsonSectionBytes(data.blogs) +
+                        estimateJsonSectionBytes(data.team) +
+                        estimateJsonSectionBytes(data.testimonials) +
+                        estimateJsonSectionBytes(data.partnerships) +
+                        estimateJsonSectionBytes(data.partnerLogos) +
+                        estimateJsonSectionBytes(data.faqs)
+                    )}
+                  </strong>
+                </span>
+              </div>
               {onPublishAll && (
                 <button
                   onClick={handlePublishAllToCloud}

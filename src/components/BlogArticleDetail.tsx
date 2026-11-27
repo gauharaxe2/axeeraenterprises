@@ -117,7 +117,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
   const isWhatIsWebDev = blog.slug === 'what-is-web-development';
 
   return (
-    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-light)', color: '#0a0a0a' }}>
+    <div style={{ paddingTop: '70px', minHeight: '100vh', background: 'var(--bg-light)', color: 'var(--text-dark)' }}>
       {/* Fixed Top Reading Progress Bar */}
       <div
         className="reading-progress-track"
@@ -321,7 +321,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
         <div className="container" style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-white)',
               border: '1px solid var(--border-color)',
               borderRadius: '20px',
               padding: 'clamp(1.5rem, 4vw, 3.5rem)',
@@ -378,11 +378,11 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Images size={18} color="var(--gold-ink)" />
-                    <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#0a0a0a' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-dark)' }}>
                       Article Image Gallery ({allImages.length} Visual Assets)
                     </h4>
                   </div>
-                  <span style={{ fontSize: '0.8rem', color: '#57534e' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     Click thumbnail to swap main preview
                   </span>
                 </div>
@@ -473,7 +473,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                       />
                       <h2
                         style={{
-                          color: '#0a0a0a',
+                          color: 'var(--text-dark)',
                           fontSize: 'clamp(1.25rem, 2.2vw, 1.65rem)',
                           fontWeight: 700,
                           margin: 0,
@@ -491,7 +491,7 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                           margin: '0 0 1.5rem',
                           borderRadius: '12px',
                           overflow: 'hidden',
-                          background: '#ffffff',
+                          background: 'var(--bg-white)',
                           border: '1px solid var(--border-color)'
                         }}
                       >
@@ -537,8 +537,8 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                             style={{
                               padding: '8px 14px',
                               fontSize: '0.82rem',
-                              color: '#44403c',
-                              background: '#ffffff',
+                              color: 'var(--text-light)',
+                              background: 'var(--bg-white)',
                               borderTop: '1px solid var(--border-color)',
                               fontStyle: 'italic',
                               display: 'flex',
@@ -554,9 +554,9 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
                     )}
 
                     {/* Section Paragraphs */}
-                    <div style={{ color: '#292524', fontSize: '1.08rem', lineHeight: 1.85 }}>
+                    <div style={{ color: 'var(--text-body)', fontSize: '1.08rem', lineHeight: 1.85 }}>
                       {section.paragraphs.map((para, pIdx) => (
-                        <p key={pIdx} style={{ color: '#292524', marginBottom: pIdx === section.paragraphs.length - 1 ? 0 : '1.25rem' }}>
+                        <p key={pIdx} style={{ color: 'var(--text-body)', marginBottom: pIdx === section.paragraphs.length - 1 ? 0 : '1.25rem' }}>
                           {para}
                         </p>
                       ))}
@@ -566,9 +566,9 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
               </div>
             ) : (
               /* Fallback for legacy paragraphs */
-              <div style={{ color: '#292524', fontSize: '1.12rem', lineHeight: 1.85, marginBottom: '2.5rem' }}>
+              <div style={{ color: 'var(--text-body)', fontSize: '1.12rem', lineHeight: 1.85, marginBottom: '2.5rem' }}>
                 {blog.paragraphs.map((para, idx) => (
-                  <p key={idx} style={{ color: '#292524', marginBottom: '1.5rem' }}>
+                  <p key={idx} style={{ color: 'var(--text-body)', marginBottom: '1.5rem' }}>
                     {para}
                   </p>
                 ))}
@@ -578,43 +578,43 @@ export const BlogArticleDetail: React.FC<BlogArticleDetailProps> = ({
             {/* Special Technical Breakdown (for "What is Web Development?") */}
             {isWhatIsWebDev && (
               <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)' }}>
-                <h2 style={{ color: '#0a0a0a', fontSize: '1.85rem', borderBottom: '2px solid var(--primary-color, #d4af37)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
+                <h2 style={{ color: 'var(--text-dark)', fontSize: '1.85rem', borderBottom: '2px solid var(--primary-color, #d4af37)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
                   Core Web Development Pillars In 2026
                 </h2>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '2.5rem' }}>
                   <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                    <h3 style={{ color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
                       <Code2 size={20} color="var(--gold-ink)" /> Frontend Engineering
                     </h3>
-                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Building high-performance user interfaces with React, Next.js, and TypeScript. Ensures fluid touch responsiveness and sub-second rendering.
                     </p>
                   </div>
 
                   <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                    <h3 style={{ color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
                       <Server size={20} color="var(--gold-ink)" /> Backend & Cloud APIs
                     </h3>
-                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Microservices, automated queue processors, serverless functions, and third-party API orchestration with enterprise-grade uptime.
                     </p>
                   </div>
 
                   <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                    <h3 style={{ color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
                       <Database size={20} color="var(--gold-ink)" /> Database Architecture
                     </h3>
-                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Relational PostgreSQL schemas, distributed caches with Redis, and NoSQL stores engineered for rapid query execution under high traffic.
                     </p>
                   </div>
 
                   <div style={{ background: 'var(--bg-light)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <h3 style={{ color: '#0a0a0a', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
+                    <h3 style={{ color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', marginBottom: '0.75rem' }}>
                       <Shield size={20} color="var(--gold-ink)" /> Cybersecurity & Compliance
                     </h3>
-                    <p style={{ color: '#44403c', fontSize: '0.92rem', lineHeight: 1.6 }}>
+                    <p style={{ color: 'var(--text-light)', fontSize: '0.92rem', lineHeight: 1.6 }}>
                       Automated rate limiting, SSL encryption, CSRF/XSS defense shields, and secure OAuth/JWT token workflows protecting client data.
                     </p>
                   </div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Globe, ChevronDown, Check } from 'lucide-react';
+import { Menu, X, Globe, ChevronDown, Check, Sun, Moon } from 'lucide-react';
 import { PageView } from '../types';
 import { SITE_LOGO_SRC } from '../brand';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { LANGUAGE_OPTIONS, getLanguageMeta } from '../i18n/languages';
 import type { Language } from '../i18n/types';
 
@@ -43,6 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage, strings } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
   const activeLangMeta = getLanguageMeta(language);
 
   useEffect(() => {
@@ -177,6 +179,27 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         <div className="nav-actions">
+          <button
+            type="button"
+            id="theme-toggle-btn"
+            role="switch"
+            aria-checked={isDark}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className={`theme-toggle-btn ${isDark ? 'is-dark' : ''}`}
+            onClick={() => {
+              setIsLangMenuOpen(false);
+              toggleTheme();
+            }}
+          >
+            <span className="theme-switch-track" aria-hidden="true">
+              <span className="theme-switch-thumb">
+                {isDark ? <Moon size={10} /> : <Sun size={10} />}
+              </span>
+            </span>
+            <span className="theme-toggle-label">{isDark ? 'Dark' : 'Light'}</span>
+          </button>
+
           <div className="lang-dropdown" ref={langDropdownRef}>
             <button
               type="button"

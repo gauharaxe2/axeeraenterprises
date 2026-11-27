@@ -268,11 +268,11 @@ export const WebsitesPage: React.FC<WebsitesPageProps> = ({
                       <span style={{ color: 'var(--gold-ink)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         {project.category}
                       </span>
-                      <span aria-hidden="true" style={{ color: '#a8a29e' }}>•</span>
-                      <span style={{ color: '#44403c' }}>{getProjectStatusLabel(details.status)}</span>
+                      <span aria-hidden="true" style={{ color: 'var(--text-muted)' }}>•</span>
+                      <span style={{ color: 'var(--text-light)' }}>{getProjectStatusLabel(details.status)}</span>
                       {project.featured && (
                         <>
-                          <span aria-hidden="true" style={{ color: '#a8a29e' }}>•</span>
+                          <span aria-hidden="true" style={{ color: 'var(--text-muted)' }}>•</span>
                           <span style={{ color: 'var(--gold-ink)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                             <Award size={12} aria-hidden="true" /> Featured
                           </span>
@@ -287,7 +287,7 @@ export const WebsitesPage: React.FC<WebsitesPageProps> = ({
                         {project.title}
                       </a>
                     </h3>
-                    <p className="editorial-muted" style={{ fontWeight: 600, color: '#1c1917' }}>
+                    <p className="editorial-muted" style={{ fontWeight: 600, color: 'var(--text-strong)' }}>
                       {project.subtitle}
                     </p>
                     <p className="editorial-muted" style={{ fontSize: '0.84rem' }}>
@@ -319,7 +319,7 @@ export const WebsitesPage: React.FC<WebsitesPageProps> = ({
                           href={project.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: '#44403c' }}
+                          style={{ color: 'var(--text-light)' }}
                         >
                           Live Site <ExternalLink size={14} aria-hidden="true" />
                         </a>

@@ -274,7 +274,7 @@ export const CaseStudyDetailView: React.FC<CaseStudyDetailViewProps> = ({
       >
         <div className="editorial-panel padded">
           <div className="editorial-copy" style={{ maxWidth: '100%' }}>
-            <p style={{ fontSize: '1.08rem', color: '#1c1917', fontWeight: 500 }}>{details.overview}</p>
+            <p style={{ fontSize: '1.08rem', color: 'var(--text-strong)', fontWeight: 500 }}>{details.overview}</p>
             {project.description && project.description.trim() !== details.overview.trim() && (
               <p>{project.description}</p>
             )}
