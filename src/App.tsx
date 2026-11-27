@@ -53,6 +53,7 @@ import {
 import { Preloader } from './components/Preloader';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { shouldTrackSpaPageView, trackMetaPixelPageView } from './utils/metaPixel';
 
 const AdminPanel = lazy(() =>
   import('./components/AdminPanel/SideAdminPanel').then((mod) => ({ default: mod.SideAdminPanel }))
@@ -396,6 +397,23 @@ const AppContent: React.FC = () => {
   }, [currentPage, adminGate, selectedProject, selectedBlog]);
 
   const pageOpenKey = `${currentPage}|${selectedBlog?.slug ?? ''}|${selectedService?.id ?? ''}|${selectedProject?.id ?? ''}|${currentPage === 'policies' ? selectedPolicy : ''}`;
+  const lastTrackedPageKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const previousPageKey = lastTrackedPageKeyRef.current;
+    lastTrackedPageKeyRef.current = pageOpenKey;
+    if (
+      shouldTrackSpaPageView({
+        previousPageKey,
+        currentPageKey: pageOpenKey,
+        adminGate,
+        currentPage
+      })
+    ) {
+      trackMetaPixelPageView();
+    }
+  }, [pageOpenKey, adminGate, currentPage]);
+
   const preloaderHoldMs = 1100;
 
   useEffect(() => {
