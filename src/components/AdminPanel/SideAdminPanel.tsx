@@ -55,7 +55,12 @@ import {
   prepareBlogForPublish,
   mergeMissingBuiltinBlogs
 } from '../../utils/blogUtils';
-import { blogsData, CURATED_WEB_DEV_BLOG_IDS, CURATED_MOBILE_APP_BLOG_IDS } from '../../data/blogs';
+import {
+  blogsData,
+  CURATED_WEB_DEV_BLOG_IDS,
+  CURATED_MOBILE_APP_BLOG_IDS,
+  CURATED_BRANDING_BLOG_IDS
+} from '../../data/blogs';
 import {
   ACCOUNT_LINK_PRESETS,
   type AccountLinkPreset,
@@ -2380,6 +2385,7 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
               {!isCreatingBlog && !editingBlog && (() => {
                 const { addedCount: missingWebDevCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_WEB_DEV_BLOG_IDS);
                 const { addedCount: missingMobileAppCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_MOBILE_APP_BLOG_IDS);
+                const { addedCount: missingBrandingCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData, CURATED_BRANDING_BLOG_IDS);
                 const { addedCount: missingBuiltinCount } = mergeMissingBuiltinBlogs(data.blogs, blogsData);
                 return (
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -2457,7 +2463,44 @@ export const SideAdminPanel: React.FC<SideAdminPanelProps> = ({
                           : `Sync ${missingMobileAppCount} New Mobile App Article${missingMobileAppCount === 1 ? '' : 's'} to Cloud`}
                       </button>
                     )}
-                    {missingWebDevCount === 0 && missingMobileAppCount === 0 && missingBuiltinCount > 0 && onImportBuiltinBlogs && (
+                    {missingBrandingCount > 0 && onImportBuiltinBlogs && (
+                      <button
+                        type="button"
+                        disabled={isSyncingBuiltinBlogs}
+                        onClick={() => {
+                          void (async () => {
+                            setIsSyncingBuiltinBlogs(true);
+                            try {
+                              const res = await onImportBuiltinBlogs(CURATED_BRANDING_BLOG_IDS);
+                              if (!res.ok) {
+                                onShowToast('Failed to sync new Branding & Design articles to cloud. Verify admin login and try again.', 'error');
+                              } else if (res.addedCount > 0) {
+                                onShowToast(`Synced ${res.addedCount} new Branding & Design article${res.addedCount === 1 ? '' : 's'} to cloud!`, 'success');
+                              } else {
+                                onShowToast('New Branding & Design articles are already present.', 'info');
+                              }
+                            } finally {
+                              setIsSyncingBuiltinBlogs(false);
+                            }
+                          })();
+                        }}
+                        className="btn btn-outline"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: isSyncingBuiltinBlogs ? 'wait' : 'pointer'
+                        }}
+                      >
+                        <UploadCloud size={15} />
+                        {isSyncingBuiltinBlogs
+                          ? 'Syncing...'
+                          : `Sync ${missingBrandingCount} New Branding Article${missingBrandingCount === 1 ? '' : 's'} to Cloud`}
+                      </button>
+                    )}
+                    {missingWebDevCount === 0 && missingMobileAppCount === 0 && missingBrandingCount === 0 && missingBuiltinCount > 0 && onImportBuiltinBlogs && (
                       <button
                         type="button"
                         disabled={isSyncingBuiltinBlogs}

@@ -12,7 +12,12 @@ import {
   calculateReadingProgress,
   mergeMissingBuiltinBlogs
 } from './blogUtils.ts';
-import { blogsData, CURATED_WEB_DEV_BLOG_IDS, CURATED_MOBILE_APP_BLOG_IDS } from '../data/blogs.ts';
+import {
+  blogsData,
+  CURATED_WEB_DEV_BLOG_IDS,
+  CURATED_MOBILE_APP_BLOG_IDS,
+  CURATED_BRANDING_BLOG_IDS
+} from '../data/blogs.ts';
 import type { BlogPost, BlogSection } from '../types.ts';
 
 test('normalizeBlogSections preserves existing structured sections', () => {
@@ -468,6 +473,29 @@ test('blogsData includes all 10 curated Mobile App Development articles ready fo
     const post = blogsData.find((b) => b.id === id);
     assert.ok(post, `Expected built-in mobile app blog ${id}`);
     assert.equal(post.category, '📱 Mobile App Development');
+    assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
+    assert.ok(post.summary && post.summary.trim().length > 20);
+    assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
+    for (const sec of post.sections!) {
+      assert.equal(sec.imageUrl, '', `Expected blank section imageUrl for later admin upload on ${sec.id}`);
+      assert.equal(sec.imageCaption, '', `Expected blank section imageCaption for later admin upload on ${sec.id}`);
+      assert.ok(sec.heading.trim().length > 0);
+      assert.ok(sec.paragraphs.length > 0);
+      for (const p of sec.paragraphs) {
+        assert.equal(p.includes('**'), false, `Section ${sec.id} should not contain raw markdown bold markers`);
+        assert.equal(p.includes('](https://'), false, `Section ${sec.id} should not contain raw markdown link markers`);
+      }
+    }
+  }
+});
+
+test('blogsData includes all 12 curated Branding & Design articles ready for admin section images', () => {
+  assert.equal(CURATED_BRANDING_BLOG_IDS.length, 12);
+
+  for (const id of CURATED_BRANDING_BLOG_IDS) {
+    const post = blogsData.find((b) => b.id === id);
+    assert.ok(post, `Expected built-in branding blog ${id}`);
+    assert.equal(post.category, '🎨 Branding & Design');
     assert.ok(post.metaDescription && post.metaDescription.trim().length > 20);
     assert.ok(post.summary && post.summary.trim().length > 20);
     assert.ok(post.sections && post.sections.length >= 6, `Expected structured sections on ${id}`);
